@@ -1,0 +1,20 @@
+{
+  "name": "project",
+  "version": "1.0.0",
+  "description": "CRUD (Create, Read, Update, Delete) application",
+  "scripts": {
+    "install:both": "concurrently \"cd frontend && npm install\" \"cd backend && npm install\"",
+    "start:both": "concurrently \"cd frontend && npm start\" \"cd backend && npm start\""
+  },  
+  "keywords": ["CRUD", "NodeJS", "ReactJS", "ExpressJS", "Javascript", "MYSQL"],
+  "author": "JohnFilhmar",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "homepage": "https://github.com/JohnFilhmar/NodeJS-and-ReactJS.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JohnFilhmar/NodeJS-and-ReactJS.git"
+  }
+}
