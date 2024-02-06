@@ -7,7 +7,6 @@ module.exports = {
   ],
   safelist: [
     {pattern: /(bg|text|border)-./},
-    'bg-transparent'
   ],
   theme: {
     fontFamily: {

@@ -7,12 +7,14 @@ const useNavigationState = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isChatboxOpen, setIsChatboxOpen] = useState(false);
   const messages = useRef(null);
   const notification = useRef(null);
   const profile = useRef(null);
   const settings = useRef(null);
   const theme = useRef(null);
   const help = useRef(null);
+  const chatbox = useRef(null);
 
   const cleanUp = ({ navButton }) => {
     if (isMessageOpen && navButton !== 'message') {
@@ -34,7 +36,7 @@ const useNavigationState = () => {
       theme.current.close();
       setIsThemeOpen(false);
     }
-  }
+  };
 
   const toggleMessage = () => {
     setIsMessageOpen(true);
@@ -46,6 +48,14 @@ const useNavigationState = () => {
       setIsMessageOpen(false);
     }
   };
+  const openChatbox = () => {
+    chatbox.current.show();
+    setIsChatboxOpen(true);
+  };
+  const closeChatbox = () => {
+    chatbox.current.close();
+    setIsChatboxOpen(false);
+  }
 
   const toggleNotif = () => {
     setIsNotifOpen(true);
@@ -124,12 +134,15 @@ const useNavigationState = () => {
     settings,
     theme,
     help,
+    chatbox,
     toggleMessage,
     toggleNotif,
     toggleProfile,
     toggleSettings,
     toggleTheme,
     toggleHelp,
+    openChatbox,
+    closeChatbox,
   };
 };
 

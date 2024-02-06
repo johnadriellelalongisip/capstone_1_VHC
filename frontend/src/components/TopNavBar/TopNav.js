@@ -5,13 +5,14 @@ import { BsBellFill } from "react-icons/bs";
 import { AiFillMessage } from "react-icons/ai";
 import { useContext, useState } from "react";
 import useNavigationState from "./useToggles";
-import Messages from "./Messages";
+import Messages from "./Messaging/Messages";
 import Notifs from "./Notifications";
 import Profile from "./Profile";
 import Settings from "./Settings/Settings";
 import Help from "./Help/Help";
 import Themes from "./Settings/Themes";
 import { colorTheme } from "../../App";
+import Chatbox from "./Messaging/Chatbox";
 
 const TopNav = () => {
   const [selectedTheme] = useContext(colorTheme);
@@ -26,12 +27,15 @@ const TopNav = () => {
     settings,
     theme,
     help,
+    chatbox,
     toggleMessage,
     toggleNotif,
     toggleProfile,
     toggleSettings,
     toggleTheme,
-    toggleHelp
+    toggleHelp,
+    openChatbox,
+    closeChatbox
   } = useNavigationState();
 
   return (
@@ -84,7 +88,9 @@ const TopNav = () => {
           </button>
         </Tooltip>
       </div>
-      <Messages message={messages} toggle={() => toggleMessage()} />
+      <Messages message={messages} toggle={() => toggleMessage()} openChatbox={() => openChatbox()}/>
+      <Chatbox chatbox={chatbox} toggle={() => closeChatbox()} />
+
       <Notifs notifs={notification} toggle={() => toggleNotif()} />
       <Profile prof={profile} toggle={() => toggleProfile()} toggleOptions={() => toggleSettings()} toggleHelp={() => toggleHelp()} />
       <Settings settings={settings} toggle={ () => {toggleSettings(); toggleProfile();} } toggleTheme={ () => toggleTheme() }/>

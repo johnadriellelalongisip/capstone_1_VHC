@@ -12,7 +12,7 @@ const Header = ({ title, icon }) => {
   return (
     <div className="mt-5 md:mt-0 lg:mt-0 flex flex-row justify-between items-center">
       <p
-        className={`flex items-center text-xl md:text-2xl lg:text-3xl font-bold antialiased text-${selectedTheme}-700`}
+        className={`flex gap-1 items-center text-xl md:text-2xl lg:text-3xl font-bold antialiased text-${selectedTheme}-700`}
       >
         { icon }
         { headTitle }

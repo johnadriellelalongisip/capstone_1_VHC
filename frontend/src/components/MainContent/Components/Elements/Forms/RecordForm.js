@@ -1,8 +1,10 @@
-import { Button, Checkbox, Label, Radio, TextInput } from 'flowbite-react';
-import { useState, useEffect } from 'react';
+import { Checkbox, Label, Radio, TextInput } from 'flowbite-react';
+import { useState, useEffect, useContext } from 'react';
 import jsonData from '../../../../../common_names_by_gender.json';
+import { colorTheme } from '../../../../../App';
 
 const RecordForm = () => {
+  const [selectedTheme] = useContext(colorTheme);
   const [firstname, setFirstName] = useState('');
   const [middlename, setMiddleName] = useState('');
   const [lastname, setLastName] = useState('');
@@ -50,10 +52,9 @@ const RecordForm = () => {
       e.preventDefault();
       cleanUp();
     }
-    console.log('SUBMITTED');
+    console.log('SUBMITTED : ' );
     cleanUp();
   }
-
 
   // THIS FORM SHOULD AUTO COMPLETE THE BARANGAY DEPENDING ON THE FAMILY NAME THAT IS ALSO WITHIN WHAT BARANGAY THE FAMILY NAME IS IN
   // SHOULD CHECK FAMILY ID FIRST BEFORE PASSING WHETHER IT ALREADY EXISTS OR NOT
@@ -126,7 +127,7 @@ const RecordForm = () => {
         </div>
         <TextInput id="familyId" type="text" disabled shadow value={`FAM_ID-${familyId}`} />
       </div>
-      <Button type="submit">Add new record</Button>
+      <button className={`group flex items-center justify-center p-0.5 text-center font-medium relative focus:z-10 focus:outline-none text-white bg-${selectedTheme}-500 border border-transparent hover:bg-${selectedTheme}-800 focus:ring-${selectedTheme}-300 rounded-lg focus:ring-2`} type="submit">Add new record</button>
       <div className="flex items-center justify-end gap-2">
         <Checkbox
           id="accept"

@@ -1,5 +1,5 @@
-const express = require('express');
 const https = require('https');
+const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
@@ -9,7 +9,7 @@ const app = express();
 const port = 5000;
 
 app.use(cors({
-  origin: 'https://localhost:3000',
+  origin: ['https://localhost:3000', 'https://192.168.1.2:3000'],
   methods: 'POST,GET,OPTIONS,HEAD,PUT,PATCH,DELETE',
   credentials: true,
 }));
