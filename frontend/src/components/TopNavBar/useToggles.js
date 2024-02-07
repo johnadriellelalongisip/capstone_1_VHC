@@ -7,6 +7,7 @@ const useNavigationState = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  // eslint-disable-next-line
   const [isChatboxOpen, setIsChatboxOpen] = useState(false);
   const messages = useRef(null);
   const notification = useRef(null);

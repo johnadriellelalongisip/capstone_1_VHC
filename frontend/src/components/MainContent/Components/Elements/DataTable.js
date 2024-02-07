@@ -135,7 +135,7 @@ const DataTable = ({ data, modalForm }) => {
               setQuery(''); 
               setSearchFocus();
             }}
-            className={`text-${selectedTheme}-500 hover:text-${selectedTheme}-600 md:mr-2 lg:mr-2 ${
+            className={`text-${selectedTheme}-500 hover:text-${selectedTheme}-600 mr-4 md:mr-2 lg:mr-2 ${
               move
                 ? 'transition-transform ease-in-out duration-200 translate-x-0'
                 : 'transition-transform ease-in-out duration-200 translate-x-[9rem] md:translate-x-[198px] lg:translate-x-[200px]'

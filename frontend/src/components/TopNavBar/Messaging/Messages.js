@@ -107,7 +107,7 @@ const Messages = ({ message, toggle, openChatbox }) => {
                       <p className={`text-slate-500 ${stat && 'font-semibold'}`}>
                         {!stat && <span>You: </span>}
                         {message.Message.length > 20
-                          ? `${message.Message.substring(0, 10)}...`
+                          ? `${message.Message.substring(0, 15)}...`
                           : message.Message}
                       </p>
                     </div>

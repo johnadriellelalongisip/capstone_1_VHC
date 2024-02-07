@@ -2,9 +2,12 @@ import { Chart as ChartJS, CategoryScale, LinearScale,PointElement, LineElement,
 import { Line } from 'react-chartjs-2';
 import faker from 'faker';
 import useDropdown from '../Elements/useDropdownButton';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { colorTheme } from '../../../../App';
+import tinycolor from 'tinycolor2';
 
 const PatientChart = ({ title }) => {
+  const [selectedTheme] = useContext(colorTheme);
   const periods = {
     yearly: [
       '2020', '2021', '2022', '2023', '2024'
@@ -53,11 +56,11 @@ const PatientChart = ({ title }) => {
     datasets: [
       {
         data: labels.map(() => faker.datatype.number({ min: 0, max: 1000 })),
-        backgroundColor: 'rgba(134, 188, 225, 1)', 
+        backgroundColor: tinycolor(selectedTheme).toRgbString(), 
       },
       {
         data: labels.map(() => faker.datatype.number({ min: 0, max: 1000 })),
-        backgroundColor: 'rgba(53, 162, 235, 1)',
+        backgroundColor: tinycolor(selectedTheme).toRgbString(),
       },
     ],
   };
@@ -76,7 +79,7 @@ const PatientChart = ({ title }) => {
   });
 
   return (
-    <div className="col-span-2 md:col-span-2 lg:col-span-1 p-2 md:p-3 lg:p-5 bg-sky-50 rounded-md">
+    <div className={`col-span-2 md:col-span-2 lg:col-span-1 p-2 md:p-3 lg:p-5 bg-${selectedTheme}-50 rounded-md`}>
     <div className="flex flex-row justify-between items-center p-3">
       <p className='text-base font-semibold'>{ title }</p>
       <DropdownButton />
