@@ -24,12 +24,13 @@ const Chatbox = ({ chatbox, toggle }) => {
           <div className="flex flex-row justify-center items-center gap-2">
             <button onClick={() => toggleSize()}>
               {
-                size ? <MdOutlineKeyboardArrowDown className={`w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 p-1 rounded-3xl transition-colors duration-200 hover:text-${selectedTheme}-${size ? `700` : `-50`} text-${selectedTheme}-${!size ? `50` : `700`} hover:bg-gray-${size ? '400' : '50'}`} /> :
-                <MdOutlineKeyboardArrowUp className={`w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 p-1 rounded-3xl transition-colors duration-200 hover:text-${selectedTheme}-${size ? `700` : `-50`} text-${selectedTheme}-${!size ? `50` : `700`} hover:bg-gray-${size ? '400' : '50'}`} />
+                size ? 
+                <MdOutlineKeyboardArrowDown className={`rounded-3xl transition-colors duration-200 w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 p-1`} /> :
+                <MdOutlineKeyboardArrowUp className={`rounded-3xl transition-colors duration-200 w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 p-1`} />
               }
             </button>
             <button onClick={toggle}>
-              <IoClose className={`w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 p-1 ${size ? `hover:text-${selectedTheme}-700` : `hover:text-${selectedTheme}-50`} ${!size ? `text-${selectedTheme}-50` : `text-${selectedTheme}-700`} rounded-3xl transition-colors duration-200 hover:bg-gray-${size ? '400' : '50'}`}/>
+              <IoClose className={`rounded-3xl transition-colors duration-200 w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 p-1`} />
             </button>
           </div>
         </div>

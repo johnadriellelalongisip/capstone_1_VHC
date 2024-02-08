@@ -21,7 +21,7 @@ const App = () => {
   const [selectedTheme, setSelectedTheme] = useState(localStorage.getItem('theme'));
   const [currentChats, setCurrentChats] = useState(null);
   const colors = [
-    'gray', 'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose'
+    'gray', 'red', 'orange', 'amber', 'lime', 'green', 'teal', 'cyan', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink'
   ];
   useMemo(() => {
     if (localStorage.getItem('theme') === null) {
