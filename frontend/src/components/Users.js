@@ -4,120 +4,48 @@ import React, { useEffect, useState } from 'react';
 import Header from './MainContent/Header';
 import { useLocation } from 'react-router-dom';
 import { FaUsers } from "react-icons/fa";
+import useQuery from './MainContent/Components/Elements/Forms/useQuery';
 
 const Users = () => {
-  const [firstname, setFirstName] = useState('');
-  const [lastname, setLastName] = useState('');
-  const [response, setResponse] = useState('');
-  const [res, setRes] = useState('');
-  const [users, setUsers] = useState([]);
-  const [toEdit, setToEdit] = useState(null);
+  // const [firstname, setFirstName] = useState('');
+  // const [lastname, setLastName] = useState('');
+  // const [users, setUsers] = useState([]);
+  // const [toEdit, setToEdit] = useState(null);
+  const { response, fetchData, addData, editData, deleteData, searchData, } = useQuery();
 
-  const BASE_URL = process.env.REACT_APP_BASE_URL;
-  const headers = (method, body, token) => {
-    const baseHeaders = {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-    if (body) {
-      baseHeaders.body = JSON.stringify(body);
-    }
-    if (token) {
-      baseHeaders.headers.authorization = `Bearer ${token}`;
-    }
-    return baseHeaders;
-  };
-  
-  const fetchUsers = async() => {
-    try {
-      const response = await fetch(`${BASE_URL}getUsers`, headers('GET'));
-      const data = await response.json();
-      setUsers(data.data);
-    } catch (error) {
-      setRes(`Something have gone wrong: ${error.message}`);
-    }
-  };
+  // function cleanUp() {
+  //   setFirstName('');
+  //   setLastName('');
+  // }
 
-  const handleAddUser = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch(`${BASE_URL}users`, headers('POST', {firstname,lastname}));
-      const data = await response.json();
-      setUsers(data.data);
-      setRes('Successfully Added!');
-      setFirstName('');
-      setLastName('');
-    } catch (error) {
-      setRes('Error sending POST request:', error.message);
-      setFirstName('');
-      setLastName('');
-    }
-  };
+  // const submitAdd = async () => {
+  //   const payload = { firstname, lastname };
+  //   await addData('users', payload);
+  //   cleanUp();
+  // ;}
+  // const submitEdit = async () => {
+  //   const userId = toEdit.id;
+  //   const payload = { firstname, lastname, userId };
+  //   await editData('editUser', payload);
+  //   cleanUp();
+  // };
+  // const deleteUser = async (id) => {
+  //   await deleteData('deleteUser', id);
+  //   cleanUp();
+  // };
+  // const searchUser = async (id) => {
+  //   searchData(`searchUser/${id}`);
+  //   cleanUp();
+  // };
 
-  const handleEditUser = async (e) => {
-    e.preventDefault();
-    try {
-      const userId = toEdit.id;
-      const response = await fetch(`${BASE_URL}editUser`, headers('POST', {firstname,lastname,userId}));
-      const data = await response.json();
-      setUsers(data.data);
-      setFirstName('');
-      setLastName('');
-      setToEdit(null);
-      setRes('User Updated!');
-    } catch (error) {
-      setRes('Error sending POST request:', error.message);
-      setFirstName('');
-      setLastName('');
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      const response = await fetch(`${BASE_URL}deleteUser`, headers('POST', {id}));
-      const data = await response.json();
-      setUsers(data.data);
-      setRes('User Deleted!');
-    } catch (error) {
-      setRes('Error sending POST request:', error.message);
-    }
-  }
-
-  const editUser = async (id) => {
-    try {
-      const response = await fetch(`${BASE_URL}searchUser/${id}`, headers('GET'));
-      const data = await response.json();
-      if (data.data[0] !== undefined) {
-        const firstUserData = data.data[0];
-        const { first_name, last_name } = firstUserData;
-        setFirstName(first_name);
-        setLastName(last_name);
-        setToEdit(firstUserData);
-      } else {
-        setRes('No user data found.');
-      }
-    } catch (error) {
-      setRes('Error sending GET request:', error.message);
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  },[]);
-
-  useEffect(() => {
-    const cleanup = () => {
-      setResponse('');
-      setRes('');
-    };
-    const timeout = setTimeout(() => {
-      cleanup();
-    },3000);
-    setResponse(res);
-    return () => clearTimeout(timeout);
-  },[res]);
+  // useEffect(() => {
+  //   const payload = {
+  //     firstname: "ampel",
+  //     lastname: "ola"
+  //   }
+  //   addData('users',payload);
+  // },[]);
+  // console.log(response);
 
   const location = useLocation();
   const pathname = location.pathname.slice(1);
@@ -125,7 +53,7 @@ const Users = () => {
 
   return (
     <div className="w-full h-screen flex flex-col">
-      <div className="flex flex-col p-2 mt-20 md:mt-28 lg:mt-32 mb-4 mx-2 md:mx-3 lg:mx-4">
+      {/* <div className="flex flex-col p-2 mt-20 md:mt-28 lg:mt-32 mb-4 mx-2 md:mx-3 lg:mx-4">
         <div>
           <Header title={ title } icon={<FaUsers />}/>
         </div>
@@ -134,7 +62,7 @@ const Users = () => {
             <div className="w-34 h-36 bg-sky-50 rounded-xl">
               <div className="container mx-auto p-4 text-center">
                 <h1 className="text-3xl font-bold mb-4">REACTJS & NODE EXPRESSJS 'CRUD'</h1>
-                <form onSubmit={toEdit !== null ? handleEditUser : handleAddUser} className='flex flex-row gap-5 justify-center m-5 p-5 border-solid border-4 border-black'>
+                <form onSubmit={toEdit !== null ? submitEdit : submitAdd } className='flex flex-row gap-5 justify-center m-5 p-5 border-solid border-4 border-black'>
                   <label>
                     First Name:
                     <input 
@@ -169,8 +97,8 @@ const Users = () => {
                           <td>{user.first_name}</td>
                           <td>{user.last_name}</td>
                           <td className='flex flex-row justify-center items-center gap-2'>
-                            <Button onClick={() => handleDelete(user.id)}>Delete</Button>
-                            <Button onClick={() => editUser(user.id)}>Edit</Button>
+                            <Button onClick={() => deleteUser(user.id)}>Delete</Button>
+                            <Button onClick={() => searchUser(user.id)}>Edit</Button>
                           </td>
                         </tr>
                       ))
@@ -186,7 +114,7 @@ const Users = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

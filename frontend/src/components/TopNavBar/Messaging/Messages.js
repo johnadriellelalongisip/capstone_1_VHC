@@ -1,17 +1,16 @@
 import { Avatar } from "flowbite-react";
 import { AiFillMessage } from "react-icons/ai";
-// import { HiMiniMagnifyingGlass } from "react-icons/hi2";
 import { RiEdit2Fill } from "react-icons/ri";
 // import faker from 'faker';
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect } from "react";
 import { colorTheme, messaging } from "../../../App";
 import useWindowSize from "../../../hooks/useWindowSize";
 import useQuery from "../../MainContent/Components/Elements/Forms/useQuery";
+// import io from 'socket.io-client';
 
 const Messages = ({ message, toggle, openChatbox, createNewChat }) => {
   const [selectedTheme] = useContext(colorTheme);
   const {avatarSize} = useWindowSize();
-  const messagesRef = useRef();
   const { responsiveTextSize } = useWindowSize();
   const [currentChats, setCurrentChats] = useContext(messaging);
   const messages = [
@@ -52,10 +51,29 @@ const Messages = ({ message, toggle, openChatbox, createNewChat }) => {
     }
   ];
   const { response, fetchData } = useQuery();
+  // useEffect(() => {
+  //   const socket = io('https://localhost:5000', {
+  //     withCredentials: true,
+  //     extraHeaders: {
+  //       "Access-Control-Allow-Credentials": "true"
+  //     }
+  //   });
+  //   socket.on('connect', () => {
+  //     console.log('Connected to socket server');
+  //   });
+  //   socket.on('disconnect', () => {
+  //     console.log('Disconnected from socket server');
+  //   });
+  //   return () => {
+  //     socket.disconnect();
+  //   };
+  // },[]);
+
   useEffect(() => {
     fetchData('getUsers');
     console.log(response);
-  },[]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const selectedChat = (id) => {
     const selectedMessage = messages.find(message => parseInt(message.Id) === id);
@@ -74,13 +92,6 @@ const Messages = ({ message, toggle, openChatbox, createNewChat }) => {
     }
   };
 
-  // NEEDS FIXING SCROLL TO BOTTOM
-  useEffect(() => {
-    if (messagesRef.current) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-    }
-  }, []);
-
   return (
     <dialog ref={message} className={`rounded-lg mr-0 fixed right-4 md:right-10 lg:right-14 top-20 bg-${selectedTheme}-100 drop-shadow-lg`}>
       <div className="flex flex-col m-2 text-xs md:text-sm lg:text-base">
@@ -93,7 +104,7 @@ const Messages = ({ message, toggle, openChatbox, createNewChat }) => {
             <RiEdit2Fill className={`w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 p-1 hover:text-${selectedTheme}-700 rounded-3xl transition-colors duration-200 hover:bg-${selectedTheme}-200`}/>
           </button>
         </div>
-        <div ref={messagesRef} className="w-52 md:w-70 lg:w-80 flex flex-col gap-2 h-60 max-h-60 overflow-y-auto">
+        <div className="w-52 md:w-70 lg:w-80 flex flex-col gap-2 h-60 max-h-60 overflow-y-auto">
           {
             messages.map((message, i) => {
               const stat = message.Status === 'read';

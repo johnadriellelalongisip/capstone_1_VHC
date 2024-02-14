@@ -57,7 +57,7 @@ const TopNav = () => {
     <div className={`fixed top-0 left-0 right-0 flex justify-between items-center p-5 bg-${selectedTheme}-200 z-50`}>
       <div className={`flex justify-center items-center text-${selectedTheme}-500`}>
         <FaPlusCircle className=' w-8 h-8 md:w-12 md:h-12 lg:w-16 lg:h-16' />
-        <span className="self-center whitespace-nowrap text-2xl font-bold">VHC</span>
+        <span className="self-center whitespace-nowrap text-2xl font-bold">MHO</span>
       </div>
       <div className="flex justify-end items-center gap-2 md:gap-3 lg:gap-4">
         <Tooltip content="Messages" animation="duration-500">
