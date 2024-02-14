@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { MdHome, MdSpaceDashboard, MdFolder, MdAnalytics, MdLocalPharmacy } from "react-icons/md";
+import { MdHome, MdSpaceDashboard, MdFolder, MdAnalytics, MdLocalPharmacy, MdCalendarMonth } from "react-icons/md";
 import { BiSolidDonateBlood } from "react-icons/bi";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { colorTheme } from "../../App";
@@ -28,9 +28,9 @@ const Menu = ({ path, Icon, label }) => {
     <Link
       to={path}
       onClick={handleClick}
-      className={`m-2 px-2 md:px-8 lg:px-14 gap-2 rounded-lg transition-colors hover:text-${selectedTheme}-100 hover:bg-gray-50 p-2 first-line duration-300 ease-linear ${
+      className={`m-2 px-2 md:px-8 lg:px-14 gap-2 rounded-lg transition-colors hover:text-${selectedTheme}-600 hover:bg-${selectedTheme}-50 hover:drop-shadow-md p-2 first-line duration-300 ease-linear ${
         loc === `/${path}`
-          ? `bg-${selectedTheme}-100`
+          ? `bg-${selectedTheme}-100 drop-shadow-xl`
           : `bg-transparent`
       }`}
     >
@@ -55,6 +55,7 @@ const SideMenu = () => {
   return (
     <div className={`flex flex-col text-${selectedTheme}-700 font-semibold mt-24 md:mt-24 lg:mt-28`}>
       <Menu path="home" Icon={MdHome} label="Home" />
+      <Menu path="appointments" Icon={MdCalendarMonth} label="Appointments" />
       <Menu path="dashboard" Icon={MdSpaceDashboard} label="Dashboard" />
       <Menu path="analytics" Icon={MdAnalytics} label="Analytics" />
       <Menu path="records" Icon={MdFolder} label="Records" />

@@ -4,38 +4,53 @@ import { FaPlusCircle } from "react-icons/fa";
 import { BsBellFill } from "react-icons/bs";
 import { AiFillMessage } from "react-icons/ai";
 import { useContext, useState } from "react";
-import useNavigationState from "./useToggles";
+import useNavigationState from "../../hooks/useToggles";
 import Messages from "./Messaging/Messages";
-import Notifs from "./Notifications";
+import Notifs from "./Notifications/Notifications";
 import Profile from "./Profile";
 import Settings from "./Settings/Settings";
 import Help from "./Help/Help";
 import Themes from "./Settings/Themes";
 import { colorTheme } from "../../App";
 import Chatbox from "./Messaging/Chatbox";
+import useWindowSize from "../../hooks/useWindowSize";
+import ReportForm from "./Help/ReportForm";
+import FeedbackForm from "./Help/FeedbackForm";
+import PopupNotification from "./Notifications/PopupNotification";
+import Newchat from "./Messaging/Newchat";
 
 const TopNav = () => {
   const [selectedTheme] = useContext(colorTheme);
+  const {avatarSize} = useWindowSize();
   const [jump1, setJump1] = useState(false);
   const [jump2, setJump2] = useState(false);
   const [fadeDown2, setFadeDown2] = useState(false);
   const [fadeDown3, setFadeDown3] = useState(false);
   const { 
     messages,
+    chatbox,
+    newChat,
     notification,
+    popupNotif,
     profile,
     settings,
     theme,
     help,
-    chatbox,
+    reportForm,
+    feedback,
     toggleMessage,
+    openChatbox,
+    closeChatbox,
+    openNewChat,
+    closeNewChat,
     toggleNotif,
+    togglePopupNotif,
     toggleProfile,
     toggleSettings,
     toggleTheme,
     toggleHelp,
-    openChatbox,
-    closeChatbox
+    toggleReportForm,
+    toggleFeedback,
   } = useNavigationState();
 
   return (
@@ -54,6 +69,7 @@ const TopNav = () => {
               setFadeDown2(false);
               toggleMessage();
             }}
+            className="relative"
           >
             <AiFillMessage 
               className={`w-6 h-6 text-${selectedTheme}-400 hover:text-${selectedTheme}-500 
@@ -62,6 +78,7 @@ const TopNav = () => {
               }`}
               onAnimationEnd={() => setJump1(!jump1)}
             />
+            <div className={`absolute bottom-0 right-0 rounded-3xl bg-${selectedTheme}-700 p-1`}></div>
           </button>
         </Tooltip>
         <Tooltip content="Notifications" animation="duration-500">
@@ -72,6 +89,7 @@ const TopNav = () => {
               setFadeDown2(!fadeDown2);
               toggleNotif();
             }}
+            className="relative"
           >
             <BsBellFill
               className={`w-6 h-6 text-${selectedTheme}-400 hover:text-${selectedTheme}-500 
@@ -80,22 +98,30 @@ const TopNav = () => {
               }`}
               onAnimationEnd={() => setJump2(!jump2)}
             />
+            <div className={`absolute bottom-0 right-0 rounded-3xl bg-${selectedTheme}-700 p-1`}></div>
           </button>
         </Tooltip>
         <Tooltip content="Profile" animation="duration-500">
           <button onClick={() => toggleProfile()}>
-            <Avatar img='default_profile.svg' rounded size='md' />
+            <Avatar img='default_profile.svg' rounded size={avatarSize} />
           </button>
         </Tooltip>
       </div>
-      <Messages message={messages} toggle={() => toggleMessage()} openChatbox={() => openChatbox()}/>
-      <Chatbox chatbox={chatbox} toggle={() => closeChatbox()} />
 
-      <Notifs notifs={notification} toggle={() => toggleNotif()} />
+      <Messages message={messages} toggle={() => toggleMessage()} openChatbox={() => openChatbox()} createNewChat={() => openNewChat()} />
+      <Chatbox chatbox={chatbox} toggle={() => closeChatbox()} />
+      <Newchat newchat={newChat} closeNewChat={() => closeNewChat()} />
+
+      <Notifs notifs={notification} toggle={() => toggleNotif()} togglePopupNotif={() => togglePopupNotif()} />
+      <PopupNotification popupNotifRef={popupNotif} toggle={() => togglePopupNotif()} />
+
       <Profile prof={profile} toggle={() => toggleProfile()} toggleOptions={() => toggleSettings()} toggleHelp={() => toggleHelp()} />
       <Settings settings={settings} toggle={ () => {toggleSettings(); toggleProfile();} } toggleTheme={ () => toggleTheme() }/>
       <Themes theme={theme} toggle={ () => toggleTheme() }/>
-      <Help help={help} toggle={ () => toggleHelp() }/>
+
+      <Help help={help} toggle={ () => toggleHelp() } toggleReportForm={() => toggleReportForm()} toggleFeedback={() => toggleFeedback()} />
+      <ReportForm reportFormRef={reportForm} toggle={ () => toggleReportForm() }/>
+      <FeedbackForm feedbackRef={feedback} toggle={ () => toggleFeedback() }/>
     </div>
   );
 }

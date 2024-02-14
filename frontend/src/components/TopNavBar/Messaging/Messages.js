@@ -1,26 +1,19 @@
-import { Avatar, TextInput } from "flowbite-react";
+import { Avatar } from "flowbite-react";
 import { AiFillMessage } from "react-icons/ai";
-import { HiMiniMagnifyingGlass } from "react-icons/hi2";
+// import { HiMiniMagnifyingGlass } from "react-icons/hi2";
 import { RiEdit2Fill } from "react-icons/ri";
 // import faker from 'faker';
-import { useContext } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { colorTheme, messaging } from "../../../App";
+import useWindowSize from "../../../hooks/useWindowSize";
+import useQuery from "../../MainContent/Components/Elements/Forms/useQuery";
 
-const Messages = ({ message, toggle, openChatbox }) => {
+const Messages = ({ message, toggle, openChatbox, createNewChat }) => {
   const [selectedTheme] = useContext(colorTheme);
-  // eslint-disable-next-line no-unused-vars
+  const {avatarSize} = useWindowSize();
+  const messagesRef = useRef();
+  const { responsiveTextSize } = useWindowSize();
   const [currentChats, setCurrentChats] = useContext(messaging);
-
-  // const generateRandomStatus = () => faker.random.arrayElement(['read', 'unread']);
-  // const generateRandomActivity = () => faker.random.arrayElement(['online', 'offline', 'away', 'busy']);
-
-  // const messages = Array.from({ length: 5 }, () => ({
-  //   Id: faker.datatype.number({ min: 1, max: 5000 }),
-  //   Name: faker.name.findName(),
-  //   Message: faker.lorem.sentence(),
-  //   Status: generateRandomStatus(),
-  //   Activity: generateRandomActivity(),
-  // }));
   const messages = [
     {
         "Id": 2884,
@@ -58,6 +51,11 @@ const Messages = ({ message, toggle, openChatbox }) => {
         "Activity": "busy"
     }
   ];
+  const { response, fetchData } = useQuery();
+  useEffect(() => {
+    fetchData('getUsers');
+    console.log(response);
+  },[]);
 
   const selectedChat = (id) => {
     const selectedMessage = messages.find(message => parseInt(message.Id) === id);
@@ -70,10 +68,18 @@ const Messages = ({ message, toggle, openChatbox }) => {
         Activity: selectedMessage.Activity
       };
       setCurrentChats(newChat);
+      console.log(currentChats);
       openChatbox();
       toggle();
     }
   };
+
+  // NEEDS FIXING SCROLL TO BOTTOM
+  useEffect(() => {
+    if (messagesRef.current) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    }
+  }, []);
 
   return (
     <dialog ref={message} className={`rounded-lg mr-0 fixed right-4 md:right-10 lg:right-14 top-20 bg-${selectedTheme}-100 drop-shadow-lg`}>
@@ -83,31 +89,30 @@ const Messages = ({ message, toggle, openChatbox }) => {
             <AiFillMessage className="w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 p-1"/>
             <p className="font-semibold p-1">Messages</p>
           </div>
-          <button onClick={toggle}>
-            <RiEdit2Fill className={`w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 p-1 hover:text-${selectedTheme}-700 rounded-3xl transition-colors duration-200 hover:bg-gray-100`}/>
+          <button onClick={() => createNewChat()}>
+            <RiEdit2Fill className={`w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 p-1 hover:text-${selectedTheme}-700 rounded-3xl transition-colors duration-200 hover:bg-${selectedTheme}-200`}/>
           </button>
         </div>
-        <TextInput
-          type="text"
-          icon={HiMiniMagnifyingGlass}
-          placeholder="Search messages. . ."
-          sizing='md'
-          className="my-2 mx-4"
-        />
-        <div className="w-52 md:w-70 lg:w-80 flex flex-col gap-2 h-60 max-h-60 overflow-y-auto">
+        <div ref={messagesRef} className="w-52 md:w-70 lg:w-80 flex flex-col gap-2 h-60 max-h-60 overflow-y-auto">
           {
             messages.map((message, i) => {
               const stat = message.Status === 'read';
               return (
-                <button key={i} className={`rounded-lg transition-colors duration-200 hover:drop-shadow-md hover:bg-gray-100 focus:ring-${selectedTheme}-500 focus:bg-${selectedTheme}-50`} onClick={() => selectedChat(message.Id)} >
+                <button key={i} className={`rounded-lg transition-colors duration-200 hover:drop-shadow-md hover:bg-${selectedTheme}-200 focus:bg-${selectedTheme}-50`} onClick={() => selectedChat(message.Id)} >
                   <div className="flex items-center gap-2 mx-2">
-                    <Avatar img="default_profile.svg" rounded status={`${message.Activity}`} size="md" statusPosition="bottom-right" />
+                    <Avatar img="default_profile.svg" rounded status={`${message.Activity}`} size={avatarSize} statusPosition="bottom-right" />
                     <div className="flex flex-col items-start">
-                      <p className={`${stat ? 'font-bold' : 'font-semibold'}`}>{message.Name}</p>
+                      <p className={`${stat ? 'font-bold' : 'font-semibold'}`}>
+                        {
+                          message.Name.length > 10
+                          ? `${message.Name.substring(0, 10)}...`
+                          : message.Name
+                        }
+                      </p>
                       <p className={`text-slate-500 ${stat && 'font-semibold'}`}>
                         {!stat && <span>You: </span>}
-                        {message.Message.length > 20
-                          ? `${message.Message.substring(0, 15)}...`
+                        {message.Message.length > 8
+                          ? `${message.Message.substring(0, Math.round(responsiveTextSize))}...`
                           : message.Message}
                       </p>
                     </div>

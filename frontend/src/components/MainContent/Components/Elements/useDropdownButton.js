@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { MdArrowDropDown } from "react-icons/md";
+import { colorTheme } from '../../../../App';
 
 const useDropdown = ({ options, defaultOption, onSelect }) => {
   const [selectedOption, setSelectedOption] = useState(defaultOption);
@@ -19,12 +20,14 @@ const useDropdown = ({ options, defaultOption, onSelect }) => {
   };
 
   const DropdownButton = ({ children }) => {
+    const [selectedTheme] = useContext(colorTheme);
+
     return (
       <div className="relative inline-block text-left">
         <button
           type="button"
           onClick={(e) => handleButtonClick(e)}
-          className="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-sky-800 rounded-md focus:outline-none focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-opacity-75"
+          className={`inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-${selectedTheme}-800 rounded-md focus:outline-none focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-opacity-75`}
         >
           {children || selectedOption}
           <MdArrowDropDown
@@ -44,7 +47,7 @@ const useDropdown = ({ options, defaultOption, onSelect }) => {
                 <button
                   key={option}
                   onClick={() => handleMenuItemClick(option)}
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  className={`block px-4 py-2 text-sm text-gray-700 hover:bg-${selectedTheme}-100 hover:text-gray-900`}
                   role="menuitem"
                 >
                   <p>{ option }</p>

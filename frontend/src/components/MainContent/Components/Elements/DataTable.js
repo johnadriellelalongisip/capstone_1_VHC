@@ -116,9 +116,9 @@ const DataTable = ({ data, modalForm }) => {
   }, [query,filteredData]);
 
   const displayedData = filteredData.slice((CurrentPage - 1) * 10, CurrentPage * 10);
-
+  
   return (
-    <div>
+    <>
       <div className="flex justify-between items-center p-4 overflow-hidden">
         <button 
           className={`text-xs md:text-sm lg:text-sm whitespace-nowrap font-semibold text-${selectedTheme}-50 bg-${selectedTheme}-600 rounded-lg p-2`}
@@ -144,6 +144,7 @@ const DataTable = ({ data, modalForm }) => {
             <MdSearch className="w-6 h-6" />
           </button>
           <TextInput
+            id="tablesearch"
             ref={inputRef}
             type="text"
             placeholder="Search here"
@@ -167,7 +168,7 @@ const DataTable = ({ data, modalForm }) => {
                 className={`flex flex-row justify-between items-center bg-${selectedTheme}-200 divide-x-2 divide-transparent`}
               >
                 {Object.values(row).map((col, coli) => (
-                  <td key={coli} className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden hover:overflow-visible hover:bg-gray-50 hover:text-gray-900 transition-colors duration-300 hover:px-2`}>
+                  <td key={coli} className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden hover:overflow-visible hover:bg-${selectedTheme}-50 hover:text-gray-900 hover:drop-shadow-md hover:rounded-md transition-colors duration-300 hover:px-2`}>
                     {col}
                   </td>
                 ))}
@@ -203,7 +204,7 @@ const DataTable = ({ data, modalForm }) => {
             <button disabled={CurrentPage <= 1} onClick={() => setCurrentPage((prev) => prev - 1)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
               <MdOutlineChevronLeft />
             </button>
-            <p className="text-sm md:text-md lg:text-base mx-1">
+            <p className="text-xs md:text-sm lg:text-base mx-1">
               {CurrentPage} of {Pages}
             </p>
             <button disabled={CurrentPage >= Pages} onClick={() => setCurrentPage((prev) => prev + 1)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
@@ -216,7 +217,7 @@ const DataTable = ({ data, modalForm }) => {
         </div>
       </div>
       <FormModal isOpen={modalIsOpen} formType={modalForm} onClose={() => setModalIsOpen(false)} />
-    </div>
+    </>
   );
 };
 

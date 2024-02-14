@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
-const useQuery = ({ method, payload, }) => {
+const useQuery = () => {
   const BASE_URL = process.env.REACT_APP_BASE_URL;
-  const [data, setData] = useState([]);
-  const [response, setResponse] = useState('');
-  const [res, setRes] = useState('');
+  const [response, setResponse] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const headers = (method, body, token) => {
     const baseHeaders = {
@@ -22,70 +21,24 @@ const useQuery = ({ method, payload, }) => {
     return baseHeaders;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (route) => {
+    setIsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}getUsers`, headers('GET'));
+      const response = await fetch(`${BASE_URL}${route}`, headers('GET'));
       const data = await response.json();
-      setData(data.data);
+      console.log(data)
+      setResponse(data.data);
+      setIsLoading(false);
     } catch (error) {
-      setRes(`Something have gone wrong: ${error.message}`);
+      setResponse(`Something have gone wrong: ${error.message}`);
+      setIsLoading(false);
     }
   };
-
-  const handleAddData = async (firstname, lastname) => {
-    try {
-      const response = await fetch(`${BASE_URL}users`, headers('POST', { firstname, lastname }));
-      const data = await response.json();
-      setData(data.data);
-      setRes('Successfully Added!');
-    } catch (error) {
-      setRes('Error sending POST request:', error.message);
-    }
-  };
-
-  const handleEditData = async (firstname, lastname, userId) => {
-    try {
-      const response = await fetch(`${BASE_URL}editUser`, headers('POST', { firstname, lastname, userId }));
-      const data = await response.json();
-      setData(data.data);
-      setRes('User Updated!');
-    } catch (error) {
-      setRes('Error sending POST request:', error.message);
-    }
-  };
-
-  const handleDeleteData = async (id) => {
-    try {
-      const response = await fetch(`${BASE_URL}deleteUser`, headers('POST', { id }));
-      const data = await response.json();
-      setData(data.data);
-      setRes('User Deleted!');
-    } catch (error) {
-      setRes('Error sending POST request:', error.message);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setRes('');
-    }, 3000);
-    return () => clearTimeout(timeout);
-  }, [res]);
-
-  useEffect(() => {
-    setResponse(res);
-  }, [res]);
-
+  
   return {
-    data,
+    isLoading,
     response,
-    handleAddData,
-    handleEditData,
-    handleDeleteData,
+    fetchData,
   };
 };
 

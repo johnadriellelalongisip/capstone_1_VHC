@@ -9,4 +9,7 @@ router.get('/searchUser/:id', userController.searchUser);
 router.post('/deleteUser', userController.deleteUser);
 router.post('/editUser', userController.editUser);
 
+// MAIN ROUTES
+
+
 module.exports = router;

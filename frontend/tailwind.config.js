@@ -7,6 +7,7 @@ module.exports = {
   ],
   safelist: [
     {pattern: /(bg|text|border)-./},
+    {pattern: /(bg|text)-./, variants: ['hover','focus','active'] }
   ],
   theme: {
     fontFamily: {
