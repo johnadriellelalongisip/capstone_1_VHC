@@ -5,6 +5,7 @@ const useQuery = () => {
   const [response, setResponse] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [toEdit, setToEdit] = useState(null);
 
   const headers = (method, body, token) => {
     const baseHeaders = {
@@ -74,12 +75,15 @@ const useQuery = () => {
     }
   }
 
-  const searchData = async ( route ) => {
+  const searchData = ( route, id ) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}${route}`, headers('GET'));
-      const data = await response.json();
-      setResponse(data);
+      const search = async() => {
+        const response = await fetch(`${BASE_URL}${route}/${id}`, headers('GET'));
+        const data = await response.json();
+        setToEdit(data.data[0]);
+      }
+      search();
       setIsLoading(false);
     } catch (error) {
       setError(error);
@@ -91,6 +95,8 @@ const useQuery = () => {
     isLoading,
     response,
     error,
+    toEdit,
+    setToEdit,
     fetchData,
     addData,
     editData,

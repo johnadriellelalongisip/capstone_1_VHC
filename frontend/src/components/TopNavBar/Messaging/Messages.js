@@ -2,10 +2,9 @@ import { Avatar } from "flowbite-react";
 import { AiFillMessage } from "react-icons/ai";
 import { RiEdit2Fill } from "react-icons/ri";
 // import faker from 'faker';
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { colorTheme, messaging } from "../../../App";
 import useWindowSize from "../../../hooks/useWindowSize";
-import useQuery from "../../MainContent/Components/Elements/Forms/useQuery";
 // import io from 'socket.io-client';
 
 const Messages = ({ message, toggle, openChatbox, createNewChat }) => {
@@ -50,7 +49,7 @@ const Messages = ({ message, toggle, openChatbox, createNewChat }) => {
         "Activity": "busy"
     }
   ];
-  const { response, fetchData } = useQuery();
+
   // useEffect(() => {
   //   const socket = io('https://localhost:5000', {
   //     withCredentials: true,
@@ -68,12 +67,6 @@ const Messages = ({ message, toggle, openChatbox, createNewChat }) => {
   //     socket.disconnect();
   //   };
   // },[]);
-
-  useEffect(() => {
-    fetchData('getUsers');
-    console.log(response);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const selectedChat = (id) => {
     const selectedMessage = messages.find(message => parseInt(message.Id) === id);
