@@ -1,7 +1,7 @@
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import faker from 'faker';
-import useDropdown from '../Elements/useDropdownButton';
+import useDropdown from '../Elements/DropdownButton';
 import { useContext } from 'react';
 import { colorTheme } from '../../../../App';
 import tinycolor from 'tinycolor2';

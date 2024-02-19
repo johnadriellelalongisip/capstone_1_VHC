@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { colorTheme } from "../../../../App";
 import { MdArrowRight, MdClose, MdPerson } from "react-icons/md";
 import useQuery from "../../../../hooks/useQuery";
@@ -14,9 +14,6 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
   const [history, setHistory] = useState(null);
   const [formVisibility, setFormVisibility] = useState(false);
   const { mysqlTime } = useCurrentTime();
-  const extendLogRef = useRef(null);
-  const [isExtendLogOpen, setIsExtendLogOpen] = useState(false);
-  const [dataset, setDataset] = useState(null);
   const { searchResults, isLoading, error, searchData, editData } = useQuery();
   const [formData, setFormData] = useState({
     "Prescription Added" : {
@@ -44,7 +41,6 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
     if (searchResults) {
       setRecord([searchResults][0]);
       setHistory(JSON.parse(searchResults.citizen_history));
-      console.log(JSON.parse(searchResults.citizen_history));
     } else if (error) {
       console.log(error);
     }
@@ -65,18 +61,6 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
     history[JKey] = formData;
     editData('addRecordHistory', history,  family_id);
     cleanUp();
-  };
-
-  const toggleExtend = (data) => {
-    if (!isExtendLogOpen) {
-      setDataset(data);
-      setIsExtendLogOpen(true);
-      extendLogRef.current.show();
-    } else {
-      setDataset(null);
-      setIsExtendLogOpen(false);
-      extendLogRef.current.close();
-    }
   };
   
   return (
@@ -134,13 +118,9 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
                                 typeof(subValue) === 'object' ? (
                                   Object.entries(subValue).map(([lastKey, lastValue], i) => (
                                     <div key={i} className="relative">
-                                      <button className="flex items-center" onClick={() => toggleExtend(subValue)}>
+                                      <button className="flex items-center">
                                         {subKey} <MdArrowRight className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6"/>
                                       </button>
-                                      <dialog ref={extendLogRef} className="flex flex-col gap-2 text-xs font-semibold">
-                                        <p>{lastKey}</p>
-                                        <p>{lastValue}</p>
-                                      </dialog>
                                     </div>
                                   ))
                                 ) : (

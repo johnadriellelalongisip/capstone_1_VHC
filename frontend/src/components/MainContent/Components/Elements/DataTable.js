@@ -13,7 +13,8 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
   const [Pages, setPages] = useState(0);
   const [sortedData, setSortedData] = useState([]);
   const inputRef = useRef(null);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const formModalRef = useRef(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [sortState, setSortState] = useState(
     data && Object.keys(data[0]).reduce((acc, field) => {
       acc[field] = false;
@@ -136,6 +137,16 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
     setPages(NumOfPages);
   }, [query,filteredData]);
 
+  const toggleForm = () => {
+    if (!isFormOpen) {
+      formModalRef.current.showModal();
+      setIsFormOpen(true);
+    } else {
+      formModalRef.current.close();
+      setIsFormOpen(false);
+    }
+  }
+
   const displayedData = filteredData.slice((CurrentPage - 1) * 20, CurrentPage * 20);
   
   return (
@@ -143,7 +154,7 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
       <div className="flex justify-between items-center p-4 overflow-hidden">
         <button 
           className={`text-xs md:text-sm lg:text-sm whitespace-nowrap font-semibold ${!isLoading && !error ? `text-${selectedTheme}-50 bg-${selectedTheme}-600 drop-shadow-md` : `text-${selectedTheme}-600 bg-${selectedTheme}-200 shadow-inner`} rounded-lg p-2`}
-          onClick={() => setModalIsOpen(true)}
+          onClick={() => toggleForm()}
           disabled={isLoading || error}
         >
           Add New Data
@@ -296,7 +307,7 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
         </div>
         )
       }
-      <FormModal isOpen={modalIsOpen} formType={modalForm} onClose={() => setModalIsOpen(false)} />
+      <FormModal formRef={formModalRef} toggleForm={toggleForm} formType={modalForm} />
     </>
   );
 };

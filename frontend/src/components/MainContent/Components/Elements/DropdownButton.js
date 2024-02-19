@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { MdArrowDropDown } from "react-icons/md";
 import { colorTheme } from '../../../../App';
 
-const useDropdown = ({ options, defaultOption, onSelect }) => {
+const Dropdown = ({ options, defaultOption, onSelect }) => {
   const [selectedOption, setSelectedOption] = useState(defaultOption);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -63,4 +63,4 @@ const useDropdown = ({ options, defaultOption, onSelect }) => {
   return { DropdownButton, selectedOption };
 };
 
-export default useDropdown;
+export default Dropdown;
