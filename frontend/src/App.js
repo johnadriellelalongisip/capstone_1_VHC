@@ -3,7 +3,6 @@ import { createContext, useMemo, useState } from "react";
 
 import Notfound from './components/Notfound';
 import TopNav from './components/TopNavBar/TopNav';
-// import FootBar from './components/Footer/FootBar';
 import SideMenu from './components/TopNavBar/SideMenu';
 
 import Users from './components/Users.js';
@@ -15,10 +14,13 @@ import Pharmacy from './components/MainContent/Components/Pharmacy';
 import BloodUnit from './components/MainContent/Components/BloodUnit';
 import Appointments from "./components/MainContent/Components/Appointments/Appointments.js";
 
+import Login from "./components/Login.js";
+import Register from "./components/Register.js";
+
 export const colorTheme = createContext();
 export const messaging = createContext();
 
-const App = () => {
+const AppContent = () => {
   if (localStorage.getItem('theme') === null) {
     localStorage.setItem('theme','blue');
   }
@@ -48,6 +50,8 @@ const App = () => {
             </div>
             <div className={`basis-11/12 h-auto bg-${selectedTheme}-100 overflow-y-hidden`}>
               <Routes>
+                <Route path="login" element={<Login />}/>
+                <Route path="register" element={<Register />}/>
                 <Route path='dashboard' element={<Dashboard />}/>
                 <Route path='users' element={<Users />}/>
                 <Route path='home' element={<Home />}/>
@@ -60,13 +64,29 @@ const App = () => {
               </Routes>
             </div>
           </div>
-          {/* <div className={`fixed bottom-0 right-0 left-0 h-auto bg-${selectedTheme}-200 p-4`}>
-            <FootBar />
-          </div> */}
         </BrowserRouter>
       </colorTheme.Provider>
     </div>
   );
 }
 
-export default App;
+// const App = () => {
+//   const [isLoggedIn, setIsLoggedIn] = useState(true);
+
+//   // some functions to handle session from the backend server
+
+//   if (!isLoggedIn) {
+//     return (
+//       <BrowserRouter basename="/">
+//         <Routes>
+//           <Route path="login" element={<Login />}/>
+//           <Route path="register" element={<Register />}/>
+//         </Routes>
+//       </BrowserRouter>
+//     )
+//   } else if (isLoggedIn) {
+//     <AppContent />
+//   }
+// }
+
+export default AppContent;

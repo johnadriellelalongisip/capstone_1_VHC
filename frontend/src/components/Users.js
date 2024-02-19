@@ -4,12 +4,12 @@ import React, { useEffect, useState } from 'react';
 // import Header from './MainContent/Header';
 // import { useLocation } from 'react-router-dom';
 // import { FaUsers } from "react-icons/fa";
-import useQuery from './MainContent/Components/Elements/Forms/useQuery';
+import useQuery from '../hooks/useQuery';
 
 const Users = () => {
   const [firstname, setFirstName] = useState('');
   const [lastname, setLastName] = useState('');
-  const { response, toEdit, setToEdit, fetchData, addData, editData, deleteData, searchData, } = useQuery();
+  const { response, searchResults, setSearchResults, fetchData, addData, editData, deleteData, searchData, } = useQuery();
   // const [USERID, setUSERID] = useState(null);
 
   function cleanUp() {
@@ -17,38 +17,35 @@ const Users = () => {
     setLastName('');
   }
 
-  const submitAdd = async (e) => {
+  const submitAdd = (e) => {
     e.preventDefault();
     const payload = { firstname: firstname, lastname: lastname };
-    await addData('addUsers', payload);
+    addData('addUsers', payload);
     cleanUp();
   ;}
-  const submitEdit = async (e) => {
+  const submitEdit = (e) => {
     e.preventDefault();
-    const payload = { firstname: firstname, lastname: lastname, userId: toEdit.id };
-    await editData('editUser', payload);
-    setToEdit(null);
+    const payload = { firstname: firstname, lastname: lastname };
+    editData('editUser', payload, searchResults.id);
+    setSearchResults(null);
     cleanUp();
   };
 
-  const deleteUser = async (id) => {
-    await deleteData('deleteUser', {id:id});
+  const deleteUser = (id) => {
+    deleteData('deleteUser', id);
   };
   const searchUser = (id) => {
     searchData(`searchUser`, id);
-    if (toEdit && toEdit.first_name && toEdit.last_name) {
-      setFirstName(toEdit.first_name);
-      setLastName(toEdit.last_name);
-    } else {
-      console.log('User data not found.');
-    }
   };
-
+  
   useEffect(() => {
-    const fetchIt = async() => {
-      await fetchData('getUsers');
+    if (searchResults !== null) {
+      setFirstName(searchResults.first_name);
+      setLastName(searchResults.last_name);
     }
-    fetchIt();
+  }, [searchResults]);
+  useEffect(() => {
+    fetchData('getUsers');
   },[]);
 
   return (
@@ -62,7 +59,7 @@ const Users = () => {
             <div className="w-34 h-36 bg-sky-50 rounded-xl">
               <div className="container mx-auto p-4 text-center">
                 <h1 className="text-3xl font-bold mb-4">REACTJS & NODE EXPRESSJS 'CRUD'</h1>
-                <form onSubmit={toEdit ? submitEdit : submitAdd } className='flex flex-row gap-5 justify-center m-5 p-5 border-solid border-4 border-black'>
+                <form onSubmit={searchResults ? submitEdit : submitAdd } className='flex flex-row gap-5 justify-center m-5 p-5 border-solid border-4 border-black'>
                   <label>
                     First Name:
                     <input 
@@ -79,7 +76,7 @@ const Users = () => {
                       onChange={(e) => setLastName(e.target.value)}
                     />
                   </label>
-                  <Button type="submit">{toEdit ? 'Update' : 'Submit'}</Button>
+                  <Button type="submit">{searchResults ? 'Update' : 'Submit'}</Button>
                 </form>
                 <table className="text-center table-auto w-full border-solid border-2 border-black divide-y divide-x">
                     <tr className='divide-y divide-x'>

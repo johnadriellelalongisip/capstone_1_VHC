@@ -69,7 +69,8 @@ class UserController {
       dbModel.releaseConnection(con);
       res.status(202).json({ response, data });
     } catch (error) {
-      
+      console.log(error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
   }
 }

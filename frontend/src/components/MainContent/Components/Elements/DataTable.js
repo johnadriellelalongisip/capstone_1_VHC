@@ -4,14 +4,14 @@ import { MdSearch, MdOutlineChevronLeft, MdOutlineChevronRight, MdOutlineKeyboar
 import FormModal from "./FormModal";
 import { colorTheme } from "../../../../App";
 
-const DataTable = ({ data, modalForm }) => {
+const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
   const [selectedTheme] = useContext(colorTheme);
 
   const [move, setMove] = useState(false);
   const [query, setQuery] = useState('');
   const [CurrentPage, setCurrentPage] = useState(1);
   const [Pages, setPages] = useState(0);
-  const [sortedData, setSortedData] = useState(data);
+  const [sortedData, setSortedData] = useState([]);
   const inputRef = useRef(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [sortState, setSortState] = useState(
@@ -20,6 +20,12 @@ const DataTable = ({ data, modalForm }) => {
       return acc;
     }, {})
   );
+
+  useEffect(() => {
+    if (data) {
+      setSortedData(data);
+    }
+  }, [data]);
 
   const setSearchFocus = () => {
     if(!move){
@@ -31,12 +37,10 @@ const DataTable = ({ data, modalForm }) => {
       };
     }
   }
-
   const searchTable = (e) => {
     setQuery(e.target.value);
     setCurrentPage(1);
   }
-
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.code === 'KeyK' && event.ctrlKey) {
@@ -83,23 +87,40 @@ const DataTable = ({ data, modalForm }) => {
     <tr className={`flex flex-row justify-between items-center bg-${selectedTheme}-300 text-xs md:text-sm lg:text-md ${
       top ? 'rounded-tl-lg rounded-tr-lg' : 'rounded-bl-lg rounded-br-lg'
     }`}>
-      {Object.keys(data[0]).map((field, fieldi) => (
-        <th key={fieldi} className="w-full p-2 text-center flex justify-center items-center">
-          <button
-            onClick={() => handleSorting(field)}
-            className="flex flex-row justify-center items-center"
-          >
-            <p>{field}</p>
-            {top && (
-              <p>
-                {sortState[field] && <MdArrowDropUp className={`w-6 h-6 text-${selectedTheme}-600`} />}
-                {!sortState[field] && <MdArrowDropDown className="w-6 h-6" />}
-              </p>
-            )}
-          </button>
-        </th>
-      ))}
-      <th className="w-full p-2 text-center flex justify-center items-center">Action</th>
+      {
+        isLoading ? (
+            <th className="w-full p-2 text-center flex justify-center items-center animate-pulse animate-infinite animate-duration-500 animate-ease-linear">{top ? 'Loading Table' : ' '}</th>
+        ) : (
+          Object.keys(data[0]).map((field, fieldi) => (
+            <th key={fieldi} className="w-full p-2 text-center flex justify-center items-center">
+              <button
+                onClick={() => handleSorting(field)}
+                className="flex flex-row justify-center items-center"
+              >
+                <p>{field}</p>
+                {top && (
+                  <p>
+                    {sortState[field] && <MdArrowDropUp className={`w-6 h-6 text-${selectedTheme}-600`} />}
+                    {!sortState[field] && <MdArrowDropDown className="w-6 h-6" />}
+                  </p>
+                )}
+              </button>
+            </th>
+          ))
+        )
+      }
+      {
+        top ? (
+          <>
+            {!isLoading && !error && <th className="w-full p-2 text-center flex justify-center items-center">Actions</th>}
+            {error && <th className="w-full p-2 text-center flex justify-center items-center">{error}</th>}
+          </>
+        ) : (
+          <>
+            {!isLoading && <th className="w-full p-2 text-center flex justify-center items-center"> </th>}
+          </>
+        )
+      }
     </tr>
   );
 
@@ -115,14 +136,15 @@ const DataTable = ({ data, modalForm }) => {
     setPages(NumOfPages);
   }, [query,filteredData]);
 
-  const displayedData = filteredData.slice((CurrentPage - 1) * 10, CurrentPage * 10);
+  const displayedData = filteredData.slice((CurrentPage - 1) * 20, CurrentPage * 20);
   
   return (
     <>
       <div className="flex justify-between items-center p-4 overflow-hidden">
         <button 
-          className={`text-xs md:text-sm lg:text-sm whitespace-nowrap font-semibold text-${selectedTheme}-50 bg-${selectedTheme}-600 rounded-lg p-2`}
+          className={`text-xs md:text-sm lg:text-sm whitespace-nowrap font-semibold ${!isLoading && !error ? `text-${selectedTheme}-50 bg-${selectedTheme}-600 drop-shadow-md` : `text-${selectedTheme}-600 bg-${selectedTheme}-200 shadow-inner`} rounded-lg p-2`}
           onClick={() => setModalIsOpen(true)}
+          disabled={isLoading || error}
         >
           Add New Data
         </button>
@@ -157,65 +179,123 @@ const DataTable = ({ data, modalForm }) => {
         </div>
       </div>
       <div className="overflow-x-auto drop-shadow-lg">
-        <table className="font-table table-auto w-full rounded-lg text-sm text-slate-700">
+        <table 
+          className="font-table table-auto w-full rounded-lg text-sm text-slate-700" 
+          // style={{tableLayout: 'fixed'}}
+        >
           <thead className="text-sm font-bold">
             <Header top={true} />
           </thead>
           <tbody className={`divide-y-2 divide-transparent text-xs md:text-sm lg:text-md`}>
-            {displayedData.map((row, rowi) => (
-              <tr
-                key={rowi}
-                className={`flex flex-row justify-between items-center bg-${selectedTheme}-200 divide-x-2 divide-transparent`}
-              >
-                {Object.values(row).map((col, coli) => (
-                  <td key={coli} className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden hover:overflow-visible hover:bg-${selectedTheme}-50 hover:text-gray-900 hover:drop-shadow-md hover:rounded-md transition-colors duration-300 hover:px-2`}>
-                    {col}
-                  </td>
-                ))}
-                <td className="w-full p-2 flex items-center justify-center">
-                  <button className={`font-semibold text-${selectedTheme}-500 hover:text-${selectedTheme}-600 hover:underline`}>Options</button>
-                </td>
-              </tr>
-            ))}
-            {Array.from({ length: Math.max(10 - displayedData.length, 0) }).map((_, rowIndex) => (
-              <tr
-                key={`empty-row-${rowIndex}`}
-                className={`flex flex-row justify-between items-center bg-${selectedTheme}-300 divide-x-2 divide-transparent`}
-              >
-                {Object.keys(data[0]).map((_, colIndex) => (
-                  <td key={`empty-col-${colIndex}`} className="w-full p-2 text-transparent"> </td>
-                ))}
-              </tr>
-            ))}
+            {
+              data && (
+                <>
+                  {
+                    isLoading ? (
+                      <>
+                        {
+                          Array.from({ length: 20 }).map((_, rindex) => (
+                            <tr
+                              key={rindex}
+                              className={`flex flex-row justify-between items-center bg-${selectedTheme}-200 divide-x-2 divide-transparent`}
+                            >
+                              {
+                                Array.from({ length: 20 }).map((_, cindex) => (
+                                  <td key={cindex} className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden hover:overflow-visible hover:bg-${selectedTheme}-50 hover:text-gray-900 hover:drop-shadow-md hover:rounded-md transition-colors duration-300 hover:px-2`}>
+                                     
+                                  </td>
+                                ))
+                              }
+                            </tr>
+                          ))
+                        }
+                      </>
+                    ) : (
+                      <>
+                        {displayedData.map((row, rowi) => (
+                          <tr
+                            key={rowi}
+                            className={`flex flex-row justify-between items-center bg-${selectedTheme}-200 divide-x-2 divide-transparent`}
+                          >
+                            {
+                              Object.values(row).map((col, coli) => (
+                                <td key={coli} className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden hover:overflow-visible hover:bg-${selectedTheme}-50 hover:text-gray-900 hover:drop-shadow-md hover:rounded-md transition-colors duration-300 hover:px-2`}>
+                                  {col}
+                                </td>
+                              ))
+                            }
+                            <td className="w-full p-2 flex items-center justify-center">
+                              <button className={`font-semibold text-${selectedTheme}-500 hover:text-${selectedTheme}-600 hover:underline`} onClick={() => toggleOption(String(row["Family-ID"]))}>Options</button>
+                            </td>
+                          </tr>
+                        ))}
+                        {Array.from({ length: Math.max(10 - displayedData.length, 0) }).map((_, rowIndex) => (
+                          <tr
+                            key={`empty-row-${rowIndex}`}
+                            className={`flex flex-row justify-between items-center bg-${selectedTheme}-300 divide-x-2 divide-transparent`}
+                          >
+                            {Object.keys(data[0]).map((_, colIndex) => (
+                              <td key={`empty-col-${colIndex}`} className="w-full p-2 text-transparent"> </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </>
+                    )
+                  }
+                </>
+              )
+            }
+            {
+              error && (
+                <>
+                  {Array.from({ length: 10 }).map((_, rowIndex) => (
+                    <tr
+                      key={`empty-row-${rowIndex}`}
+                      className={`flex flex-row justify-between items-center bg-${selectedTheme}-300 divide-x-2 divide-transparent`}
+                    >
+                      {Array.from({ length: 10 }).map((_, colIndex) => (
+                        <td key={`empty-col-${colIndex}`} className="w-full p-2 text-transparent"> </td>
+                      ))}
+                    </tr>
+                  ))}
+                </>
+              )
+            }
           </tbody>
           <tfoot>
             <Header top={false} />
           </tfoot>
         </table>
       </div>
-      <div className="flex flex-row justify-between items-center">
-        <p> </p>
-        <div className="grid grid-cols-2 gap-4">
+      {
+        isLoading || error ? (
+          <></>
+        ) : (
+        <div className="flex flex-row justify-between items-center">
           <p> </p>
-          <div className={`flex flex-row text-md font-semibold p-1 m-1 bg-${selectedTheme}-200 rounded-lg`}>
-            <button disabled={CurrentPage <= 2} onClick={() => setCurrentPage((prev) => prev - 2)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
-              <MdOutlineKeyboardDoubleArrowLeft />
-            </button>
-            <button disabled={CurrentPage <= 1} onClick={() => setCurrentPage((prev) => prev - 1)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
-              <MdOutlineChevronLeft />
-            </button>
-            <p className="text-xs md:text-sm lg:text-base mx-1">
-              {CurrentPage} of {Pages}
-            </p>
-            <button disabled={CurrentPage >= Pages} onClick={() => setCurrentPage((prev) => prev + 1)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
-              <MdOutlineChevronRight />
-            </button>
-            <button disabled={CurrentPage >= Pages - 1} onClick={() => setCurrentPage((prev) => prev + 2)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
-              <MdOutlineKeyboardDoubleArrowRight />
-            </button>
+          <div className="grid grid-cols-2 gap-4">
+            <p> </p>
+            <div className={`flex flex-row text-md font-semibold p-1 m-1 bg-${selectedTheme}-200 rounded-lg`}>
+              <button disabled={CurrentPage <= 2} onClick={() => setCurrentPage((prev) => prev - 2)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
+                <MdOutlineKeyboardDoubleArrowLeft />
+              </button>
+              <button disabled={CurrentPage <= 1} onClick={() => setCurrentPage((prev) => prev - 1)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
+                <MdOutlineChevronLeft />
+              </button>
+              <p className="text-xs md:text-sm lg:text-base mx-1">
+                {CurrentPage} of {Pages}
+              </p>
+              <button disabled={CurrentPage >= Pages} onClick={() => setCurrentPage((prev) => prev + 1)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
+                <MdOutlineChevronRight />
+              </button>
+              <button disabled={CurrentPage >= Pages - 1} onClick={() => setCurrentPage((prev) => prev + 2)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
+                <MdOutlineKeyboardDoubleArrowRight />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+        )
+      }
       <FormModal isOpen={modalIsOpen} formType={modalForm} onClose={() => setModalIsOpen(false)} />
     </>
   );

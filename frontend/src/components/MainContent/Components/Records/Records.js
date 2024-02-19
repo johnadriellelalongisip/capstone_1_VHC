@@ -2,197 +2,64 @@ import { useLocation } from "react-router-dom";
 import Header from "../../Header";
 import DataTable from "../Elements/DataTable";
 import { MdFolder } from "react-icons/md";
+import useQuery from "../../../../hooks/useQuery";
+import { useEffect, useRef, useState } from "react";
+import RecordAudit from "./RecordAudit";
 
 const Records = () => {
+  const [records, setRecords] = useState([{}]);
   const location = useLocation();
   const pathname = location.pathname.slice(1);
   const title = pathname.charAt(0).toUpperCase() + pathname.slice(1);
-  const records = [
-    {
-      "First Name": "Zoe",
-      "Middle Name": "X.",
-      "Family Name": "Liu",
-      "Family ID": "XYZ2023-1122",
-      "Gender": "Female",
-      "Barangay": "Astral"
-    },
-    {
-      "First Name": "Mason",
-      "Middle Name": "Y.",
-      "Family Name": "Gomez",
-      "Family ID": "LMN2022-3344",
-      "Gender": "Male",
-      "Barangay": "Celestial"
-    },
-    {
-      "First Name": "Lily",
-      "Middle Name": "Z.",
-      "Family Name": "Fernandez",
-      "Family ID": "ABC2021-5566",
-      "Gender": "Female",
-      "Barangay": "Supernova"
-    },
-    {
-      "First Name": "Sophia",
-      "Middle Name": "N.",
-      "Family Name": "Martinez",
-      "Family ID": "LMN2023-9876",
-      "Gender": "Female",
-      "Barangay": "Sunset"
-    },
-    {
-      "First Name": "Oliver",
-      "Middle Name": "O.",
-      "Family Name": "Chen",
-      "Family ID": "ABC2022-5432",
-      "Gender": "Male",
-      "Barangay": "Moonlight"
-    },
-    {
-      "First Name": "Mia",
-      "Middle Name": "P.",
-      "Family Name": "Nguyen",
-      "Family ID": "XYZ2021-7890",
-      "Gender": "Female",
-      "Barangay": "Starlight"
-    },
-    {
-      "First Name": "Liam",
-      "Middle Name": "Q.",
-      "Family Name": "Gonzalez",
-      "Family ID": "PQR2023-2468",
-      "Gender": "Male",
-      "Barangay": "Galaxy"
-    },
-    {
-      "First Name": "Emma",
-      "Middle Name": "R.",
-      "Family Name": "Patel",
-      "Family ID": "GHI2022-1357",
-      "Gender": "Female",
-      "Barangay": "Nebula"
-    },
-    {
-      "First Name": "Noah",
-      "Middle Name": "S.",
-      "Family Name": "Kim",
-      "Family ID": "JKL2021-1122",
-      "Gender": "Male",
-      "Barangay": "Cosmos"
-    },
-    {
-      "First Name": "Ava",
-      "Middle Name": "T.",
-      "Family Name": "Singh",
-      "Family ID": "UVW2023-8765",
-      "Gender": "Female",
-      "Barangay": "Stardust"
-    },
-    {
-      "First Name": "William",
-      "Middle Name": "U.",
-      "Family Name": "Lopez",
-      "Family ID": "OPQ2020-6543",
-      "Gender": "Male",
-      "Barangay": "Aurora"
-    },
-    {
-      "First Name": "Sophie",
-      "Middle Name": "V.",
-      "Family Name": "Wang",
-      "Family ID": "RST2022-1122",
-      "Gender": "Female",
-      "Barangay": "Orion"
-    },
-    {
-      "First Name": "Ethan",
-      "Middle Name": "W.",
-      "Family Name": "Hernandez",
-      "Family ID": "ABC2021-1122",
-      "Gender": "Male",
-      "Barangay": "Pegasus"
-    },
-    {
-      "First Name": "Alice",
-      "Middle Name": "C.",
-      "Family Name": "Smith",
-      "Family ID": "ABC2023-1234",
-      "Gender": "Female",
-      "Barangay": "Downtown"
-    },
-    {
-      "First Name": "Bob",
-      "Middle Name": "E.",
-      "Family Name": "Johnson",
-      "Family ID": "XYZ2022-5678",
-      "Gender": "Male",
-      "Barangay": "Uptown"
-    },
-    {
-      "First Name": "Eva",
-      "Middle Name": "F.",
-      "Family Name": "Brown",
-      "Family ID": "PQR2021-9876",
-      "Gender": "Female",
-      "Barangay": "Suburbia"
-    },
-    {
-      "First Name": "David",
-      "Middle Name": "G.",
-      "Family Name": "Miller",
-      "Family ID": "LMN2020-4321",
-      "Gender": "Male",
-      "Barangay": "Countryside"
-    },
-    {
-      "First Name": "Grace",
-      "Middle Name": "H.",
-      "Family Name": "Anderson",
-      "Family ID": "DEF2022-2468",
-      "Gender": "Female",
-      "Barangay": "Hilltop"
-    },
-    {
-      "First Name": "Charlie",
-      "Middle Name": "I.",
-      "Family Name": "Davis",
-      "Family ID": "JKL2021-1357",
-      "Gender": "Male",
-      "Barangay": "Valley"
-    },
-    {
-      "First Name": "Emma",
-      "Middle Name": "J.",
-      "Family Name": "Wilson",
-      "Family ID": "GHI2023-7890",
-      "Gender": "Female",
-      "Barangay": "Riverside"
-    },
-    {
-      "First Name": "Frank",
-      "Middle Name": "K.",
-      "Family Name": "White",
-      "Family ID": "UVW2020-8765",
-      "Gender": "Male",
-      "Barangay": "Seaside"
-    },
-    {
-      "First Name": "Holly",
-      "Middle Name": "L.",
-      "Family Name": "Taylor",
-      "Family ID": "OPQ2022-6543",
-      "Gender": "Female",
-      "Barangay": "Mountainside"
-    },
-    {
-      "First Name": "Isaac",
-      "Middle Name": "M.",
-      "Family Name": "Lee",
-      "Family ID": "RST2021-1122",
-      "Gender": "Male",
-      "Barangay": "Lakeside"
+  const recordAuditRef = useRef(null);
+  const [isRecordAuditOpen, setIsRecordAuditOpen] = useState(false);
+  const [famID, setFamID] = useState(null);
+  const { response, isLoading, error, fetchData } = useQuery();
+  
+  useEffect(() => {
+    fetchData('getRecords');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
+
+  useEffect(() => {
+    if (response && response.status === 200) {
+      const keyMap = {
+        "citizen_firstname": "Firstname",
+        "citizen_middlename": "Middlename",
+        "citizen_lastname": "Lastname",
+        "citizen_gender": "Gender",
+        "citizen_barangay": "Barangay",
+        "citizen_family_id": "Family-ID",
+        "citizen_number": "Number"
+      };
+      const newResponse = response.data.map(obj => {
+        const newObj = {};
+        Object.keys(obj).forEach(key => {
+          if (keyMap[key]) {
+            newObj[keyMap[key]] = obj[key];
+          } else {
+            newObj[key] = obj[key];
+          }
+        });
+        return newObj;
+      });
+      setRecords(newResponse);
     }
-  ];
+    if (error) {
+      console.log(error);
+    }
+  }, [response,error]);
+
+  const toggleOptions = (familyId) => {
+    setFamID(familyId);
+    if (!isRecordAuditOpen) {
+      setIsRecordAuditOpen(true);
+      recordAuditRef.current.showModal();
+    } else {
+      setIsRecordAuditOpen(false);
+      recordAuditRef.current.close();
+    }
+  };
 
   return (
     <div className="w-full h-screen flex flex-col">
@@ -203,11 +70,12 @@ const Records = () => {
         <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-60 md:mb-72 lg:mb-80">
             <div className="col-span-2 w-34 h-36 bg-gray-50 rounded-xl">
-              <DataTable data={records} modalForm={pathname}/>
+              <DataTable data={records} modalForm={pathname} isLoading={isLoading} toggleOption={toggleOptions} error={error}/>
             </div>
           </div>
         </div>
       </div>
+      <RecordAudit recordAudit={recordAuditRef} toggle={toggleOptions} family_id={famID} />
     </div>
   );
 }

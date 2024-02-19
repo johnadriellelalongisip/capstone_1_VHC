@@ -147,10 +147,10 @@ const FeedbackForm = ({ feedbackRef, toggle }) => {
             </select>
           </div>
           <div className={`p-2`}>
-            <label htmlFor="details" className={`block mb-2 text-${selectedTheme}-600 font-semibold`}>Details</label>
+            <label htmlFor="feedback" className={`block mb-2 text-${selectedTheme}-600 font-semibold`}>Details</label>
             <textarea
-              id="details"
-              name="details"
+              id="feedback"
+              name="feedback"
               value={formData.details}
               onChange={handleChange}
               placeholder="Share what you want. . . . ."

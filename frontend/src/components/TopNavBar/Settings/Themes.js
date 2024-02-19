@@ -3,6 +3,7 @@ import { colorTheme } from "../../../App";
 import { useContext } from "react";
 
 const Themes = ({ theme, toggle }) => {
+  // eslint-disable-next-line
   const [selectedTheme, setSelectedTheme, colors] = useContext(colorTheme);
 
   return (

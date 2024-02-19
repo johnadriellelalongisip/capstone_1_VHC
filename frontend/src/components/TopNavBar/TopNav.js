@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Avatar, Tooltip } from "flowbite-react";
-import { FaPlusCircle } from "react-icons/fa";
 import { BsBellFill } from "react-icons/bs";
 import { AiFillMessage } from "react-icons/ai";
 import { useContext, useState } from "react";
@@ -18,6 +17,7 @@ import ReportForm from "./Help/ReportForm";
 import FeedbackForm from "./Help/FeedbackForm";
 import PopupNotification from "./Notifications/PopupNotification";
 import Newchat from "./Messaging/Newchat";
+import useCurrentTime from "../../hooks/useCurrentTime";
 
 const TopNav = () => {
   const [selectedTheme] = useContext(colorTheme);
@@ -26,6 +26,7 @@ const TopNav = () => {
   const [jump2, setJump2] = useState(false);
   const [fadeDown2, setFadeDown2] = useState(false);
   const [fadeDown3, setFadeDown3] = useState(false);
+  const { TimeComponent } = useCurrentTime();
   const { 
     messages,
     chatbox,
@@ -56,8 +57,8 @@ const TopNav = () => {
   return (
     <div className={`fixed top-0 left-0 right-0 flex justify-between items-center p-5 bg-${selectedTheme}-200 z-50`}>
       <div className={`flex justify-center items-center text-${selectedTheme}-500`}>
-        <FaPlusCircle className=' w-8 h-8 md:w-12 md:h-12 lg:w-16 lg:h-16' />
-        <span className="self-center whitespace-nowrap text-2xl font-bold">MHO</span>
+        <img src="MHO_logo.png" className=' w-8 h-8 md:w-12 md:h-12 lg:w-16 lg:h-16 drop-shadow-md' alt="..."/>
+        <span className="self-center whitespace-nowrap text-2xl font-bold">MHO<div className={`p-1 bg-${selectedTheme}-100 flex gap-2 items-center justify-start text-xs rounded-lg`}><TimeComponent /></div></span>
       </div>
       <div className="flex justify-end items-center gap-2 md:gap-3 lg:gap-4">
         <Tooltip content="Messages" animation="duration-500">

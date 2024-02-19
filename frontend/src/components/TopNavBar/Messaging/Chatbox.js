@@ -15,6 +15,7 @@ const Chatbox = ({ chatbox, toggle }) => {
   const [files, setFiles] = useState({});
   const [fileIdCounter, setFileIdCounter] = useState(0);
   const chatsRef = useRef(null);
+  const textInputRef = useRef(null);
   const messages = [
     {
       "id": 1,
@@ -72,7 +73,9 @@ const Chatbox = ({ chatbox, toggle }) => {
     const handleKeyDown = (event) => {
       if (event.code === 'Enter') {
         event.preventDefault();
-        sendMessage();
+        if (document.activeElement === textInputRef.current) {
+          sendMessage();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -190,6 +193,7 @@ const Chatbox = ({ chatbox, toggle }) => {
                     placeholder="Aa" 
                     value={chatText}
                     onChange={(e) => setChatText(e.target.value)}
+                    ref={textInputRef}
                   />
                   <Tooltip content="Send" animation="duration-500">
                     <button onClick={() => sendMessage()} className={`p-2 transition-colors duration-200 bg-${selectedTheme}-100 hover:bg-${selectedTheme}-200 rounded-3xl`}>

@@ -3,9 +3,9 @@ import { useState } from 'react';
 const useQuery = () => {
   const BASE_URL = process.env.REACT_APP_BASE_URL;
   const [response, setResponse] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [toEdit, setToEdit] = useState(null);
+  const [searchResults, setSearchResults] = useState(null);
 
   const headers = (method, body, token) => {
     const baseHeaders = {
@@ -28,10 +28,17 @@ const useQuery = () => {
     try {
       const response = await fetch(`${BASE_URL}${route}`, headers('GET'));
       const data = await response.json();
+      if (data.status === 500) {
+        throw new Error(data.message);
+      }
       setResponse(data);
       setIsLoading(false);
     } catch (error) {
-      setResponse(`Something have gone wrong: ${error.message}`);
+      if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+        setError('No internet connection');
+      } else {
+        setError(`Error: ${error.message}`);
+      }
       setIsLoading(false);
     }
   };
@@ -40,24 +47,31 @@ const useQuery = () => {
     setIsLoading(true);
     try {
       const response = await fetch(`${BASE_URL}${route}`, headers('POST', payload));
+      if (!response) {
+        throw new Error('Network response was not ok');
+      }
       const data = await response.json();
       setResponse(data);
       setIsLoading(false); 
     } catch (error) {
-      setError(error);
+      setError(`Something have gone wrong`, error);
       setIsLoading(false); 
     }
   };
 
-  const editData = async ( route, payload ) => {
+  // NOTE TO SELF: set up for socketIO to check whether the searchResults.id still exists to set the searchResults to null again
+  const editData = async ( route, payload, id ) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}${route}`, headers('POST', payload));
+      const response = await fetch(`${BASE_URL}${route}/${id}`, headers('POST', payload));
+      if (!response) {
+        throw new Error('Network response was not ok');
+      }
       const data = await response.json();
       setResponse(data);
       setIsLoading(false);
     } catch (error) {
-      setError(error);
+      setError(`Something have gone wrong`, error);
       setIsLoading(false);
     }
   }
@@ -66,27 +80,30 @@ const useQuery = () => {
     setIsLoading(true);
     try {
       const response = await fetch(`${BASE_URL}${route}`, headers('POST', id));
+      if (!response) {
+        throw new Error('Network response was not ok');
+      }
       const data = await response.json();
       setResponse(data);
       setIsLoading(false);
     } catch (error) {
-      setError(error);
+      setError(`Something have gone wrong`, error);
       setIsLoading(false);
     }
   }
 
-  const searchData = ( route, id ) => {
+  const searchData = async( route, id ) => {
     setIsLoading(true);
     try {
-      const search = async() => {
-        const response = await fetch(`${BASE_URL}${route}/${id}`, headers('GET'));
-        const data = await response.json();
-        setToEdit(data.data[0]);
+      const response = await fetch(`${BASE_URL}${route}/${id}`, headers('GET'));
+      if (!response) {
+        throw new Error('Network response was not ok');
       }
-      search();
+      const data = await response.json();
+      setSearchResults(data.data[0]);
       setIsLoading(false);
     } catch (error) {
-      setError(error);
+      setError(`Something have gone wrong`, error);
       setIsLoading(false);
     }
   }
@@ -95,8 +112,8 @@ const useQuery = () => {
     isLoading,
     response,
     error,
-    toEdit,
-    setToEdit,
+    searchResults,
+    setSearchResults,
     fetchData,
     addData,
     editData,
