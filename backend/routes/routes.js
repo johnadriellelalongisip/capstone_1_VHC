@@ -12,8 +12,8 @@ router.post('/deleteUser', userController.deleteUser);
 router.post('/editUser', userController.editUser);
 
 // USER AUTHENTICATION/REGISTRATION
-router.post('/addStaff', staffController.addStaff);
-router.post('/authStaff', staffController.authStaff);
+// router.post('/addStaff', staffController.addStaff);
+// router.post('/authStaff', staffController.authStaff);
 
 // RECORDS
 router.post('/addRecord', recordController.addRecord);

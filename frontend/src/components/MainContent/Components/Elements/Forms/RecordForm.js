@@ -60,7 +60,9 @@ const RecordForm = () => {
   };
 
   const handleSubmit = async (e) => {
-    const history = {logs:{"Record added": String(mysqlTime)}};
+    const history = {};
+    const JKey = String(mysqlTime);
+    history[JKey] = "Record Added";
     const payload = {
       firstName: firstname,
       middleName: middlename,
@@ -72,12 +74,12 @@ const RecordForm = () => {
       date_added: mysqlTime,
       history: JSON.stringify(history)
     }
+    console.log(payload);
+    e.preventDefault();
     if(dontCloseUponSubmission) {
-      e.preventDefault();
       addData('addRecord',payload);
       cleanUp();
     } else {
-      e.preventDefault();
       // console.log('SUBMITTED : ', payload );
       addData('addRecord',payload);
       cleanUp();
@@ -92,19 +94,19 @@ const RecordForm = () => {
         <div className="mb-2 block">
           <Label htmlFor="firstname" value="First Name" />
         </div>
-        <TextInput maxLength={50} id="firstname" type="text" placeholder="Enter first name. . . . ." required shadow value={firstname} onChange={(e) => setFirstName(e.target.value)} />
+        <TextInput required maxLength={50} id="firstname" type="text" placeholder="Enter first name. . . . ." shadow value={firstname} onChange={(e) => setFirstName(e.target.value)} />
       </div>
       <div>
         <div className="mb-2 block">
           <Label htmlFor="middlename" value="Middle Name" />
         </div>
-        <TextInput maxLength={50} id="middlename" type="text" placeholder="Enter middle name. . . . ." required shadow value={middlename} onChange={(e) => setMiddleName(e.target.value)} />
+        <TextInput required maxLength={50} id="middlename" type="text" placeholder="Enter middle name. . . . ." shadow value={middlename} onChange={(e) => setMiddleName(e.target.value)} />
       </div>
       <div>
         <div className="mb-2 block">
           <Label htmlFor="lastname" value="Last Name" />
         </div>
-        <TextInput maxLength={50} id="lastname" type="text" placeholder="Enter last name. . . . ." required shadow value={lastname} onChange={(e) => setLastName(e.target.value)} />
+        <TextInput required maxLength={50} id="lastname" type="text" placeholder="Enter last name. . . . ." shadow value={lastname} onChange={(e) => setLastName(e.target.value)} />
       </div>
       <fieldset className="flex flex-row gap-3 p-2">
         <legend className="mr-4">Choose a gender</legend>
@@ -142,7 +144,7 @@ const RecordForm = () => {
       <div className='flex flex-col md:flex-row lg:flex-row gap-3'>
         <div className='basis-1/2'>
           <Label htmlFor="barangay" value="Barangay: " />
-          <TextInput className='basis-1/2' id="barangay" type="text" shadow placeholder="Enter barangay. . . . ." value={barangay} onChange={(e) => setBarangay(e.target.value)} />
+          <TextInput required className='basis-1/2' id="barangay" type="text" shadow placeholder="Enter barangay. . . . ." value={barangay} onChange={(e) => setBarangay(e.target.value)} />
         </div>
         <div className='basis-1/2'>
           <Label htmlFor="phoneNumber" value="Phone Number: " />

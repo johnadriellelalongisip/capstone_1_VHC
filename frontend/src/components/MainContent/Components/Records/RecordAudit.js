@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { colorTheme } from "../../../../App";
-import { MdClose, MdPerson } from "react-icons/md";
+import { MdArrowRight, MdClose, MdPerson } from "react-icons/md";
 import useQuery from "../../../../hooks/useQuery";
 import { MdOutlineKeyboardArrowUp } from "react-icons/md";
 import { FaFilePrescription } from "react-icons/fa6";
@@ -14,10 +14,12 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
   const [history, setHistory] = useState(null);
   const [formVisibility, setFormVisibility] = useState(false);
   const { mysqlTime } = useCurrentTime();
+  const extendLogRef = useRef(null);
+  const [isExtendLogOpen, setIsExtendLogOpen] = useState(false);
+  const [dataset, setDataset] = useState(null);
   const { searchResults, isLoading, error, searchData, editData } = useQuery();
   const [formData, setFormData] = useState({
     "Prescription Added" : {
-      time: '',
       notes: '',
     }
   });
@@ -42,6 +44,7 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
     if (searchResults) {
       setRecord([searchResults][0]);
       setHistory(JSON.parse(searchResults.citizen_history));
+      console.log(JSON.parse(searchResults.citizen_history));
     } else if (error) {
       console.log(error);
     }
@@ -50,7 +53,6 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
   const cleanUp = () => {
     setFormData({
       "Prescription Added" : {
-        time: '',
         notes: '',
       }
     });
@@ -58,14 +60,23 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const payload = {
-      "Prescription Added": {
-        time: String(mysqlTime),
-        notes: formData["Prescription Added"].notes
-      }
-    };
-    editData('addRecordHistory', payload,  family_id);
+    const history = {};
+    const JKey = String(mysqlTime);
+    history[JKey] = formData;
+    editData('addRecordHistory', history,  family_id);
     cleanUp();
+  };
+
+  const toggleExtend = (data) => {
+    if (!isExtendLogOpen) {
+      setDataset(data);
+      setIsExtendLogOpen(true);
+      extendLogRef.current.show();
+    } else {
+      setDataset(null);
+      setIsExtendLogOpen(false);
+      extendLogRef.current.close();
+    }
   };
   
   return (
@@ -110,7 +121,7 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
               <tbody className={`divide-y-2 divide-transparent text-xs md:text-sm lg:text-md`}>
               {
                 history ? (
-                  Object.entries(history.logs).map(([key, value], i) => (
+                  Object.entries(history).map(([key, value], i) => (
                     <tr key={i}
                       className={`flex flex-row justify-between items-center bg-${selectedTheme}-200 divide-x-2 divide-transparent`}
                     >
@@ -119,12 +130,31 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
                         {typeof(value) === 'object' ? (
                           Object.entries(value).map(([subKey, subValue], j) => (
                             <span key={j}>
-                              {subKey}: {subValue}
-                              {j !== Object.keys(value).length - 1 && ', '}
+                              {
+                                typeof(subValue) === 'object' ? (
+                                  Object.entries(subValue).map(([lastKey, lastValue], i) => (
+                                    <div key={i} className="relative">
+                                      <button className="flex items-center" onClick={() => toggleExtend(subValue)}>
+                                        {subKey} <MdArrowRight className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6"/>
+                                      </button>
+                                      <dialog ref={extendLogRef} className="flex flex-col gap-2 text-xs font-semibold">
+                                        <p>{lastKey}</p>
+                                        <p>{lastValue}</p>
+                                      </dialog>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <>
+                                    {subValue}
+                                  </>
+                                )
+                              }
                             </span>
                           ))
                         ) : (
-                          value
+                          <span key={i}>
+                            {value}
+                          </span>
                         )}
                       </td>
                     </tr>

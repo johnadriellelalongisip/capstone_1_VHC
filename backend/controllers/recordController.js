@@ -83,15 +83,14 @@ class RecordController {
       const family_id = req.params.id;
       const data = await dbModel.query('SELECT `citizen_history` FROM `municipal_citizens` WHERE `citizen_family_id` = ?', family_id);
       const oldHistory = JSON.parse(data[0].citizen_history);
-      const combinedHistory = {...oldHistory["logs"], ...payload};
-      const newHistory = {logs:{...combinedHistory}};
+      const newHistory = {...oldHistory, ...payload};
       const query = 'UPDATE `municipal_citizens` SET `citizen_history` = ? WHERE `citizen_family_id` = ?';
       const response = await dbModel.query(query, [JSON.stringify(newHistory), family_id]);
       dbModel.releaseConnection(connection);
       res.status(200).json({
         status: 200,
         message: "Data updated successfully",
-        response: response,
+        response: response
       });
     } catch (error) {
       res.status(500).json({

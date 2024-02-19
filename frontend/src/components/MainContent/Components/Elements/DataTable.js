@@ -15,7 +15,7 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
   const inputRef = useRef(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [sortState, setSortState] = useState(
-    Object.keys(data[0]).reduce((acc, field) => {
+    data && Object.keys(data[0]).reduce((acc, field) => {
       acc[field] = false;
       return acc;
     }, {})
