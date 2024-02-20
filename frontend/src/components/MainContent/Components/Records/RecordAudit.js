@@ -3,7 +3,6 @@ import { useContext, useEffect, useState } from "react";
 import { colorTheme } from "../../../../App";
 import { MdArrowRight, MdClose, MdPerson } from "react-icons/md";
 import useQuery from "../../../../hooks/useQuery";
-import { MdOutlineKeyboardArrowUp } from "react-icons/md";
 import { FaFilePrescription } from "react-icons/fa6";
 import { Spinner } from "flowbite-react";
 import useCurrentTime from "../../../../hooks/useCurrentTime";
@@ -94,90 +93,92 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
               }
             </p>
           </div>
-          <div className="m-3">
-            <table className="font-table table-auto w-full text-sm text-slate-700">
-              <thead className={`text-${selectedTheme}-900 bg-${selectedTheme}-300 font-bold border-b-[1px] border-solid border-b-${selectedTheme}-700 drop-shadow-lg`}>
-                <tr className={`flex flex-row justify-between items-center text-xs md:text-sm lg:text-md`}>
-                  <th className="w-full p-2 text-center flex justify-center items-center">Date</th>
-                  <th className="w-full p-2 text-center flex justify-center items-center">Logs</th>
-                </tr>
-              </thead>
-              <tbody className={`divide-y-2 divide-transparent text-xs md:text-sm lg:text-md`}>
-              {
-                history ? (
-                  Object.entries(history).map(([key, value], i) => (
-                    <tr key={i}
-                      className={`flex flex-row justify-between items-center bg-${selectedTheme}-200 divide-x-2 divide-transparent`}
-                    >
-                      <td className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden hover:overflow-visible hover:bg-${selectedTheme}-50 hover:text-gray-900 hover:drop-shadow-md rounded-md transition-colors duration-300 hover:px-2`}>{key}</td>
-                      <td  className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden hover:overflow-visible hover:bg-${selectedTheme}-50 hover:text-gray-900 hover:drop-shadow-md rounded-md transition-colors duration-300 hover:px-2`}>
-                        {typeof(value) === 'object' ? (
-                          Object.entries(value).map(([subKey, subValue], j) => (
-                            <span key={j}>
-                              {
-                                typeof(subValue) === 'object' ? (
-                                  Object.entries(subValue).map(([lastKey, lastValue], i) => (
-                                    <div key={i} className="relative">
-                                      <button className="flex items-center">
-                                        {subKey} <MdArrowRight className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6"/>
-                                      </button>
-                                    </div>
-                                  ))
-                                ) : (
-                                  <>
-                                    {subValue}
-                                  </>
-                                )
-                              }
-                            </span>
-                          ))
-                        ) : (
-                          <span key={i}>
-                            {value}
-                          </span>
-                        )}
-                      </td>
+          <div className="m-3 h-56 min-h-56 overflow-y-auto">
+            {
+              !formVisibility ? (
+                <table className="font-table table-auto w-full text-sm text-slate-700">
+                  <thead className={`text-${selectedTheme}-900 bg-${selectedTheme}-300 font-bold border-b-[1px] border-solid border-b-${selectedTheme}-700 drop-shadow-lg`}>
+                    <tr className={`flex flex-row justify-between items-center text-xs md:text-sm lg:text-md`}>
+                      <th className="w-full p-2 text-center flex justify-center items-center">Date</th>
+                      <th className="w-full p-2 text-center flex justify-center items-center">Logs</th>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    
-                  </tr>
-                )
-              }
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody className={`divide-y-2 divide-transparent text-xs md:text-sm lg:text-md`}>
+                  {
+                    history ? (
+                      Object.entries(history).map(([key, value], i) => (
+                        <tr key={i}
+                          className={`flex flex-row justify-between items-center text-center bg-${selectedTheme}-200 divide-x-2 divide-transparent`}
+                        >
+                          <td className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden hover:overflow-visible hover:bg-${selectedTheme}-50 hover:text-gray-900 hover:drop-shadow-md rounded-md transition-colors duration-300 hover:px-2`}>{key}</td>
+                          <td  className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden hover:overflow-visible hover:bg-${selectedTheme}-50 hover:text-gray-900 hover:drop-shadow-md rounded-md transition-colors duration-300 hover:px-2`}>
+                            {typeof(value) === 'object' ? (
+                              Object.entries(value).map(([subKey, subValue], j) => (
+                                <span key={j}>
+                                  {
+                                    typeof(subValue) === 'object' ? (
+                                      Object.entries(subValue).map(([lastKey, lastValue], i) => (
+                                        <button className="flex items-center">
+                                          {subKey} <MdArrowRight className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6"/>
+                                        </button>
+                                      ))
+                                    ) : (
+                                      <>
+                                        {subValue}
+                                      </>
+                                    )
+                                  }
+                                </span>
+                              ))
+                            ) : (
+                              <span key={i}>
+                                {value}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      Array.from({ length: 10 }).map((_, i) => (
+                        <tr key={i} className={`text-center flex flex-row justify-between items-center bg-${selectedTheme}-200 divide-x-2 divide-transparent`}>
+                          <td className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden rounded-md bg-transparent`}>{i === 0 ? <span className="font-extrabold animate-pulse animate-infinite animate-ease-linear">L O A D I N G</span> : ' '}</td>
+                        </tr>
+                      ))
+                    )
+                  }
+                  </tbody>
+                </table>
+              ):(
+                <form onSubmit={handleSubmit} className={`flex flex-col gap-0 p-2 mx-5 my-2 border-2 border-solid border-${selectedTheme}-500 drop-shadow-lg shadow-md rounded-lg`}>
+                  <p className={`text-${selectedTheme}-500 font-bold flex gap-1 mb-2`}>
+                    <FaFilePrescription className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6"/>
+                    <span>Create new prescription</span>
+                  </p>
+                  <div className={`p-2`}>
+                    <label htmlFor="notes" className={`block mb-2 text-${selectedTheme}-600 font-semibold`}>Additional Notes:</label>
+                    <textarea
+                      id="notes"
+                      name="notes"
+                      value={formData["Prescription Added"].notes}
+                      onChange={handleChange}
+                      placeholder="Additional relevant instructions given to the patient's care. . . . ."
+                      className="w-full rounded-lg text-xs md:text-sm lg:text-base"
+                      rows={4}
+                      maxLength={255}
+                    />
+                  </div>
+                  <div className="flex justify-end items-center gap-2 mt-4">
+                    <button onClick={(e) => { e.preventDefault(); toggle(); }} className={`py-2 px-4 hover:shadow-md font-semibold text-${selectedTheme}-600 rounded-lg hover:bg-${selectedTheme}-100 transition-colors duration-200`}>Cancel</button>
+                    <button type="submit" className={`py-2 px-4 hover:shadow-md font-semibold rounded-lg transition-colors duration-200 ${formData["Prescription Added"].notes ? `text-${selectedTheme}-100 bg-${selectedTheme}-600 hover:cursor-pointer shadow-sm` : `shadow-inner text-${selectedTheme}-100 bg-${selectedTheme}-400 hover:cursor-not-allowed`}`} disabled={!formData["Prescription Added"].notes}>{isLoading || error ? <Spinner /> : 'Create Prescription'}</button>
+                  </div>
+                </form>
+              )
+            }
           </div>
 
           <button onClick={() => setFormVisibility(prev => !prev)} className={`m-1 p-2 block rounded-lg font-semibold text-${selectedTheme}-800 bg-${selectedTheme}-300 hover:bg-${selectedTheme}-400 active:bg-${selectedTheme}-600 active:text-${selectedTheme}-200 flex items-center justify-center`}>
-            <MdOutlineKeyboardArrowUp className={`w-5 h-5 md:w-6 md:h-6 lg:h-7 lg:w-7 ${!formVisibility && 'rotate-180'}`}/>
               <span>Create new prescription</span>
-            <MdOutlineKeyboardArrowUp className={`w-5 h-5 md:w-6 md:h-6 lg:h-7 lg:w-7 ${!formVisibility && 'rotate-180'}`}/>
           </button>
-
-          <form onSubmit={handleSubmit} className={`${formVisibility ? 'flex' : 'hidden'} flex-col gap-0 p-2 mx-5 my-2 border-2 border-solid border-${selectedTheme}-500 drop-shadow-lg shadow-md rounded-lg`}>
-            <p className={`text-${selectedTheme}-500 font-bold flex gap-1 mb-2`}>
-              <FaFilePrescription className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6"/>
-              <span>Create new prescription</span>
-            </p>
-            <div className={`p-2`}>
-              <label htmlFor="notes" className={`block mb-2 text-${selectedTheme}-600 font-semibold`}>Additional Notes:</label>
-              <textarea
-                id="notes"
-                name="notes"
-                value={formData["Prescription Added"].notes}
-                onChange={handleChange}
-                placeholder="Additional relevant instructions given to the patient's care. . . . ."
-                className="w-full rounded-lg text-xs md:text-sm lg:text-base"
-                rows={4}
-                maxLength={255}
-              />
-            </div>
-            <div className="flex justify-end items-center gap-2 mt-4">
-              <button onClick={(e) => { e.preventDefault(); toggle(); }} className={`py-2 px-4 hover:shadow-md font-semibold text-${selectedTheme}-600 rounded-lg hover:bg-${selectedTheme}-100 transition-colors duration-200`}>Cancel</button>
-              <button type="submit" className={`py-2 px-4 hover:shadow-md font-semibold rounded-lg transition-colors duration-200 ${formData["Prescription Added"].notes ? `text-${selectedTheme}-100 bg-${selectedTheme}-600 hover:cursor-pointer shadow-sm` : `shadow-inner text-${selectedTheme}-100 bg-${selectedTheme}-400 hover:cursor-not-allowed`}`} disabled={!formData["Prescription Added"].notes}>{isLoading || error ? <Spinner /> : 'Create Prescription'}</button>
-            </div>
-          </form>
         </div>
       </div>
     </dialog>

@@ -147,7 +147,7 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
     }
   }
 
-  const displayedData = filteredData.slice((CurrentPage - 1) * 20, CurrentPage * 20);
+  const displayedData = filteredData.slice((CurrentPage - 1) * 10, CurrentPage * 10);
   
   return (
     <>
@@ -205,13 +205,13 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
                     isLoading ? (
                       <>
                         {
-                          Array.from({ length: 20 }).map((_, rindex) => (
+                          Array.from({ length: 10 }).map((_, rindex) => (
                             <tr
                               key={rindex}
                               className={`flex flex-row justify-between items-center bg-${selectedTheme}-200 divide-x-2 divide-transparent`}
                             >
                               {
-                                Array.from({ length: 20 }).map((_, cindex) => (
+                                Array.from({ length: 10 }).map((_, cindex) => (
                                   <td key={cindex} className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden hover:overflow-visible hover:bg-${selectedTheme}-50 hover:text-gray-900 hover:drop-shadow-md hover:rounded-md transition-colors duration-300 hover:px-2`}>
                                      
                                   </td>
