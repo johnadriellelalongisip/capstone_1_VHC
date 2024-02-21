@@ -99,7 +99,7 @@ const RecordForm = ( { close, children } ) => {
           <input 
             type="text" 
             required 
-            className={`text-xs md:text-sm lg:text-base drop-shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-500`}
+            className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
             maxLength={50} 
             id="firstname" 
             placeholder="Enter first name. . . . ." 
@@ -113,7 +113,7 @@ const RecordForm = ( { close, children } ) => {
           </div>
           <input 
             required 
-            className={`text-xs md:text-sm lg:text-base drop-shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-500`}
+            className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
             maxLength={50} 
             id="middlename"
             type="text" 
@@ -127,7 +127,7 @@ const RecordForm = ( { close, children } ) => {
           </div>
           <input 
             required 
-            className={`text-xs md:text-sm lg:text-base drop-shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-500`}
+            className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
             maxLength={50} 
             id="lastname" 
             type="text" 
@@ -176,7 +176,7 @@ const RecordForm = ( { close, children } ) => {
             <label htmlFor="barangay" className='text-xs md:text-sm lg:text-base font-semibold'>Barangay: </label>
             <input 
               required 
-              className={`text-xs md:text-sm lg:text-base drop-shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-500`}
+              className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
               id="barangay" 
               type="text"
               placeholder="Enter barangay. . . . ." 
@@ -186,7 +186,7 @@ const RecordForm = ( { close, children } ) => {
           <div className='basis-1/2'>
             <label htmlFor="phoneNumber" className='text-xs md:text-sm lg:text-base font-semibold'>Phone Number: </label>
             <input 
-              className={`text-xs md:text-sm lg:text-base drop-shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-500`}
+              className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
               id="phoneNumber" 
               type="text" 
               placeholder="Enter phone number. . . . ." 
@@ -203,7 +203,7 @@ const RecordForm = ( { close, children } ) => {
           </div>
           <input 
             id="familyId" 
-            className={`text-xs md:text-sm lg:text-base drop-shadow-md rounded-lg w-full bg-transparent text-slate-500 border-[1px] border-${selectedTheme}-500`}
+            className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent text-slate-500 border-[1px] border-${selectedTheme}-800`}
             type="text" 
             disabled 
             value={`FAM_ID-${familyId}`} 

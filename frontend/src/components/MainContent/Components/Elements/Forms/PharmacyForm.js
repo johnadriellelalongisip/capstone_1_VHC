@@ -1,4 +1,4 @@
-import { Checkbox, Label, Radio, Spinner, TextInput } from 'flowbite-react';
+import { Checkbox, Label, Radio, TextInput } from 'flowbite-react';
 
 const PharmacyForm = () => {
   
