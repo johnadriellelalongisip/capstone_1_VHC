@@ -14,7 +14,6 @@ const Horizontalbarchart = () => {
     labels: years,
     datasets: [
       {
-        type: 'bar',
         label: 'Dataset 1',
         data: years.map(() => faker.datatype.number({ min: 0, max: 1000 })),
         backgroundColor: tinycolor(selectedTheme).toRgbString(),

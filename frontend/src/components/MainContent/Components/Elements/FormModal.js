@@ -27,7 +27,17 @@ const SelectedForm = ({ formType, toggle }) => {
   } else if (formType === 'pharmacy') {
     return (
       <div>
-        <PharmacyForm close={toggle} />
+        <PharmacyForm close={toggle}>
+          <div className={`fixed top-0 left-0 right-0 flex justify-between items-center p-5 bg-${selectedTheme}-300 text-${selectedTheme}-800 border-b-[1px] shadow-md drop-shadow-md border-${selectedTheme}-950`}>
+            <div className='flex items-center'>
+              <MdCreate className='mr-2 w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6'/>
+              <p className='font-bold text-base md:text-lg lg:text-xl'>Add new record</p>
+            </div>
+            <button onClick={() => toggle()} className={`transition-colors duration-300 p-2 rounded-3xl bg-${selectedTheme}-400 hover:bg-${selectedTheme}-500 active:bg-${selectedTheme}-200`}>
+              <MdClose className='w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6'/>
+            </button>
+          </div>
+        </PharmacyForm>
       </div>
     );
   } else if (formType === 'blood_unit') {

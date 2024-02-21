@@ -151,7 +151,7 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
                                   </span>
                                 ))
                               ) : (
-                                <span key={i}>
+                                <span>
                                   {value}
                                 </span>
                               )}

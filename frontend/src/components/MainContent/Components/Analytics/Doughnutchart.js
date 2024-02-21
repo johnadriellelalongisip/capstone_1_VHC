@@ -4,8 +4,6 @@ import { Doughnut } from 'react-chartjs-2';
 import { colorTheme } from '../../../../App';
 import faker from 'faker';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
-
 const Doughnutchart = () => {
   const [selectedTheme] = useContext(colorTheme);
   // const years = [

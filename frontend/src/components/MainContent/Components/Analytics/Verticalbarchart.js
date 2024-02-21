@@ -13,8 +13,7 @@ const Verticalbarchart = () => {
   const data = {
     labels: months,
     datasets: [
-      {
-        type: 'bar',
+      { 
         label: 'Dataset 3',
         data: months.map(() => faker.datatype.number({ min: 0, max: 1000 })),
         backgroundColor: tinycolor(selectedTheme).toRgbString(),
