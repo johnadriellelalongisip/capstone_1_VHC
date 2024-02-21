@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 19, 2024 at 04:43 AM
+-- Generation Time: Feb 21, 2024 at 02:58 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -62,7 +62,7 @@ CREATE TABLE `municipal_citizens` (
   `citizen_barangay` varchar(255) NOT NULL,
   `date_added` datetime NOT NULL,
   `citizen_number` varchar(12) DEFAULT NULL,
-  `citizen_history` json NOT NULL
+  `citizen_history` json DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -70,8 +70,25 @@ CREATE TABLE `municipal_citizens` (
 --
 
 INSERT INTO `municipal_citizens` (`citizen_family_id`, `citizen_firstname`, `citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_barangay`, `date_added`, `citizen_number`, `citizen_history`) VALUES
-('FAMILY_ID-LKGBAX8R', 'NEW RECORD', 'MIDDLE NAME', 'LAST NAME', 'male', 'BARANGAY', '2024-02-18 22:57:45', '123456789012', '{\"logs\": {\"Record added\": \"2024-02-18 22:57:45\"}}'),
-('FAMILY_ID-LWDSXLIP', 'FIRSTNAME', 'MIDDLE', 'LASTNAME', 'female', 'THEBARANGAY', '2024-02-19 02:52:49', '121212121212', '{\"logs\": {\"Record added\": \"2024-02-18 22:57:45\", \"Prescription Added\": {\"time\": \"2024-02-19 11:03:54\", \"notes\": \"NEW HISTORY\"}}}');
+('FAMILY_ID-JQFGURWV', 'asdf', 'asdf', 'asdf', 'male', 'asdf', '2024-02-19 15:55:34', '123123123213', '{\"2024-02-19 15:55:34\": \"Record Added\", \"2024-02-19 16:09:36\": {\"Prescription Added\": {\"notes\": \"asdf\"}}, \"2024-02-19 16:09:42\": {\"Prescription Added\": {\"notes\": \"adsf\"}}, \"2024-02-19 16:09:45\": {\"Prescription Added\": {\"notes\": \"123132\"}}, \"2024-02-19 16:33:28\": {\"Prescription Added\": {\"notes\": \"asdffasd\"}}, \"2024-02-21 11:34:09\": {\"Prescription Added\": {\"notes\": \"lvmafhalef\"}}}'),
+('FAMILY_ID-TLDFOWRY', 'Dominic', 'El Nido', 'Medrano', 'male', 'Adrialuna', '2024-02-21 13:22:35', '639277764083', '{\"2024-02-21 13:22:35\": \"Record Added\"}'),
+('FAMILY_ID-ZHA1DO2R', 'Yuan', 'Tumbagahon', 'De Guzman', 'male', 'Sto. Niño', '2024-02-21 13:21:38', '09755330928', '{\"2024-02-21 13:21:38\": \"Record Added\", \"2024-02-21 13:23:21\": {\"Prescription Added\": {\"notes\": \"KAPUGE\"}}, \"2024-02-21 14:16:28\": {\"Prescription Added\": {\"notes\": \"kuyvkv\"}}, \"2024-02-21 14:25:16\": {\"Prescription Added\": {\"notes\": \"yjtfkychgvh,\"}}}');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pharmacy_inventory`
+--
+
+CREATE TABLE `pharmacy_inventory` (
+  `item_id` int NOT NULL,
+  `item_name` varchar(55) NOT NULL,
+  `unit_size` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `lot_no` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `exp_date` date DEFAULT NULL,
+  `quantity_stockroom` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `item_logs` json NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -111,6 +128,12 @@ ALTER TABLE `municipal_citizens`
   ADD PRIMARY KEY (`citizen_family_id`);
 
 --
+-- Indexes for table `pharmacy_inventory`
+--
+ALTER TABLE `pharmacy_inventory`
+  ADD PRIMARY KEY (`item_id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -125,6 +148,12 @@ ALTER TABLE `users`
 --
 ALTER TABLE `medicalstaff`
   MODIFY `staff_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+
+--
+-- AUTO_INCREMENT for table `pharmacy_inventory`
+--
+ALTER TABLE `pharmacy_inventory`
+  MODIFY `item_id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
