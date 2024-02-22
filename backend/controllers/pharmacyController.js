@@ -37,7 +37,27 @@ class PharmacyController {
         error: error,
       });
     }
-  }  
+  }
+  
+  async getPharmacyInventory(req, res) {
+    try {
+      const connection = await dbModel.getConnection();
+      const query = 'SELECT * FROM `pharmacy_inventory`';
+      const response = await dbModel.query(query);
+      dbModel.releaseConnection(connection);
+      res.status(200).json({
+        status: 200,
+        message: "Data retrieved successfully",
+        data: response,
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 500,
+        message: "Something have gone wrong",
+        error: error
+      })
+    }
+  }
 
 }
 module.exports = new PharmacyController();

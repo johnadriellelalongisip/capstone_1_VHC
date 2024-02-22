@@ -24,5 +24,6 @@ router.post('/addRecordHistory/:id', recordController.addRecordHistory);
 
 // PHARMACY
 router.post('/submitCSVMedicinesRecord', pharmacyController.handleFile);
+router.get('/getPharmacyInventory', pharmacyController.getPharmacyInventory);
 
 module.exports = router;
