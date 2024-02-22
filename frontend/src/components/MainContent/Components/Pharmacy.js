@@ -1,27 +1,16 @@
-import { useLocation } from "react-router-dom";
+import { useState, useLocation } from "react-router-dom";
 import Header from "../Header";
 import DataTable from "./Elements/DataTable";
 import { MdLocalPharmacy } from "react-icons/md";
+import useQuery from "../../../hooks/useQuery";
 
 const Pharmacy = () => {
   const location = useLocation();
   const pathname = location.pathname.slice(1);
   const title = pathname.charAt(0).toUpperCase() + pathname.slice(1);
-  const medicines = [
-    {
-      "End-User": "DOH",
-      "Pro/Don Con. #": "PR NO. 4411-2023-02-004",
-      "Source": "Provincial DOH Calapan",
-      "Date Delivered": "03-10-2023",
-      "Item Description": "Clozapine 100mg",
-      "Exp Date": "11-10-2024",
-      "Batch/Lot #": "B344JO15",
-      "Quantity": "1,500",
-      "Unit of Measure": "Table",
-      "Unit Cost": "",
-      "Remarks": ""
-    }
-  ];
+  const { response, isLoading, error, addData } = useQuery();
+  const [medicines, setMedicines] = useState(null);
+  
 
   return (
     <div className="w-full h-screen flex flex-col">

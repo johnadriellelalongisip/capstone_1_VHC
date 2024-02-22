@@ -22,7 +22,10 @@ const PharmacyForm = ({ close, children }) => {
 
       workbook.SheetNames.forEach((sheetName) => {
         const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+          raw: false,
+          dateNF: 'yyyy-mm-dd'
+        });
         console.log(jsonData);
         setData(jsonData);
       });
@@ -35,10 +38,12 @@ const PharmacyForm = ({ close, children }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('SUBMITTED');
+    const date_added = {};
+    const payloadKey = String(mysqlTime);
+    date_added[payloadKey] = "Date Added";
     const payload = {
-      "date_added": mysqlTime,
       data,
-      log : String(mysqlTime)
+      logs : date_added
     };
     console.log(payload);
     addData('submitCSVMedicinesRecord', payload);
