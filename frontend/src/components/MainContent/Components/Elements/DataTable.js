@@ -60,9 +60,9 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
 
   const sortedRecord = (column, order) => {
     return data.slice().sort((a, b) => {
-      const valA = a[column].toString().toLowerCase();
-      const valB = b[column].toString().toLowerCase();
-
+      const valA = (a[column] ? a[column].toString().toLowerCase() : '');
+      const valB = (b[column] ? b[column].toString().toLowerCase() : '');
+  
       if (order === 'asc') {
         return valA.localeCompare(valB);
       } else {
@@ -70,7 +70,7 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
       }
     });
   };
-
+  
   const handleSorting = (field) => {
     setSortState((prev) => {
       const newState = {};
@@ -82,7 +82,7 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
     });
     const order = sortState[field] ? 'desc' : 'asc';
     setSortedData(sortedRecord(field, order));
-  };
+  };  
 
   const Header = ({ top }) => (
     <tr className={`flex flex-row justify-between items-center bg-${selectedTheme}-300 text-xs md:text-sm lg:text-md ${
@@ -90,7 +90,7 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
     }`}>
       {
         isLoading ? (
-            <th className="w-full p-2 text-center flex justify-center items-center animate-pulse animate-infinite animate-duration-500 animate-ease-linear">{top ? 'Loading Table' : ' '}</th>
+          <th className="w-full p-2 text-center flex justify-center items-center animate-pulse animate-infinite animate-duration-500 animate-ease-linear">{top ? 'Loading Table' : ' '}</th>
         ) : (
           Object.keys(data[0]).map((field, fieldi) => (
             <th key={fieldi} className="w-full p-2 text-center flex justify-center items-center">
@@ -101,8 +101,7 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
                 <p>{field}</p>
                 {top && (
                   <p>
-                    {sortState[field] && <MdArrowDropUp className={`w-6 h-6 text-${selectedTheme}-600`} />}
-                    {!sortState[field] && <MdArrowDropDown className="w-6 h-6" />}
+                    <MdArrowDropUp className={`w-6 h-6 text-${selectedTheme}-600 ${sortState[field] ? 'rotate-180' : ''}`} />
                   </p>
                 )}
               </button>
@@ -113,8 +112,8 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
       {
         top ? (
           <>
-            {!isLoading && !error && <th className="w-full p-2 text-center flex justify-center items-center">Actions</th>}
             {error && <th className="w-full p-2 text-center flex justify-center items-center">{error}</th>}
+            {!isLoading && !error && <th className="w-full p-2 text-center flex justify-center items-center">{!isLoading && 'Actions'}</th>}
           </>
         ) : (
           <>
@@ -127,6 +126,8 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
 
   const filteredData = sortedData.filter((row) =>
     Object.values(row).some((col) =>
+      typeof(col) === 'string' &&
+      col.match(/[a-zA-Z]/) &&
       col.toString().toLowerCase().includes(query.toLowerCase()) &&
       col.toString().toLowerCase().startsWith(query.toLowerCase())
     )
