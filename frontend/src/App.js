@@ -10,7 +10,7 @@ import Home from './components/MainContent/Components/Home';
 import Dashboard from './components/MainContent/Components/Dashboard/Dashboard';
 import Records from './components/MainContent/Components/Records/Records';
 import Analytics from "./components/MainContent/Components/Analytics/Analytics";
-import Pharmacy from './components/MainContent/Components/Pharmacy';
+import Pharmacy from './components/MainContent/Components/Pharmacy/Pharmacy.js';
 import BloodUnit from './components/MainContent/Components/BloodUnit';
 import Appointments from "./components/MainContent/Components/Appointments/Appointments.js";
 

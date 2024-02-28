@@ -78,7 +78,7 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
   };
   
   return (
-    <dialog ref={recordAudit}className={`rounded-lg bg-${selectedTheme}-100 drop-shadow-lg w-96 w-80 md:w-[500px] lg:w-[600px]`}>
+    <dialog ref={recordAudit} className={`rounded-lg bg-${selectedTheme}-100 drop-shadow-lg w-80 md:w-[500px] lg:w-[600px]`}>
       <div className="flex flex-col text-xs md:text-sm lg:text-base">
         <div className={`flex justify-between items-center p-2 text-${selectedTheme}-600 border-b-[1px] border-solid border-${selectedTheme}-500 shadow-md shadow-${selectedTheme}-600 mb-2`}>
           <div className="flex items-center p-1 gap-1">
@@ -103,6 +103,24 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
                 ) : (
                   <span className="underline underline-offset-4">
                     {record.citizen_firstname} <span>{record.citizen_middlename.charAt(0).toUpperCase()}.</span> {record.citizen_lastname} ({record.citizen_gender.charAt(0).toUpperCase() + record.citizen_gender.substring(1)})
+                  </span>
+                )
+              }
+            </p>
+          </div>
+          <div className={`flex gap-2 mx-5 my-2 text-${selectedTheme}-600 font-semibold`}>
+            <p>
+              Family ID: 
+            </p>
+            <p >
+              {
+                !record ? (
+                  <span className="drop-shadow-lg animate-pulse animate-infinite animate-duration-[800ms] animate-ease-linear font-bold">
+                    { error ? String(error) : '. . . . . . . . .' }
+                  </span>
+                ) : (
+                  <span className="underline underline-offset-4">
+                    {family_id}
                   </span>
                 )
               }
@@ -138,7 +156,7 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
                                     {
                                       typeof(subValue) === 'object' ? (
                                         Object.entries(subValue).map(([lastKey, lastValue], i) => (
-                                          <button className="flex items-center">
+                                          <button key={i} className="flex items-center">
                                             {subKey} <MdArrowRight className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6"/>
                                           </button>
                                         ))

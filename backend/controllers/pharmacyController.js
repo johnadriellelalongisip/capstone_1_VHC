@@ -42,7 +42,7 @@ class PharmacyController {
   async getPharmacyInventory(req, res) {
     try {
       const connection = await dbModel.getConnection();
-      const query = 'SELECT `item_name`, `unit_size`, `lot_no`, `exp_date`, `quantity_stockroom` FROM `pharmacy_inventory`';
+      const query = 'SELECT `item_id`, `item_name`, `unit_size`, `lot_no`, `exp_date`, `quantity_stockroom` FROM `pharmacy_inventory`';
       const response = await dbModel.query(query);
       dbModel.releaseConnection(connection);
       const formattedResponse = response.map((row) => {
@@ -51,6 +51,36 @@ class PharmacyController {
         return {
           ...row,
           exp_date: formattedExpDate,
+        };
+      });
+      res.status(200).json({
+        status: 200,
+        message: "Data retrieved successfully",
+        data: formattedResponse,
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 500,
+        message: "Something have gone wrong",
+        error: error
+      })
+    }
+  }
+
+  async searchPharmacyInventory(req, res) {
+    try {
+      const connection = await dbModel.getConnection();
+      const query = 'SELECT `item_name`, `unit_size`, `lot_no`, `exp_date`, `quantity_stockroom`, `item_logs` FROM `pharmacy_inventory` WHERE `item_id` = ?';
+      const response = await dbModel.query(query, req.params.id);
+      dbModel.releaseConnection(connection);
+      const formattedResponse = response.map((row) => {
+        const expDate = row.exp_date ? new Date(row.exp_date) : null;
+        const formattedExpDate = expDate ? 
+            `${expDate.getFullYear()}-${(expDate.getMonth() + 1).toString().padStart(2, '0')}-${expDate.getDate().toString().padStart(2, '0')}`
+            : null;
+        return {
+            ...row,
+            exp_date: formattedExpDate,
         };
       });
       res.status(200).json({

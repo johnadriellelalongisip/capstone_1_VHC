@@ -1,76 +1,113 @@
 import { useLocation } from "react-router-dom";
-import Header from "../Header";
-import DataTable from "./Elements/DataTable";
+import Header from "../../Header";
+import DataTable from "../Elements/DataTable";
 import { MdLocalPharmacy } from "react-icons/md";
-import useQuery from "../../../hooks/useQuery";
-import { useContext, useEffect, useRef, useState } from "react";
-import useCurrentTime from "../../../hooks/useCurrentTime";
-import * as XLSX from 'xlsx';
-import { Checkbox, Spinner } from "flowbite-react";
-import { colorTheme } from "../../../App";
+import useQuery from "../../../../hooks/useQuery";
+import { useEffect, useRef, useState } from "react";
+import PharmacyAudit from "./PharmacyAudit";
+// import useCurrentTime from "../../../../hooks/useCurrentTime";
+// import * as XLSX from 'xlsx';
+// import { Checkbox, Spinner } from "flowbite-react";
+// import { colorTheme } from "../../../../App";
 
 const Pharmacy = () => {
-  const [selectedTheme] = useContext(colorTheme);
   const location = useLocation();
   const pathname = location.pathname.slice(1);
   const title = pathname.charAt(0).toUpperCase() + pathname.slice(1);
-  const { response, isLoading, error, fetchData, addData } = useQuery();
-  const [medicines, setMedicines] = useState(null);
   
-  const [data, setData] = useState(null);
-  const fileRef = useRef(null);
-  const { mysqlTime } = useCurrentTime();
+  // const [selectedTheme] = useContext(colorTheme);
+  const [medicines, setMedicines] = useState(null);
+  const [isProductAuditOpen, setIsProductAuditOpen] = useState(false);
+  const productAuditRef = useRef(null);
+  const [itemId, setItemId] = useState(null);
+
+  const { response, isLoading, error, fetchData } = useQuery();
+  
+  // const [data, setData] = useState(null);
+  // const fileRef = useRef(null);
+  // const { mysqlTime } = useCurrentTime();
 
   useEffect(() => {
     fetchData('getPharmacyInventory');
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  
   useEffect(() => {
     if (response && response.status === 200) {
-      setMedicines(response.data);
-      console.log(response);
+      const keyMap = {
+        "item_id": "ItemID",
+        "item_name": "ItemName",
+        "unit_size": "Unit",
+        "lot_no": "LotNO",
+        "exp_date": "Expiry",
+        "quantity_stockroom": "Quantity",
+        "item_logs": "Logs"
+      };
+      const newResponse = response.data.map(obj => {
+        const newObj = {};
+        Object.keys(obj).forEach(key => {
+          if (keyMap[key]) {
+            newObj[keyMap[key]] = obj[key];
+          } else {
+            newObj[key] = obj[key];
+          }
+        });
+        return newObj;
+      });
+      setMedicines(newResponse);
     }
     if (error) {
       console.log(error);
     }
   },[response, error]);
 
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
+  // const handleFileUpload = (event) => {
+  //   const file = event.target.files[0];
+  //   const reader = new FileReader();
 
-    reader.onload = (e) => {
-      const data = e.target.result;
-      const workbook = XLSX.read(data, { type: 'binary' });
+  //   reader.onload = (e) => {
+  //     const data = e.target.result;
+  //     const workbook = XLSX.read(data, { type: 'binary' });
 
-      workbook.SheetNames.forEach((sheetName) => {
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-          raw: false,
-          dateNF: 'yyyy-mm-dd'
-        });
-        console.log(jsonData);
-        setData(jsonData);
-      });
-    };
-    reader.readAsBinaryString(file);
+  //     workbook.SheetNames.forEach((sheetName) => {
+  //       const worksheet = workbook.Sheets[sheetName];
+  //       const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+  //         raw: false,
+  //         dateNF: 'yyyy-mm-dd'
+  //       });
+  //       console.log(jsonData);
+  //       setData(jsonData);
+  //     });
+  //   };
+  //   reader.readAsBinaryString(file);
+  // };
+
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   console.log('SUBMITTED');
+  //   const date_added = {};
+  //   const payloadKey = String(mysqlTime);
+  //   date_added[payloadKey] = "Date Added";
+  //   const payload = {
+  //     data,
+  //     logs : date_added
+  //   };
+  //   console.log(payload);
+  //   addData('submitCSVMedicinesRecord', payload);
+  //   setData(null);
+  //   fileRef.current.value = "";
+  // }
+
+  const toggleOptions = (itemId) => {
+    setItemId(itemId);
+    if (!isProductAuditOpen) {
+      setIsProductAuditOpen(true);
+      productAuditRef.current.showModal();
+    } else {
+      setIsProductAuditOpen(false);
+      productAuditRef.current.close();
+    }
   };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('SUBMITTED');
-    const date_added = {};
-    const payloadKey = String(mysqlTime);
-    date_added[payloadKey] = "Date Added";
-    const payload = {
-      data,
-      logs : date_added
-    };
-    console.log(payload);
-    addData('submitCSVMedicinesRecord', payload);
-    setData(null);
-    fileRef.current.value = "";
-  }
 
   return (
     <div className="w-full h-screen flex flex-col">
@@ -81,8 +118,8 @@ const Pharmacy = () => {
         <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-60 md:mb-72 lg:mb-80">
             <div className="col-span-2 w-34 h-36 bg-gray-50 rounded-xl">
-              <DataTable data={medicines} modalForm={pathname} isLoading={isLoading} error={error} />
-              <>
+              <DataTable data={medicines} modalForm={pathname} isLoading={isLoading} toggleOption={toggleOptions} error={error} />
+              {/* <>
                 <form className="flex flex-col gap-4 m-5" onSubmit={handleSubmit}>
                   <div>
                     <div className="mb-2 block">
@@ -111,11 +148,12 @@ const Pharmacy = () => {
                     </label>
                   </div>
                 </form>
-              </>
+              </> */}
             </div>
           </div>
         </div>
       </div>
+      <PharmacyAudit recordAudit={productAuditRef} toggle={toggleOptions} itemId={itemId} />
     </div>
   );
 }
