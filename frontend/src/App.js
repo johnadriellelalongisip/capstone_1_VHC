@@ -12,7 +12,7 @@ import Records from './components/MainContent/Components/Records/Records';
 import Analytics from "./components/MainContent/Components/Analytics/Analytics";
 import Pharmacy from './components/MainContent/Components/Pharmacy/Pharmacy.js';
 import BloodUnit from './components/MainContent/Components/BloodUnit';
-import Appointments from "./components/MainContent/Components/Appointments/Appointments.js";
+import Appointments from "./components/MainContent/Components/Appointments/Queue.js";
 
 import Login from "./components/Login.js";
 import Register from "./components/Register.js";
@@ -55,7 +55,7 @@ const AppContent = () => {
                 <Route path='dashboard' element={<Dashboard />}/>
                 <Route path='users' element={<Users />}/>
                 <Route path='home' element={<Home />}/>
-                <Route path='appointments' element={<Appointments />}/>
+                <Route path='queue' element={<Appointments />}/>
                 <Route path='analytics' element={<Analytics />}/>
                 <Route path='records' element={<Records />}/>
                 <Route path='pharmacy' element={<Pharmacy />}/>

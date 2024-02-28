@@ -10,7 +10,7 @@ const PharmacyAudit = ({ recordAudit, toggle, itemId }) => {
   const [toEdit, setToEdit] = useState(true);
   const [isDirty, setIsDirty] = useState(false);
   const [initialFormData, setInitialFormData] = useState({});
-  const { searchResults, isLoading, error, searchData, editData } = useQuery();
+  const { searchResults, setSearchResults, isLoading, error, searchData, editData } = useQuery();
   const [formData, setFormData] = useState({
     item_name: "",
     unit_size: "",
@@ -42,6 +42,17 @@ const PharmacyAudit = ({ recordAudit, toggle, itemId }) => {
       searchData('searchPharmacyInventory', itemId);
     }
   }, [itemId]);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  useEffect(() => {
+    const haschanged = !isEqual(formData, initialFormData);
+    setIsDirty(haschanged);
+  }, [formData, toEdit]);
 
   useEffect(() => {
     if (searchResults) {
@@ -53,22 +64,16 @@ const PharmacyAudit = ({ recordAudit, toggle, itemId }) => {
         exp_date: searchResults.exp_date ? searchResults.exp_date : '2000-01-01',
         quantity_stockroom: searchResults.quantity_stockroom ? searchResults.quantity_stockroom : 'n/a'
       }));
-      setInitialFormData(formData); 
+      setInitialFormData((prev) => ({
+        ...prev,
+        item_name: searchResults.item_name ? searchResults.item_name : 'n/a',
+        unit_size: searchResults.unit_size ? searchResults.unit_size : 'n/a',
+        lot_no: searchResults.lot_no ? searchResults.lot_no : 'n/a',
+        exp_date: searchResults.exp_date ? searchResults.exp_date : '2000-01-01',
+        quantity_stockroom: searchResults.quantity_stockroom ? searchResults.quantity_stockroom : 'n/a'
+      })); 
     }
   }, [searchResults]);
-
-  useEffect(() => {
-    const hasChanged = !isEqual(formData, initialFormData);
-    setIsDirty(hasChanged);
-  }, [formData, initialFormData]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
 
   const closeModal = () => {
     toggle();
@@ -81,31 +86,41 @@ const PharmacyAudit = ({ recordAudit, toggle, itemId }) => {
         quantity_stockroom: ""
       });
     };
+    setSearchResults(null);
     setToEdit(true);
   };
   const toggleEdit = () => {
-    if (isDirty && !toEdit) {
+    if (isDirty) {
       const confirmLeave = window.confirm("You have unsaved changes. Are you sure you want to leave?");
-      if (!confirmLeave) {
-        return;
+      if (confirmLeave) {
+        setFormData((prev) => ({
+          ...prev,
+          item_name: searchResults.item_name ? searchResults.item_name : 'n/a',
+          unit_size: searchResults.unit_size ? searchResults.unit_size : 'n/a',
+          lot_no: searchResults.lot_no ? searchResults.lot_no : 'n/a',
+          exp_date: searchResults.exp_date ? searchResults.exp_date : '2000-01-01',
+          quantity_stockroom: searchResults.quantity_stockroom ? searchResults.quantity_stockroom : 'n/a'
+        }));
+        setInitialFormData((prev) => ({
+          ...prev,
+          item_name: searchResults.item_name ? searchResults.item_name : 'n/a',
+          unit_size: searchResults.unit_size ? searchResults.unit_size : 'n/a',
+          lot_no: searchResults.lot_no ? searchResults.lot_no : 'n/a',
+          exp_date: searchResults.exp_date ? searchResults.exp_date : '2000-01-01',
+          quantity_stockroom: searchResults.quantity_stockroom ? searchResults.quantity_stockroom : 'n/a'
+        }));
+        setToEdit(prev => !prev);
+      } else {
+        setToEdit(prev => !prev);
       }
-      setFormData((prev) => ({
-        ...prev,
-        item_name: searchResults.item_name ? searchResults.item_name : 'n/a',
-        unit_size: searchResults.unit_size ? searchResults.unit_size : 'n/a',
-        lot_no: searchResults.lot_no ? searchResults.lot_no : 'n/a',
-        exp_date: searchResults.exp_date ? searchResults.exp_date : '2000-01-01',
-        quantity_stockroom: searchResults.quantity_stockroom ? searchResults.quantity_stockroom : 'n/a'
-      }));
-      setInitialFormData(formData);
+    } else {
       setToEdit(prev => !prev);
     }
-  }
+  };
 
   const handleUpdate = (e) => {
     e.preventDefault();
     closeModal();
-    setToEdit(true);
   };
   
   return (
@@ -131,27 +146,27 @@ const PharmacyAudit = ({ recordAudit, toggle, itemId }) => {
           <form className={`flex flex-col gap-4 mx-5 my-2 font-semibold`} onSubmit={handleUpdate}>
             <div className="flex gap-3 items-center justify-start">
               <label htmlFor="item_name">Item Name:</label>
-              <input required maxLength={50} type="text" name="item_name" id="item_name" placeholder={searchResults?.item_name} value={formData.item_name} onChange={handleChange} disabled={toEdit} className={`text-xs md:text-sm lg:text-base grow p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent`} />
+              <input required maxLength={50} type="text" name="item_name" id="item_name" placeholder={searchResults?.item_name} value={formData.item_name} onChange={handleChange} disabled={toEdit} className={`text-xs md:text-sm lg:text-base grow p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent ${toEdit ? `text-${selectedTheme}-300` : `text-${selectedTheme}-800`}`} />
             </div>
             <div className="flex flex-col md:flex-col lg:flex-row gap-4 items-start justify-between">
               <div className="flex gap-3 items-center justify-start w-full">
                 <label htmlFor="unit_size">Unit/Size:</label>
-                <input required maxLength={50} type="text" name="unit_size" id="unit_size" placeholder={searchResults?.unit_size} value={formData.unit_size} onChange={handleChange} disabled={toEdit} className={`grow text-xs md:text-sm lg:text-base p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent`} />
+                <input required maxLength={50} type="text" name="unit_size" id="unit_size" placeholder={searchResults?.unit_size} value={formData.unit_size} onChange={handleChange} disabled={toEdit} className={`grow text-xs md:text-sm lg:text-base p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent ${toEdit ? `text-${selectedTheme}-300` : `text-${selectedTheme}-800`}`} />
               </div>
               <div className="flex gap-3 items-center justify-start w-full">
                 <label htmlFor="lot_no">Lot No.:</label>
-                <input required maxLength={50} type="text" name="lot_no" id="lot_no" placeholder={searchResults?.lot_no} value={formData.lot_no} onChange={handleChange} disabled={toEdit} className={`grow text-xs md:text-sm lg:text-base p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent`} />
+                <input required maxLength={50} type="text" name="lot_no" id="lot_no" placeholder={searchResults?.lot_no} value={formData.lot_no} onChange={handleChange} disabled={toEdit} className={`grow text-xs md:text-sm lg:text-base p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent ${toEdit ? `text-${selectedTheme}-300` : `text-${selectedTheme}-800`}`} />
               </div>
             </div>
             <div className="flex gap-3 items-center justify-start">
               <label htmlFor="exp_date">Expiry Date:</label>
-              <input required type="date" name="exp_date" id="exp_date" value={formData.exp_date} onChange={handleChange} disabled={toEdit} className={`grow text-cetext-xs md:text-sm lg:text-base p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent`} />
+              <input required type="date" name="exp_date" id="exp_date" value={formData.exp_date} onChange={handleChange} disabled={toEdit} className={`grow text-cetext-xs md:text-sm lg:text-base p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent ${toEdit ? `text-${selectedTheme}-300` : `text-${selectedTheme}-800`}`} />
             </div>
             <div className="flex gap-3 items-center justify-start">
               <label htmlFor="quantity_stockroom">Quantity-Stockroom:</label>
-              <input required maxLength={50} type="text" name="quantity_stockroom" id="quantity_stockroom" placeholder={searchResults?.quantity_stockroom} value={formData.quantity_stockroom} onChange={handleChange} disabled={toEdit} className={`grow text-cetext-xs md:text-sm lg:text-base p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent`} />
+              <input required maxLength={50} type="text" name="quantity_stockroom" id="quantity_stockroom" placeholder={searchResults?.quantity_stockroom} value={formData.quantity_stockroom} onChange={handleChange} disabled={toEdit} className={`grow text-cetext-xs md:text-sm lg:text-base p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent ${toEdit ? `text-${selectedTheme}-300` : `text-${selectedTheme}-800`}`} />
             </div>
-            <button type="submit" className={`py-2 px-4 hover:shadow-md font-semibold rounded-lg transition-colors duration-200 ${formData.item_name && formData.lot_no && formData.unit_size && formData.exp_date && formData.quantity_stockroom ? `text-${selectedTheme}-100 bg-${selectedTheme}-600 hover:cursor-pointer shadow-sm` : `shadow-inner text-${selectedTheme}-100 bg-${selectedTheme}-400 hover:cursor-not-allowed`}`} disabled={ toEdit}>{isLoading || error ? <Spinner /> : 'Submit Edit'}</button>
+            <button type="submit" className={`py-2 px-4 hover:shadow-md font-semibold rounded-lg transition-colors duration-200 ${formData.item_name && formData.lot_no && formData.unit_size && formData.exp_date && formData.quantity_stockroom ? `text-${selectedTheme}-100 bg-${selectedTheme}-600 hover:cursor-pointer shadow-sm` : `shadow-inner text-${selectedTheme}-100 bg-${selectedTheme}-400 hover:cursor-not-allowed`}`} disabled={toEdit}>{isLoading || error ? <Spinner /> : 'Submit Edit'}</button>
           </form>
         </div>
       </div>
