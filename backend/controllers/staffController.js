@@ -36,7 +36,7 @@ class StaffController {
       });
     } catch (error) {
       console.log(error);
-      res.status(500).json({ status: 500, message: `Internal Server Error`, error: error });
+      res.status(500).json({ status: 500, message: error.message, error: error });
     }
   };
 
@@ -70,7 +70,7 @@ class StaffController {
       dbModel.releaseConnection(connection);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ status: 500, message: 'Internal Server Error', error: error });
+      res.status(500).json({ status: 500, message: error.message, error: error });
     }
   }
 

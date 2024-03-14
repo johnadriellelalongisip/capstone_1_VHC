@@ -26,7 +26,7 @@ const TopNav = () => {
   const [jump2, setJump2] = useState(false);
   const [fadeDown2, setFadeDown2] = useState(false);
   const [fadeDown3, setFadeDown3] = useState(false);
-  const { TimeComponent } = useCurrentTime();
+  const { DateComponent, TimeComponent } = useCurrentTime();
   const { 
     messages,
     chatbox,
@@ -58,7 +58,7 @@ const TopNav = () => {
     <div className={`fixed top-0 left-0 right-0 flex justify-between items-center p-5 bg-${selectedTheme}-200 z-50`}>
       <div className={`flex justify-center items-center text-${selectedTheme}-500`}>
         <img src="MHO_logo.png" className=' w-8 h-8 md:w-12 md:h-12 lg:w-16 lg:h-16 drop-shadow-md' alt="..."/>
-        <span className="self-center whitespace-nowrap text-2xl font-bold">MHO<div className={`p-1 bg-${selectedTheme}-100 flex gap-2 items-center justify-start text-xs rounded-lg`}><TimeComponent /></div></span>
+        <span className="self-center whitespace-nowrap text-2xl font-bold">MHO<div className={`p-1 bg-${selectedTheme}-100 flex gap-2 items-center justify-start text-xs rounded-lg`}><DateComponent /><TimeComponent /></div></span>
       </div>
       <div className="flex justify-end items-center gap-2 md:gap-3 lg:gap-4">
         <Tooltip content="Messages" animation="duration-500">

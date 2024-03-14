@@ -14,6 +14,7 @@ const Records = () => {
   const recordAuditRef = useRef(null);
   const [isRecordAuditOpen, setIsRecordAuditOpen] = useState(false);
   const [famID, setFamID] = useState(null);
+  
   const { response, isLoading, error, fetchData } = useQuery();
   
   useEffect(() => {
@@ -24,12 +25,13 @@ const Records = () => {
   useEffect(() => {
     if (response && response.status === 200) {
       const keyMap = {
+        "citizen_family_id": "Family-ID",
         "citizen_firstname": "Firstname",
         "citizen_middlename": "Middlename",
         "citizen_lastname": "Lastname",
         "citizen_gender": "Gender",
+        "citizen_birthdate": "Birthdate",
         "citizen_barangay": "Barangay",
-        "citizen_family_id": "Family-ID",
         "citizen_number": "Number"
       };
       const newResponse = response.data.map(obj => {

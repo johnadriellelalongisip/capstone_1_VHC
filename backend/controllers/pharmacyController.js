@@ -33,7 +33,7 @@ class PharmacyController {
       console.error("Error inserting data:", error);
       res.status(500).json({
         status: 500,
-        message: 'Something went wrong',
+        message: error.message,
         error: error,
       });
     }
@@ -61,7 +61,7 @@ class PharmacyController {
     } catch (error) {
       res.status(500).json({
         status: 500,
-        message: "Something have gone wrong",
+        message: error.message,
         error: error
       })
     }
@@ -91,7 +91,7 @@ class PharmacyController {
     } catch (error) {
       res.status(500).json({
         status: 500,
-        message: "Something have gone wrong",
+        message: error.message,
         error: error
       })
     }

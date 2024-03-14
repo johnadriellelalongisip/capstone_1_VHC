@@ -88,7 +88,7 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
     <tr className={`flex flex-row justify-between items-center bg-${selectedTheme}-300 text-xs md:text-sm lg:text-md ${
       top ? 'rounded-tl-lg rounded-tr-lg' : 'rounded-bl-lg rounded-br-lg'
     }`}>
-      {/* {
+      {
         data && isLoading ? (
           <th className="w-full p-2 text-center flex justify-center items-center animate-pulse animate-infinite animate-duration-500 animate-ease-linear">{top ? 'Loading Table' : ' '}</th>
         ) : (
@@ -108,7 +108,7 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
             </th>
           ))
         )
-      } */}
+      }
       {
         top ? (
           <>

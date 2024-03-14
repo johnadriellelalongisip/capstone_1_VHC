@@ -25,6 +25,7 @@
     "url": "https://github.com/JohnFilhmar/NodeJS-and-ReactJS.git"
   },
   "dependencies": {
+    "crypto": "^1.0.1",
     "xlsx": "^0.18.5"
   }
 }

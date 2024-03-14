@@ -15,9 +15,12 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
   const [formVisibility, setFormVisibility] = useState(false);
   const { mysqlTime } = useCurrentTime();
   const { searchResults, isLoading, error, searchData, editData } = useQuery();
+  const [medicine, setMedicine] = useState('');
+  const [isFormComplete, setIsFormComplete] = useState(false);
   const [formData, setFormData] = useState({
     "Prescription Added" : {
       notes: '',
+      prescribed_medicines: [],
     }
   });
   const handleChange = (e) => {
@@ -36,6 +39,9 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
       searchData(`findRecord`, family_id);
     }
   },[family_id]);
+  useEffect(() => {
+    setIsFormComplete(formData["Prescription Added"].notes && formData["Prescription Added"].prescribed_medicines.length !== 0);
+  }, [formData]);
 
   useEffect(() => {
     if (searchResults) {
@@ -64,6 +70,7 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
     setFormData({
       "Prescription Added" : {
         notes: '',
+        prescribed_medicines: [],
       }
     });
   };
@@ -76,6 +83,27 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
     editData('addRecordHistory', history,  family_id);
     cleanUp();
   };
+
+  const handleRemoveMedicine = (e,i) => {
+    e.preventDefault();
+    formData["Prescription Added"].prescribed_medicines.splice(i,1)
+  };
+
+  const handleAddMedicine = (e,value) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      setFormData(prev => ({
+        "Prescription Added": {
+          notes: prev["Prescription Added"].notes,
+          prescribed_medicines : [
+            ...prev["Prescription Added"].prescribed_medicines,
+            value,
+          ]
+        }
+      }));
+      setMedicine('');
+    }
+  };
   
   return (
     <dialog ref={recordAudit} className={`rounded-lg bg-${selectedTheme}-100 drop-shadow-lg w-80 md:w-[500px] lg:w-[600px]`}>
@@ -85,7 +113,7 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
             <MdPerson className='w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8' />
             <strong className="font-semibold drop-shadow-md text-sm md:text-base lg:text-lg">Health Assessment</strong>
           </div>
-          <button onClick={() => {toggle(); setRecord(null); setHistory(null);}} className={`transition-colors duration-200 rounded-3xl p-1 bg-${selectedTheme}-300 hover:bg-${selectedTheme}-400 active:bg-${selectedTheme}-200`}>
+          <button onClick={() => {toggle(); setRecord(null); setHistory(null); cleanUp();}} className={`transition-colors duration-200 rounded-3xl p-1 bg-${selectedTheme}-300 hover:bg-${selectedTheme}-400 active:bg-${selectedTheme}-200`}>
             <MdClose className='w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7' />
           </button>
         </div>
@@ -130,10 +158,10 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
               <span>{formVisibility ? 'Open History Table' : 'Open Prescription Form'}</span>
           </button>
           <p className={`mx-4 text-left text-${selectedTheme}-700 font-bold text-base md:text-lg lg:text-xl`}>{formVisibility ? 'Prescription Form' : 'Patient History'}</p>
-          <div className="m-3 overflow-y-auto rounded-lg">
+          <div className="m-3 overflow-y-auto min-h-96 rounded-lg">
             {
               !formVisibility ? (
-                <table className="relative h-72 min-h-72 font-table table-auto w-full text-sm rounded-lg bg-transparent text-slate-700">
+                <table className="relative h-96 min-h-96 font-table table-auto w-full text-sm rounded-lg bg-transparent text-slate-700">
                   <thead className={`text-${selectedTheme}-900 bg-${selectedTheme}-300 font-bold border-b-[1px] border-solid border-b-${selectedTheme}-700 drop-shadow-lg`}>
                     <tr className={`flex flex-row justify-between items-center text-xs md:text-sm lg:text-md`}>
                       <th className="w-full p-2 text-center flex justify-center items-center">Date</th>
@@ -202,6 +230,33 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
                     <span>Create new prescription</span>
                   </p>
                   <div className={`p-2`}>
+                    <label htmlFor="medicines" className={`block mb-2 text-${selectedTheme}-600 font-semibold`}>Prescribed Medicines:</label>
+                    <input
+                      type="text"
+                      id="medicines"
+                      name="medicines"
+                      value={medicine}
+                      onChange={(e) => setMedicine(e.target.value)}
+                      onKeyDown={(e) => handleAddMedicine(e,medicine)}
+                      placeholder="Search and press enter. . . . ."
+                      className="w-full rounded-lg text-xs md:text-sm lg:text-base"
+                      maxLength={100}
+                    />
+                  </div>
+                  <div className={`${formData["Prescription Added"].prescribed_medicines.length !== 0 && `max-h-20 overflow-y-auto m-2 p-2 border-solid border-[1px] shadow-inner rounded-md border-${selectedTheme}-600 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2`}`}>
+                    {
+                      formData["Prescription Added"].prescribed_medicines.map((med, i) => (
+                        <div key={i} className={`rounded-lg bg-${selectedTheme}-200 flex justify-between items-center text-xs md:text-sm lg:text-base text-${selectedTheme}-600`}>
+                          <p className="truncate p-1 font-semibold">{med}</p>
+                          <button onClick={(e) => handleRemoveMedicine(e,i)} className={`p-1 rounded-3xl bg-${selectedTheme}-300 hover:bg-${selectedTheme}-400 focus:bg-${selectedTheme}-200 hover:text-${selectedTheme}-700 active:text-${selectedTheme}-300 active:bg-${selectedTheme}-600`}>
+                            <MdClose className="size-3 md:size-4 lg:size-5"/>
+                          </button>
+                        </div>
+                      ))
+                    }
+
+                  </div>
+                  <div className={`p-2`}>
                     <label htmlFor="notes" className={`block mb-2 text-${selectedTheme}-600 font-semibold`}>Additional Notes:</label>
                     <textarea
                       id="notes"
@@ -214,20 +269,9 @@ const RecordAudit = ({ recordAudit, toggle, family_id }) => {
                       maxLength={255}
                     />
                   </div>
-                  {/* <div className="p-2">
-                    <label htmlFor="asdf" className={`block mb-2 text-${selectedTheme}-600 font-semibold`}>asdf:</label>
-                    <textarea
-                      id="asdf"
-                      name="asdf"
-                      placeholder="Additional relevant instructions given to the patient's care. . . . ."
-                      className="w-full rounded-lg text-xs md:text-sm lg:text-base"
-                      rows={4}
-                      maxLength={255}
-                    />
-                  </div> */}
                   <div className="flex justify-end items-center gap-2 mt-4">
                     <button onClick={(e) => { e.preventDefault(); toggle(); }} className={`py-2 px-4 hover:shadow-md font-semibold text-${selectedTheme}-600 rounded-lg hover:bg-${selectedTheme}-100 transition-colors duration-200`}>Cancel</button>
-                    <button type="submit" className={`py-2 px-4 hover:shadow-md font-semibold rounded-lg transition-colors duration-200 ${formData["Prescription Added"].notes ? `text-${selectedTheme}-100 bg-${selectedTheme}-600 hover:cursor-pointer shadow-sm` : `shadow-inner text-${selectedTheme}-100 bg-${selectedTheme}-400 hover:cursor-not-allowed`}`} disabled={!formData["Prescription Added"].notes}>{isLoading || error ? <Spinner /> : 'Create Prescription'}</button>
+                    <button type="submit" className={`py-2 px-4 hover:shadow-md font-semibold rounded-lg transition-colors duration-200 ${isFormComplete ? `text-${selectedTheme}-100 bg-${selectedTheme}-600 hover:cursor-pointer shadow-sm` : `shadow-inner text-${selectedTheme}-100 bg-${selectedTheme}-400 hover:cursor-not-allowed`}`} disabled={!isFormComplete}>{isLoading || error ? <Spinner /> : 'Create Prescription'}</button>
                   </div>
                 </form>
               )

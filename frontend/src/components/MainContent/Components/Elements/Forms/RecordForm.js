@@ -12,6 +12,7 @@ const RecordForm = ( { close, children } ) => {
   const [lastname, setLastName] = useState('');
   const [barangay, setBarangay] = useState('');
   const [gender, setGender] = useState('male');
+  const [birthdate, setBirthdate] = useState("2001-01-01")
   const [familyId, setFamilyId] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [dontCloseUponSubmission, setDontCloseUponSubmission] = useState(false);
@@ -54,6 +55,7 @@ const RecordForm = ( { close, children } ) => {
     setMiddleName('');
     setLastName('');
     setGender('male');
+    setBirthdate("2001-01-01");
     setBarangay('');
     setPhoneNumber('');
     setFamilyId(GenerateFamId(8).toUpperCase());
@@ -68,6 +70,7 @@ const RecordForm = ( { close, children } ) => {
       middleName: middlename,
       lastName: lastname,
       gender: gender,
+      birthdate: birthdate,
       barangay: barangay,
       family_id: `FAMILY_ID-${familyId}`,
       phone_number: phoneNumber,
@@ -135,42 +138,53 @@ const RecordForm = ( { close, children } ) => {
             value={lastname} onChange={(e) => setLastName(e.target.value)}
           />
         </div>
-        <fieldset className="flex flex-row gap-3 p-2">
-          <legend className="mr-4 text-xs md:text-sm lg:text-base">Choose a gender</legend>
-          <div className="flex items-center gap-2">
-            <Radio
-              id="male"
-              name="gender"
-              value="male"
-              className='text-xs md:text-sm lg:text-base'
-              checked={gender === 'male'}
-              onChange={() => setGender('male')}
+        <div className="flex gap-4 justify-between items-center">
+          <fieldset className="flex flex-row gap-3 p-2">
+            <legend className="mr-4 text-xs md:text-sm lg:text-base">Choose a gender</legend>
+            <div className="flex items-center gap-2">
+              <Radio
+                id="male"
+                name="gender"
+                value="male"
+                className='text-xs md:text-sm lg:text-base'
+                checked={gender === 'male'}
+                onChange={() => setGender('male')}
+              />
+              <Label htmlFor="male">Male</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Radio
+                id="female"
+                name="gender"
+                value="female"
+                className='text-xs md:text-sm lg:text-base'
+                checked={gender === 'female'}
+                onChange={() => setGender('female')}
+              />
+              <Label htmlFor="female">Female</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Radio
+                id="others"
+                name="gender"
+                value="others"
+                className='text-xs md:text-sm lg:text-base'
+                checked={gender === 'others'}
+                onChange={() => setGender('others')}
+              />
+              <Label htmlFor="others">Others</Label>
+            </div>
+          </fieldset>
+          <div className="grow">
+            <label htmlFor="birthdate" className='text-xs md:text-sm lg:text-base font-semibold'>Birthdate: </label>
+            <input 
+              type="date" 
+              className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`} 
+              value={birthdate}
+              onChange={(e) => setBirthdate(e.target.value)}
             />
-            <Label htmlFor="male">Male</Label>
           </div>
-          <div className="flex items-center gap-2">
-            <Radio
-              id="female"
-              name="gender"
-              value="female"
-              className='text-xs md:text-sm lg:text-base'
-              checked={gender === 'female'}
-              onChange={() => setGender('female')}
-            />
-            <Label htmlFor="female">Female</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <Radio
-              id="others"
-              name="gender"
-              value="others"
-              className='text-xs md:text-sm lg:text-base'
-              checked={gender === 'others'}
-              onChange={() => setGender('others')}
-            />
-            <Label htmlFor="others">Others</Label>
-          </div>
-        </fieldset>
+        </div>
         <div className='flex flex-col md:flex-row lg:flex-row gap-3'>
           <div className='basis-1/2'>
             <label htmlFor="barangay" className='text-xs md:text-sm lg:text-base font-semibold'>Barangay: </label>

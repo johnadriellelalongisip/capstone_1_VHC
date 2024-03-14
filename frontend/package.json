@@ -10,6 +10,7 @@
     "@testing-library/user-event": "^13.5.0",
     "autoprefixer": "^10.4.16",
     "chart.js": "^4.4.1",
+    "crypto-js": "^4.2.0",
     "faker": "^5.5.3",
     "flowbite-react": "^0.7.2",
     "postcss": "^8.4.32",

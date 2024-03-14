@@ -16,7 +16,7 @@ const Pharmacy = () => {
   const title = pathname.charAt(0).toUpperCase() + pathname.slice(1);
   
   // const [selectedTheme] = useContext(colorTheme);
-  const [medicines, setMedicines] = useState(null);
+  const [medicines, setMedicines] = useState([{}]);
   const [isProductAuditOpen, setIsProductAuditOpen] = useState(false);
   const productAuditRef = useRef(null);
   const [itemId, setItemId] = useState(null);

@@ -5,6 +5,7 @@ const userController = require('../controllers/userController');
 const staffController = require('../controllers/staffController');
 const recordController = require('../controllers/recordController');
 const pharmacyController = require('../controllers/pharmacyController');
+const queueController = require('../controllers/queueController');
 
 router.post('/addUsers', userController.addUser);
 router.get('/getUsers', userController.getUsers);
@@ -26,5 +27,10 @@ router.post('/addRecordHistory/:id', recordController.addRecordHistory);
 router.post('/submitCSVMedicinesRecord', pharmacyController.handleFile);
 router.get('/getPharmacyInventory', pharmacyController.getPharmacyInventory);
 router.get('/searchPharmacyInventory/:id', pharmacyController.searchPharmacyInventory);
+
+// QUEUE
+router.post('/addToQueue', queueController.addToQueue);
+router.get('/getQueue', queueController.getQueue);
+
 
 module.exports = router;

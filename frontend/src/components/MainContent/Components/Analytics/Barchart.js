@@ -1,23 +1,23 @@
-import { Chart as ChartJS, CategoryScale, LinearScale,PointElement, LineElement,  Tooltip, Legend } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement,  Tooltip, Legend } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
 import faker from 'faker';
 import { useContext } from 'react';
 import { colorTheme } from '../../../../App';
 import tinycolor from 'tinycolor2';
 
-const Barchart = () => {
+const Linechart = () => {
   const [selectedTheme] = useContext(colorTheme);
   const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   
   ChartJS.register(
     CategoryScale,
     LinearScale,
-    PointElement,
-    LineElement,
+    BarElement,
     Tooltip,
     Legend
   );
   const patientChartOptions = {
+    indexAxis: 'y',
     responsive: true,
     plugins: {
       legend: false,
@@ -30,12 +30,7 @@ const Barchart = () => {
         display: true,
       },
       y: {
-        display: false,
-      },
-    },
-    elements: {
-      line: {
-        tension: 0.4,
+        display: true,
       },
     },
   };
@@ -45,19 +40,15 @@ const Barchart = () => {
       {
         data: labels.map(() => faker.datatype.number({ min: 0, max: 1000 })),
         backgroundColor: tinycolor(selectedTheme).toRgbString(), 
-      },
-      {
-        data: labels.map(() => faker.datatype.number({ min: 0, max: 1000 })),
-        backgroundColor: tinycolor(selectedTheme).toRgbString(),
-      },
+      }
     ],
   };
 
   return (
     <>
-    <Line options={patientChartOptions} data={PatientData}/>
+    <Bar options={patientChartOptions} data={PatientData}/>
     </>
   );
 }
  
-export default Barchart;
+export default Linechart;

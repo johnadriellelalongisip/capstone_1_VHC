@@ -80,12 +80,12 @@ const PatientChart = ({ title }) => {
 
   return (
     <div className={`col-span-2 md:col-span-2 lg:col-span-1 p-2 md:p-3 lg:p-5 bg-${selectedTheme}-50 rounded-md`}>
-    <div className="flex flex-row justify-between items-center p-3">
-      <p className='text-base font-semibold'>{ title }</p>
-      <DropdownButton />
+      <div className="flex flex-row justify-between items-center p-3">
+        <p className='text-base font-semibold'>{ title }</p>
+        <DropdownButton />
+      </div>
+      <Line options={patientChartOptions} data={PatientData}/>
     </div>
-    <Line options={patientChartOptions} data={PatientData}/>
-  </div>
   );
 }
  
