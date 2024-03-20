@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 21, 2024 at 02:58 PM
+-- Generation Time: Mar 20, 2024 at 01:41 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -59,6 +59,7 @@ CREATE TABLE `municipal_citizens` (
   `citizen_middlename` varchar(255) NOT NULL,
   `citizen_lastname` varchar(255) NOT NULL,
   `citizen_gender` varchar(50) NOT NULL,
+  `citizen_birthdate` date NOT NULL,
   `citizen_barangay` varchar(255) NOT NULL,
   `date_added` datetime NOT NULL,
   `citizen_number` varchar(12) DEFAULT NULL,
@@ -69,10 +70,35 @@ CREATE TABLE `municipal_citizens` (
 -- Dumping data for table `municipal_citizens`
 --
 
-INSERT INTO `municipal_citizens` (`citizen_family_id`, `citizen_firstname`, `citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_barangay`, `date_added`, `citizen_number`, `citizen_history`) VALUES
-('FAMILY_ID-JQFGURWV', 'asdf', 'asdf', 'asdf', 'male', 'asdf', '2024-02-19 15:55:34', '123123123213', '{\"2024-02-19 15:55:34\": \"Record Added\", \"2024-02-19 16:09:36\": {\"Prescription Added\": {\"notes\": \"asdf\"}}, \"2024-02-19 16:09:42\": {\"Prescription Added\": {\"notes\": \"adsf\"}}, \"2024-02-19 16:09:45\": {\"Prescription Added\": {\"notes\": \"123132\"}}, \"2024-02-19 16:33:28\": {\"Prescription Added\": {\"notes\": \"asdffasd\"}}, \"2024-02-21 11:34:09\": {\"Prescription Added\": {\"notes\": \"lvmafhalef\"}}}'),
-('FAMILY_ID-TLDFOWRY', 'Dominic', 'El Nido', 'Medrano', 'male', 'Adrialuna', '2024-02-21 13:22:35', '639277764083', '{\"2024-02-21 13:22:35\": \"Record Added\"}'),
-('FAMILY_ID-ZHA1DO2R', 'Yuan', 'Tumbagahon', 'De Guzman', 'male', 'Sto. Niño', '2024-02-21 13:21:38', '09755330928', '{\"2024-02-21 13:21:38\": \"Record Added\", \"2024-02-21 13:23:21\": {\"Prescription Added\": {\"notes\": \"KAPUGE\"}}, \"2024-02-21 14:16:28\": {\"Prescription Added\": {\"notes\": \"kuyvkv\"}}, \"2024-02-21 14:25:16\": {\"Prescription Added\": {\"notes\": \"yjtfkychgvh,\"}}}');
+INSERT INTO `municipal_citizens` (`citizen_family_id`, `citizen_firstname`, `citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_birthdate`, `citizen_barangay`, `date_added`, `citizen_number`, `citizen_history`) VALUES
+('FAMILY_ID-WPY8ECKV', 'John Filhmar', 'De Los Reyes', 'Ola', 'male', '2001-02-21', 'Canubing 1', '2024-02-29 20:07:18', '09777353309', '{\"2024-02-29 20:07:18\": \"Record Added\"}'),
+('FAMILY_ID-YHVNHRJE', 'Jef', 'Donald', 'Ramos', 'male', '2003-05-12', 'Puerto', '2024-02-29 21:03:10', '09128241827', '{\"2024-02-29 21:03:10\": \"Record Added\"}');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `patient_queue`
+--
+
+CREATE TABLE `patient_queue` (
+  `queue_number` int NOT NULL,
+  `patient_name` varchar(50) NOT NULL,
+  `patient_gender` varchar(10) NOT NULL,
+  `barangay_from` varchar(50) NOT NULL,
+  `time_arrived` datetime NOT NULL,
+  `time_attended` datetime DEFAULT NULL,
+  `time_dismissed` datetime DEFAULT NULL,
+  `patient_status` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `patient_queue`
+--
+
+INSERT INTO `patient_queue` (`queue_number`, `patient_name`, `patient_gender`, `barangay_from`, `time_arrived`, `time_attended`, `time_dismissed`, `patient_status`) VALUES
+(1, 'Filhmar', 'male', 'Canubing 1', '2024-03-18 12:18:45', NULL, NULL, 'serving'),
+(2, 'Zabeth', 'male', 'Bucayao', '2024-03-18 12:31:12', NULL, NULL, 'serving'),
+(3, 'asdf', 'male', 'asdf', '2024-03-18 18:58:11', NULL, NULL, 'waiting');
 
 -- --------------------------------------------------------
 
@@ -89,6 +115,16 @@ CREATE TABLE `pharmacy_inventory` (
   `quantity_stockroom` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `item_logs` json NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `pharmacy_inventory`
+--
+
+INSERT INTO `pharmacy_inventory` (`item_id`, `item_name`, `unit_size`, `lot_no`, `exp_date`, `quantity_stockroom`, `item_logs`) VALUES
+(1, 'ACETYCISTEINE 600mg/tablet 20\'s', 'bx', NULL, NULL, 'sample data', '{\"2024-02-22 00:04:00\": \"Date Added\"}'),
+(2, 'ACICLOVIR 400mg/tabet 30\'s', '4_bxs', '37416', '2025-07-01', NULL, '{\"2024-02-22 00:04:00\": \"Date Added\"}'),
+(3, 'ALLOPURINOL 100mg/tablet 100\'s', '6_bxs', 'u-02038', '2026-03-01', NULL, '{\"2024-02-22 00:04:00\": \"Date Added\"}'),
+(4, 'ALLOPURINOL 300mg/tablet 100\'s', '3_bxs', 'ZKN209', '2025-10-01', NULL, '{\"2024-02-22 00:04:00\": \"Date Added\"}');
 
 -- --------------------------------------------------------
 
@@ -128,6 +164,12 @@ ALTER TABLE `municipal_citizens`
   ADD PRIMARY KEY (`citizen_family_id`);
 
 --
+-- Indexes for table `patient_queue`
+--
+ALTER TABLE `patient_queue`
+  ADD PRIMARY KEY (`queue_number`);
+
+--
 -- Indexes for table `pharmacy_inventory`
 --
 ALTER TABLE `pharmacy_inventory`
@@ -150,10 +192,16 @@ ALTER TABLE `medicalstaff`
   MODIFY `staff_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
+-- AUTO_INCREMENT for table `patient_queue`
+--
+ALTER TABLE `patient_queue`
+  MODIFY `queue_number` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `pharmacy_inventory`
 --
 ALTER TABLE `pharmacy_inventory`
-  MODIFY `item_id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `item_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=150;
 
 --
 -- AUTO_INCREMENT for table `users`
