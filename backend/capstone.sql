@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Mar 20, 2024 at 01:41 AM
+-- Generation Time: Apr 03, 2024 at 04:43 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -44,8 +44,10 @@ CREATE TABLE `medicalstaff` (
 --
 
 INSERT INTO `medicalstaff` (`staff_id`, `staff_username`, `staff_password`, `staff_email`, `staff_role`, `account_created_at`, `account_last_updated_at`, `staff_last_activity`, `staff_history`) VALUES
-(24, 'asdfasdf', '$2b$10$GGSae1g9bGYbAS67GkR25.0bMyIBEuGxx8bo.d.VBTqhuaiiNsrL6', 'asdfasdf@asdf', 'USER', '2024-02-17 13:05:01', '2024-02-17 13:05:01', '2024-02-17 13:05:01', '{\"account_created_at\": \"2024-02-17 13:05:01\", \"2024-02-17 21:17:41\": \"Logged In\"}'),
-(25, 'asdfasdf', '$2b$10$cUwKYyQnyof9j830Oa2rF.wNMcUSvE4pMl7/y5CsNN3VjuEZ..n8W', 'asdfasdf@asdf', 'USER', '2024-02-17 21:07:48', '2024-02-17 21:07:48', '2024-02-17 21:07:48', '{\"account_created_at\": \"2024-02-17 21:07:48\"}');
+(24, 'asdfasdf', '$2b$10$GGSae1g9bGYbAS67GkR25.0bMyIBEuGxx8bo.d.VBTqhuaiiNsrL6', 'asdfasdf@asdf', 'USER', '2024-02-17 13:05:01', '2024-02-17 13:05:01', '2024-02-17 13:05:01', '{\"account_created_at\": \"2024-02-17 13:05:01\", \"2024-02-17 21:17:41\": \"Logged In\", \"2024-03-26 19:35:56\": \"Logged In\", \"2024-03-26 19:36:06\": \"Logged In\", \"2024-03-26 19:36:08\": \"Logged In\", \"2024-03-26 20:10:27\": \"Logged In\", \"2024-03-26 20:40:52\": \"Logged In\", \"2024-03-27 07:05:14\": \"Logged In\", \"2024-03-27 07:07:43\": \"Logged In\", \"2024-03-27 07:26:16\": \"Logged In\", \"2024-03-27 07:28:58\": \"Logged In\", \"2024-03-27 07:29:28\": \"Logged In\", \"2024-03-27 07:30:20\": \"Logged In\", \"2024-03-27 07:30:40\": \"Logged In\", \"2024-03-27 07:31:02\": \"Logged In\", \"2024-03-29 10:19:57\": \"Logged In\", \"2024-03-29 10:31:03\": \"Logged In\", \"2024-03-29 10:43:29\": \"Logged In\", \"2024-03-29 10:45:06\": \"Logged In\", \"2024-03-29 11:04:55\": \"Logged In\", \"2024-03-29 11:10:20\": \"Logged In\", \"2024-03-29 11:11:22\": \"Logged In\", \"2024-03-29 11:34:47\": \"Logged In\", \"2024-03-29 11:35:28\": \"Logged In\", \"2024-03-29 11:36:36\": \"Logged In\", \"2024-03-29 12:36:54\": \"Logged In\", \"2024-03-29 13:13:55\": \"Logged In\", \"2024-03-29 13:14:16\": \"Logged In\", \"2024-03-29 13:44:35\": \"Logged In\", \"2024-03-29 13:44:58\": \"Logged In\", \"2024-03-29 13:48:35\": \"Logged In\", \"2024-03-29 13:51:14\": \"Logged In\", \"2024-03-29 14:12:04\": \"Logged In\", \"2024-03-29 14:13:51\": \"Logged In\", \"2024-03-29 15:50:33\": \"Logged In\", \"2024-03-29 15:52:50\": \"Logged In\", \"2024-03-29 15:53:15\": \"Logged In\", \"2024-03-29 15:54:05\": \"Logged In\"}'),
+(25, 'asdfasdf', '$2b$10$cUwKYyQnyof9j830Oa2rF.wNMcUSvE4pMl7/y5CsNN3VjuEZ..n8W', 'asdfasdf@asdf', 'USER', '2024-02-17 21:07:48', '2024-02-17 21:07:48', '2024-02-17 21:07:48', '{\"account_created_at\": \"2024-02-17 21:07:48\"}'),
+(26, 'asdfasdf', '$2b$10$e6wxnD6NDeeldb/pVLQGeOvtkd4eRfvIUNeQu9YdnH16DoFfbWgCu', 'olajohnfilhmar@gmail.com', 'USER', '2024-03-26 19:35:17', '2024-03-26 19:35:17', '2024-03-26 19:35:17', '{\"account_created_at\": \"2024-03-26 19:35:17\"}'),
+(27, 'asdfasdf', '$2b$10$QTJb8w6uI.qvGK6TTHzhZeKLb7FYYS.3bAfSHJsXyy696W1lwfF9y', 'asdf@asdf.com', 'USER', '2024-03-26 19:35:54', '2024-03-26 19:35:54', '2024-03-26 19:35:54', '{\"account_created_at\": \"2024-03-26 19:35:54\"}');
 
 -- --------------------------------------------------------
 
@@ -88,17 +90,19 @@ CREATE TABLE `patient_queue` (
   `time_arrived` datetime NOT NULL,
   `time_attended` datetime DEFAULT NULL,
   `time_dismissed` datetime DEFAULT NULL,
-  `patient_status` varchar(50) NOT NULL
+  `patient_status` varchar(50) NOT NULL,
+  `existing_record` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `patient_queue`
 --
 
-INSERT INTO `patient_queue` (`queue_number`, `patient_name`, `patient_gender`, `barangay_from`, `time_arrived`, `time_attended`, `time_dismissed`, `patient_status`) VALUES
-(1, 'Filhmar', 'male', 'Canubing 1', '2024-03-18 12:18:45', NULL, NULL, 'serving'),
-(2, 'Zabeth', 'male', 'Bucayao', '2024-03-18 12:31:12', NULL, NULL, 'serving'),
-(3, 'asdf', 'male', 'asdf', '2024-03-18 18:58:11', NULL, NULL, 'waiting');
+INSERT INTO `patient_queue` (`queue_number`, `patient_name`, `patient_gender`, `barangay_from`, `time_arrived`, `time_attended`, `time_dismissed`, `patient_status`, `existing_record`) VALUES
+(1, 'Filhmar', 'male', 'Canubing 1', '2024-03-18 12:18:45', NULL, NULL, 'serving', NULL),
+(2, 'Zabeth', 'male', 'Bucayao', '2024-03-18 12:31:12', NULL, NULL, 'serving', NULL),
+(3, 'asdf', 'male', 'asdf', '2024-03-18 18:58:11', NULL, NULL, 'waiting', NULL),
+(4, 'asdffasdf', 'male', 'asdfasd', '2024-04-03 09:44:29', NULL, NULL, 'waiting', NULL);
 
 -- --------------------------------------------------------
 
@@ -167,7 +171,8 @@ ALTER TABLE `municipal_citizens`
 -- Indexes for table `patient_queue`
 --
 ALTER TABLE `patient_queue`
-  ADD PRIMARY KEY (`queue_number`);
+  ADD PRIMARY KEY (`queue_number`),
+  ADD KEY `constraint_patient_queue_existing_record_FK_municipal_citizens` (`existing_record`);
 
 --
 -- Indexes for table `pharmacy_inventory`
@@ -189,13 +194,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `medicalstaff`
 --
 ALTER TABLE `medicalstaff`
-  MODIFY `staff_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `staff_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `patient_queue`
 --
 ALTER TABLE `patient_queue`
-  MODIFY `queue_number` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `queue_number` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `pharmacy_inventory`
@@ -208,6 +213,16 @@ ALTER TABLE `pharmacy_inventory`
 --
 ALTER TABLE `users`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `patient_queue`
+--
+ALTER TABLE `patient_queue`
+  ADD CONSTRAINT `constraint_patient_queue_existing_record_FK_municipal_citizens` FOREIGN KEY (`existing_record`) REFERENCES `municipal_citizens` (`citizen_family_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

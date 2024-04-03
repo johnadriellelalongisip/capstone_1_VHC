@@ -47,7 +47,7 @@ class StaffController {
       const password = req.body.password;
       const userData = await dbModel.query('SELECT staff_id, staff_password, staff_history FROM medicalstaff WHERE staff_username = ?', username);
       if (userData.length === 0) {
-        res.status(401).json({ status: 401, message: 'Invalid credentials' });
+        res.status(401).json({ status: 401, message: 'No user found.' });
         return;
       }
       const storedHashedPassword = userData[0].staff_password;
@@ -64,8 +64,8 @@ class StaffController {
             response: updateHistoryResponse,
             logs: newData
         });
-    } else {
-        res.status(401).json({ status: 401, message: 'Invalid credentials' });
+      } else {
+        res.status(401).json({ status: 401, message: 'Wrong password, retry.' });
       }
       dbModel.releaseConnection(connection);
     } catch (error) {

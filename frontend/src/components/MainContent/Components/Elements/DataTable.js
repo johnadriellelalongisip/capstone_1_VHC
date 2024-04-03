@@ -153,13 +153,22 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
   return (
     <>
       <div className="flex justify-between items-center p-4 overflow-hidden">
-        <button 
-          className={`text-xs md:text-sm lg:text-sm whitespace-nowrap font-semibold ${!isLoading && !error ? `text-${selectedTheme}-50 bg-${selectedTheme}-600 drop-shadow-md` : `text-${selectedTheme}-600 bg-${selectedTheme}-200 shadow-inner`} rounded-lg p-2`}
-          onClick={() => toggleForm()}
-          disabled={isLoading || error}
-        >
-          Add New Data
-        </button>
+        <div className="flex justify-center items-center gap-3">
+          <button 
+            className={`text-xs md:text-sm lg:text-sm whitespace-nowrap font-semibold ${!isLoading && !error ? `text-${selectedTheme}-50 bg-${selectedTheme}-600 drop-shadow-md` : `text-${selectedTheme}-600 bg-${selectedTheme}-200 shadow-inner`} rounded-lg p-2`}
+            onClick={() => toggleForm()}
+            disabled={isLoading || error}
+          >
+            Import File
+          </button>
+          <button 
+            className={`text-xs md:text-sm lg:text-sm whitespace-nowrap font-semibold ${!isLoading && !error ? `text-${selectedTheme}-50 bg-${selectedTheme}-600 drop-shadow-md` : `text-${selectedTheme}-600 bg-${selectedTheme}-200 shadow-inner`} rounded-lg p-2`}
+            onClick={() => toggleForm()}
+            disabled={isLoading || error}
+          >
+            Add New Data
+          </button>
+        </div>
         <div 
           className={`flex`}
         >

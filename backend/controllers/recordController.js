@@ -114,6 +114,35 @@ class RecordController {
     }
   }
 
+  async findFirstName(req, res) {
+    try {
+      const connection = await dbModel.getConnection();
+      const query = "SELECT `citizen_family_id`, CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) AS citizen_full_name, `citizen_gender` FROM `municipal_citizens` WHERE CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) LIKE CONCAT('%', ?, '%')";
+      const nameInput = req.params.id;
+      const response = await dbModel.query(query, nameInput);
+      dbModel.releaseConnection(connection);
+      if (response.length !== 0) {
+        res.status(200).json({
+          status: 200,
+          message: "Data retrieved successfully",
+          data: response,
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          message: "Nothing found",
+          data: response,
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        status: 500,
+        message: error.message,
+        error: error.message
+      });
+    }
+  }
+
 }
 
 module.exports = new RecordController();

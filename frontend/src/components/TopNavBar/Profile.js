@@ -3,14 +3,24 @@ import { IoMdSettings } from "react-icons/io";
 import { MdHelp, MdKeyboardArrowRight } from "react-icons/md";
 import { ImExit } from "react-icons/im";
 import { useContext, useState } from "react";
-import { colorTheme } from "../../App";
+import { colorTheme, isLoggedInContext } from "../../App";
 import useWindowSize from "../../hooks/useWindowSize";
 import OptionButton from "./OptionButton";
+import { redirect, useNavigate } from "react-router-dom";
 
 const Profile = ({ prof, toggle, toggleOptions, toggleHelp }) => {
+  // eslint-disable-next-line no-unused-vars
+  const [isLoggedIn, setIsLoggedIn] = useContext(isLoggedInContext);
+  const navigate = useNavigate();
   const [selectedTheme] = useContext(colorTheme);
   const [rotateSetting, setRotateSetting] = useState(false);
   const {avatarSize} = useWindowSize();
+  
+  const Logout = () => {
+    navigate('/login');
+    setIsLoggedIn(false);
+    localStorage.setItem('isLoggedIn',false);
+  };
 
   return (
     <dialog ref={prof} className={`rounded-lg mr-0 fixed right-4 md:right-10 lg:right-14 top-20 bg-${selectedTheme}-100 drop-shadow-lg`}>
@@ -34,7 +44,7 @@ const Profile = ({ prof, toggle, toggleOptions, toggleHelp }) => {
               </div>
             </button>
             <OptionButton Icon={MdHelp} label={'Help & Support'} isExtending={true} buttonClick={() => {toggleHelp(); toggle();}} />
-            <OptionButton Icon={ImExit} label={'Logout'} isExtending={false} buttonClick={() => console.log('clicked')} />
+            <OptionButton Icon={ImExit} label={'Logout'} isExtending={false} buttonClick={() => Logout()} />
           </div>
         </div>
     </dialog>

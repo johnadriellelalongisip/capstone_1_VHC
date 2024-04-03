@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, redirect } from "react-router-dom";
 import { createContext, useEffect, useMemo, useRef, useState } from "react";
 
 import Notfound from './components/Notfound';
@@ -19,6 +19,7 @@ import Register from "./components/Register.js";
 
 export const colorTheme = createContext();
 export const messaging = createContext();
+export const isLoggedInContext = createContext();
 
 const AppContent = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -71,8 +72,6 @@ const AppContent = () => {
             </div>
             <div className={`basis-11/12 h-auto bg-${selectedTheme}-100 overflow-y-hidden`}>
               <Routes>
-                <Route path="login" element={<Login />}/>
-                <Route path="register" element={<Register />}/>
                 <Route path='dashboard' element={<Dashboard />}/>
                 <Route path='users' element={<Users />}/>
                 <Route path='home' element={<Home />}/>
@@ -92,23 +91,36 @@ const AppContent = () => {
   );
 }
 
-// const App = () => {
-//   const [isLoggedIn, setIsLoggedIn] = useState(true);
+const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn'));
+  useEffect(() => {
+    if (window.location.pathname !== '/login' && !localStorage.getItem('isLoggedIn')) {
+      redirect('/login');
+    }
+    setIsLoggedIn(localStorage.getItem('isLoggedIn'));
+  }, [isLoggedIn]);
 
-//   // some functions to handle session from the backend server
+  if (!isLoggedIn) {
+    return (
+      <BrowserRouter basename="/">
+        <Routes>
+          <Route path="login" element={
+            <isLoggedInContext.Provider value={[isLoggedIn, setIsLoggedIn]}><Login /></isLoggedInContext.Provider>
+          }/>
+          <Route path="register" element={<Register />}/>
+          <Route exact path="*" element={
+            <isLoggedInContext.Provider value={[isLoggedIn, setIsLoggedIn]}><Login /></isLoggedInContext.Provider>
+          } />
+        </Routes>
+      </BrowserRouter>
+    )
+  } else {
+    return (
+      <isLoggedInContext.Provider value={[isLoggedIn, setIsLoggedIn]}>
+        <AppContent />
+      </isLoggedInContext.Provider>
+    )
+  }
+}
 
-//   if (!isLoggedIn) {
-//     return (
-//       <BrowserRouter basename="/">
-//         <Routes>
-//           <Route path="login" element={<Login />}/>
-//           <Route path="register" element={<Register />}/>
-//         </Routes>
-//       </BrowserRouter>
-//     )
-//   } else if (isLoggedIn) {
-//     <AppContent />
-//   }
-// }
-
-export default AppContent;
+export default App;

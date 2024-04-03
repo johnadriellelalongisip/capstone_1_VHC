@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import axios from 'axios';
 
 const useQuery = () => {
   const BASE_URL = process.env.REACT_APP_BASE_URL;
@@ -7,107 +8,90 @@ const useQuery = () => {
   const [error, setError] = useState(null);
   const [searchResults, setSearchResults] = useState(null);
 
-  const headers = (method, body, token) => {
-    const baseHeaders = {
-      method: method,
+  const headers = (token) => {
+    return {
       headers: {
         'Content-Type': 'application/json',
+        Authorization: token ? `Bearer ${token}` : undefined,
       },
     };
-    if (body) {
-      baseHeaders.body = JSON.stringify(body);
-    }
-    if (token) {
-      baseHeaders.headers.authorization = `Bearer ${token}`;
-    }
-    return baseHeaders;
   };
 
-  const fetchData = async ( route ) => {
+  const fetchData = async (route, token) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}${route}`, headers('GET'));
-      const data = await response.json();
-      if (data.status === 500) {
-        throw new Error(data.message);
-      }
-      setResponse(data);
+      const response = await axios.get(`${BASE_URL}${route}`, headers(token));
+      setResponse(response.data);
       setIsLoading(false);
     } catch (error) {
-      if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
-        setError('No internet connection');
-      } else {
-        setError(`Error: ${error.message}`);
-      }
-      setIsLoading(false);
+      handleError(error);
     }
   };
 
-  const addData = async ( route, payload ) => {
+  const addData = async (route, payload, token) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}${route}`, headers('POST', payload));
-      if (!response) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      setResponse(data);
-      setIsLoading(false); 
+      const response = await axios.post(`${BASE_URL}${route}`, payload, headers(token));
+      setResponse(response.data);
+      setIsLoading(false);
     } catch (error) {
-      setError(`Something have gone wrong`, error);
-      setIsLoading(false); 
+      handleError(error);
     }
   };
 
-  // NOTE TO SELF: set up for socketIO to check whether the searchResults.id still exists to set the searchResults to null again
-  const editData = async ( route, payload, id ) => {
+  const editData = async (route, payload, id, token) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}${route}/${id}`, headers('POST', payload));
-      if (!response) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      setResponse(data);
+      const response = await axios.post(`${BASE_URL}${route}/${id}`, payload, headers(token));
+      setResponse(response.data);
       setIsLoading(false);
     } catch (error) {
-      setError(`Something have gone wrong`, error);
-      setIsLoading(false);
+      handleError(error);
     }
-  }
+  };
 
-  const deleteData = async ( route, id ) => {
+  const deleteData = async (route, id, token) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}${route}`, headers('POST', id));
-      if (!response) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      setResponse(data);
+      const response = await axios.post(`${BASE_URL}${route}`, id, headers(token));
+      setResponse(response.data);
       setIsLoading(false);
     } catch (error) {
-      setError(`Something have gone wrong`, error);
-      setIsLoading(false);
+      handleError(error);
     }
-  }
+  };
 
-  const searchData = async( route, id ) => {
+  const searchData = async (route, id, token) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}${route}/${id}`, headers('GET'));
-      if (!response) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      setSearchResults(data.data[0]);
+      const response = await axios.get(`${BASE_URL}${route}/${id}`, headers(token));
+      setSearchResults(response.data.data[0]);
       setIsLoading(false);
     } catch (error) {
-      setError(`Something have gone wrong`, error);
-      setIsLoading(false);
+      handleError(error);
     }
-  }
-  
+  };
+
+  const searchItems = async (route, id, token) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`${BASE_URL}${route}/${id}`, headers(token));
+      setSearchResults(response.data);
+      setIsLoading(false);
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  const handleError = (error) => {
+    if (!error.response) {
+      setError('No internet connection');
+    } else {
+      setError(`Error: ${error.message}`);
+    }
+    setIsLoading(false);
+  };
+
   return {
     isLoading,
     response,
@@ -119,6 +103,7 @@ const useQuery = () => {
     editData,
     deleteData,
     searchData,
+    searchItems,
   };
 };
 

@@ -11,8 +11,11 @@ class UserController {
       dbModel.releaseConnection(connection);
       res.status(200).json({ response, data });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      res.status(500).json({
+        status: 500,
+        message: error.message,
+        error: error
+      })
     }
   }
 
@@ -23,8 +26,11 @@ class UserController {
       dbModel.releaseConnection(connection);
       res.status(200).json({ data });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      res.status(500).json({
+        status: 500,
+        message: error.message,
+        error: error
+      })
     }
   }
 
@@ -36,8 +42,11 @@ class UserController {
       dbModel.releaseConnection(connection);
       res.status(202).json({ data });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      res.status(500).json({
+        status: 500,
+        message: error.message,
+        error: error
+      })
     }
   }
 
@@ -50,8 +59,11 @@ class UserController {
       dbModel.releaseConnection(con);
       res.status(202).json({ response,data });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      res.status(500).json({
+        status: 500,
+        message: error.message,
+        error: error
+      })
     }
   }
 
@@ -69,8 +81,11 @@ class UserController {
       dbModel.releaseConnection(con);
       res.status(202).json({ response, data });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      res.status(500).json({
+        status: 500,
+        message: error.message,
+        error: error
+      })
     }
   }
 }

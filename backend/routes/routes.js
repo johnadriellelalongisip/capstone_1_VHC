@@ -14,14 +14,15 @@ router.post('/deleteUser', userController.deleteUser);
 router.post('/editUser', userController.editUser);
 
 // USER AUTHENTICATION/REGISTRATION
-// router.post('/addStaff', staffController.addStaff);
-// router.post('/authStaff', staffController.authStaff);
+router.post('/addStaff', staffController.addStaff);
+router.post('/authStaff', staffController.authStaff);
 
 // RECORDS
 router.post('/addRecord', recordController.addRecord);
 router.get('/getRecords', recordController.getRecords);
 router.get('/findRecord/:id', recordController.findRecord);
 router.post('/addRecordHistory/:id', recordController.addRecordHistory);
+router.get('/findFirstName/:id', recordController.findFirstName);
 
 // PHARMACY
 router.post('/submitCSVMedicinesRecord', pharmacyController.handleFile);
