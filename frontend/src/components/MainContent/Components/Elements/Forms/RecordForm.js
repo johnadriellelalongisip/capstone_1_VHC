@@ -17,6 +17,40 @@ const RecordForm = ( { close, children } ) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [dontCloseUponSubmission, setDontCloseUponSubmission] = useState(false);
   const { mysqlTime } = useCurrentTime();
+  const barangays = [
+    'Alcate',
+    'Antonino (Malinao)',
+    'Babangonan',
+    'Bagong Buhay',
+    'Bagong Silang',
+    'Bambanin',
+    'Bethel',
+    'Canaan',
+    'Concepcion',
+    'Duongan',
+    'Leido',
+    'Loyal',
+    'Mabini',
+    'Macatoc',
+    'Malabo',
+    'Merit',
+    'Ordovilla',
+    'Pakyas',
+    'Poblacion I',
+    'Poblacion II',
+    'Poblacion III',
+    'Poblacion IV',
+    'Sampaguita',
+    'San Antonio',
+    'San Cristobal',
+    'San Gabriel',
+    'San Gelacio',
+    'San Isidro',
+    'San Juan',
+    'San Narciso',
+    'Urdaneta',
+    'Villa Cerveza',
+  ];
 
   const { response, isLoading, error, addData } = useQuery();
 
@@ -195,7 +229,14 @@ const RecordForm = ( { close, children } ) => {
               type="text"
               placeholder="Enter barangay. . . . ." 
               value={barangay} onChange={(e) => setBarangay(e.target.value)} 
+              list='barangaySuggestions'
+              autoComplete='off'
             />
+            <datalist id="barangaySuggestions">
+              {barangay.length >= 4 && barangays.map((bangay, index) => (
+                <option key={index} value={bangay} onClick={() => setBarangay(bangay)} />
+              ))}
+            </datalist>
           </div>
           <div className='basis-1/2'>
             <label htmlFor="phoneNumber" className='text-xs md:text-sm lg:text-base font-semibold'>Phone Number: </label>

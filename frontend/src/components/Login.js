@@ -101,7 +101,7 @@ function Login() {
                 minLength={8}
                 autoComplete="off"
               />
-            <div className="hidden">
+            {/* <div className="hidden">
               <label className="font-semibold text-sky-900" htmlFor="username">Honeypot:</label>
               <input 
                 required
@@ -114,7 +114,7 @@ function Login() {
                 minLength={8}
                 autoComplete="honeypot"
               />
-            </div>
+            </div> */}
               <button className="absolute right-0 p-1 drop-shadow-md" onClick={(e) => {e.preventDefault(); setPasswordVisibility(prev => !prev);}}>
                 {
                   passwordVisibility ? (

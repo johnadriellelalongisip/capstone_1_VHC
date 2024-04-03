@@ -15,9 +15,45 @@ const AddToQueue = ({ ATref, ATonClick }) => {
     barangay: "",
   });
   const [isNameFocused, setIsNameFocused] = useState(false);
+  const [isNameSelected, setIsNameSelected] = useState(false);
+  const [isBarangayValid, setIsBarangayValid] = useState(false);
   const [gender, setGender] = useState('male');
   const [status, setStatus] = useState('waiting');
   const [isChecked, setIsChecked] = useState(true);
+  const barangays = [
+    'Alcate',
+    'Antonino (Malinao)',
+    'Babangonan',
+    'Bagong Buhay',
+    'Bagong Silang',
+    'Bambanin',
+    'Bethel',
+    'Canaan',
+    'Concepcion',
+    'Duongan',
+    'Leido',
+    'Loyal',
+    'Mabini',
+    'Macatoc',
+    'Malabo',
+    'Merit',
+    'Ordovilla',
+    'Pakyas',
+    'Poblacion I',
+    'Poblacion II',
+    'Poblacion III',
+    'Poblacion IV',
+    'Sampaguita',
+    'San Antonio',
+    'San Cristobal',
+    'San Gabriel',
+    'San Gelacio',
+    'San Isidro',
+    'San Juan',
+    'San Narciso',
+    'Urdaneta',
+    'Villa Cerveza',
+  ];
 
   function cleanUp() {
     setPayload({
@@ -29,7 +65,11 @@ const AddToQueue = ({ ATref, ATonClick }) => {
   function setNewSuggestions(newData) {
     setSuggestions((prevSuggestions) => {
       const newSuggestions = newData.map((data) => String(data.citizen_full_name));
-      return [...prevSuggestions, ...newSuggestions];
+      if (newSuggestions !== null || newSuggestions !== undefined) {
+        return [...prevSuggestions, ...newSuggestions];
+      } else {
+        return null;
+      }
     });
   }
   
@@ -45,6 +85,12 @@ const AddToQueue = ({ ATref, ATonClick }) => {
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payload.name]);
+  
+  useEffect(() => {
+    setIsBarangayValid(barangays.includes(payload.barangay.charAt(0).toUpperCase() + payload.barangay.slice(1)));
+    console.log(isBarangayValid)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [payload.barangay]);
   
   useEffect(() => {
     if (searchResults?.data) {
@@ -66,29 +112,40 @@ const AddToQueue = ({ ATref, ATonClick }) => {
   const handleEnter = (event) => {
     if (event.key === 'Enter' && isNameFocused) {
       searchItems('findFirstName', String(payload.name));
-      setNewSuggestions();
-      console.log(suggestions)
+      setNewSuggestions([]);
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setPayload((prevFormData) => ({
-        ...prevFormData,
-        [name]: value,
-        time_added: String(mysqlTime),
-        status: status,
-        gender: gender
-    }));
+    const specialCharacterPattern = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g;
+    if (!specialCharacterPattern.test(value)) {
+      setPayload((prevFormData) => ({
+          ...prevFormData,
+          [name]: value,
+          time_added: String(mysqlTime),
+          status: status,
+          gender: gender
+      }));
+    } else {
+      e.preventDefault();
+    }
   };
 
-  const handleSelect = (value) => {
+  const handleSelectName = (value) => {
     setPayload((prevFormData) => ({
       ...prevFormData,
-      name: value
+      name: value,
+    }));
+    setIsNameSelected(true);
+  };
+  const handleSelectBarangay = (value) => {
+    setPayload((prevFormData) => ({
+      ...prevFormData,
+      barangay: value
     }));
   };
-
+  
   return (
     <dialog ref={ATref} className={`rounded-lg bg-gray-100 drop-shadow-lg w-80 md:w-[500px] lg:w-[600px]`}>
       <div className="flex flex-col text-xs md:text-sm lg:text-base">
@@ -98,7 +155,7 @@ const AddToQueue = ({ ATref, ATonClick }) => {
             <MdPeople className='w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8' />
             <strong className="font-semibold drop-shadow-md text-sm md:text-base lg:text-lg">Add to query<span className={`ml-2 text-${selectedTheme}-500 font-bold`}>Patient's Number: 55</span></strong>
           </div>
-          <button onClick={() => ATonClick()} className={`transition-colors duration-200 rounded-3xl p-1 bg-${selectedTheme}-300 hover:bg-${selectedTheme}-400 active:bg-${selectedTheme}-200`}>
+          <button onClick={() => {ATonClick(); cleanUp();}} className={`transition-colors duration-200 rounded-3xl p-1 bg-${selectedTheme}-300 hover:bg-${selectedTheme}-400 active:bg-${selectedTheme}-200`}>
             <MdClose className='w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7' />
           </button>
         </div>
@@ -116,14 +173,14 @@ const AddToQueue = ({ ATref, ATonClick }) => {
               onChange={handleChange} 
               className={`text-xs md:text-sm lg:text-base grow p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent`}
               autoComplete="off"
-              onFocus={(e) => {setIsNameFocused(true); searchItems('findFirstName', e.target.value)}}
+              onFocus={(e) => {setIsNameFocused(true); payload.name.length && isNameSelected && searchItems('findFirstName', e.target.value);} }
               onBlur={() => {setIsNameFocused(false); setSuggestions([]);}}
               onKeyDown={handleEnter}
               list="nameResults"
             />
             <datalist id="nameResults">
               {suggestions && suggestions.slice(0, 5).map((name, index) => (
-                <option key={index} value={name} onClick={() => handleSelect(name)} />
+                <option key={index} value={name} onClick={() => handleSelectName(name)} />
               ))}
             </datalist>
           </div>
@@ -139,7 +196,13 @@ const AddToQueue = ({ ATref, ATonClick }) => {
               onChange={handleChange} 
               className={`text-xs md:text-sm lg:text-base grow p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent`} 
               autoComplete="off"
+              list="barangaySuggestions"
             />
+            <datalist id="barangaySuggestions">
+              {payload.barangay.length >= 4 && barangays.map((barangay, index) => (
+                <option key={index} value={barangay} onClick={() => handleSelectBarangay(barangay)} />
+              ))}
+            </datalist>
           </div>
           <fieldset className="flex flex-row gap-3 p-2">
             <legend className="mr-4 text-xs md:text-sm lg:text-base">Choose a gender</legend>
@@ -213,7 +276,7 @@ const AddToQueue = ({ ATref, ATonClick }) => {
               <Label htmlFor="emergency">Emergency</Label>
             </div>
           </fieldset>
-          <button type="submit" className={`py-2 px-4 hover:shadow-md font-semibold rounded-lg transition-colors duration-200 ${payload.name && payload.barangay ? `text-${selectedTheme}-100 bg-${selectedTheme}-600 hover:cursor-pointer shadow-sm` : `shadow-inner text-${selectedTheme}-100 bg-${selectedTheme}-400 hover:cursor-not-allowed`}`} disabled={!payload.name && !payload.barangay}>{isLoading || error ? <Spinner /> : 'Submit Edit'}</button>
+          <button type="submit" className={`py-2 px-4 hover:shadow-md font-semibold rounded-lg transition-colors duration-200 ${payload.name && payload.barangay && isBarangayValid ? `text-${selectedTheme}-100 bg-${selectedTheme}-600 hover:cursor-pointer shadow-sm` : `shadow-inner text-${selectedTheme}-100 bg-${selectedTheme}-400 hover:cursor-not-allowed`}`} disabled={!payload.name || !isBarangayValid}>{isLoading || error ? <Spinner /> : 'Submit Edit'}</button>
           <div className="flex items-center justify-end gap-2">
             <Checkbox
               id="accept"
