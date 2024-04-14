@@ -100,17 +100,28 @@ const FeedbackForm = ({ feedbackRef, toggle }) => {
     area: '',
   });
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === 'imageReport' ? files[0] : value
+      [name]: value
     });
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     window.location.reload(true);
-  };  
+  };
+  const toggleClose = (e) => {
+    e.preventDefault();
+    if (formData.details || formData.area) {
+      
+    } else {
+      toggle();
+      setFormData({
+        details: '',
+        area: '',
+      });
+    }
+  };
 
   //  HANDLE SPAM BY ONLY MAKING THE USER SUBMIT ONLY ONE REPORT FOR THE ADMIN TO ACCEPT FOR THE USER REQUEST TO REFRESH BACK TO 1
   return (
@@ -147,10 +158,10 @@ const FeedbackForm = ({ feedbackRef, toggle }) => {
             </select>
           </div>
           <div className={`p-2`}>
-            <label htmlFor="feedback" className={`block mb-2 text-${selectedTheme}-600 font-semibold`}>Details</label>
+            <label htmlFor="details" className={`block mb-2 text-${selectedTheme}-600 font-semibold`}>Details</label>
             <textarea
-              id="feedback"
-              name="feedback"
+              id="details"
+              name="details"
               value={formData.details}
               onChange={handleChange}
               placeholder="Share what you want. . . . ."
@@ -163,7 +174,7 @@ const FeedbackForm = ({ feedbackRef, toggle }) => {
             Let us know if you have ideas that can help make our system better. If you need help with solving a specific problem or if you think that there are things that can further have some improvement. Share your ideas with us.
           </p>
           <div className="flex justify-end items-center gap-2 mt-4">
-            <button onClick={(e) => { e.preventDefault(); toggle(); }} className={`py-2 px-4 hover:shadow-md font-semibold text-${selectedTheme}-600 rounded-lg hover:bg-${selectedTheme}-100 transition-colors duration-200`}>Cancel</button>
+            <button onClick={toggleClose} className={`py-2 px-4 hover:shadow-md font-semibold text-${selectedTheme}-600 rounded-lg hover:bg-${selectedTheme}-100 transition-colors duration-200`}>Cancel</button>
             <button type="submit" className={`py-2 px-4 hover:shadow-md font-semibold rounded-lg transition-colors duration-200 ${formData.details && formData.area ? `text-${selectedTheme}-100 bg-${selectedTheme}-600 hover:cursor-pointer shadow-sm` : `shadow-inner text-${selectedTheme}-200 bg-${selectedTheme}-500 hover:cursor-not-allowed`}`} disabled={!formData.details && !formData.area}>Submit Feedback</button>
           </div>
         </form>

@@ -6,7 +6,7 @@ import TopNav from './components/TopNavBar/TopNav';
 import SideMenu from './components/TopNavBar/SideMenu';
 
 import Users from './components/Users.js';
-import Home from './components/MainContent/Components/Home';
+import Home from './components/MainContent/Components/Home/Home.js';
 import Dashboard from './components/MainContent/Components/Dashboard/Dashboard';
 import Records from './components/MainContent/Components/Records/Records';
 import Analytics from "./components/MainContent/Components/Analytics/Analytics";
@@ -16,6 +16,10 @@ import Queue from "./components/MainContent/Components/Queue/Queue.js";
 
 import Login from "./components/Login.js";
 import Register from "./components/Register.js";
+
+import { socket } from "./socket.js";
+import Appointments from "./components/MainContent/Components/Appointments/Appointments.js";
+import Accounts from "./components/MainContent/Components/Accounts/Accounts.js";
 
 export const colorTheme = createContext();
 export const messaging = createContext();
@@ -74,6 +78,8 @@ const AppContent = () => {
               <Routes>
                 <Route path='dashboard' element={<Dashboard />}/>
                 <Route path='users' element={<Users />}/>
+                <Route path='accounts' element={<Accounts />}/>
+                <Route path='appointments' element={<Appointments />}/>
                 <Route path='home' element={<Home />}/>
                 <Route path='queue' element={<Queue />}/>
                 <Route path='analytics' element={<Analytics />}/>
@@ -99,6 +105,13 @@ const App = () => {
     }
     setIsLoggedIn(localStorage.getItem('isLoggedIn'));
   }, [isLoggedIn]);
+  
+  useEffect(() => {
+    socket.connect();
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   if (!isLoggedIn) {
     return (

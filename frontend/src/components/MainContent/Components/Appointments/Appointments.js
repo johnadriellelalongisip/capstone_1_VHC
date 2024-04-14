@@ -1,12 +1,19 @@
 import { useLocation } from "react-router-dom";
-import Header from "../Header";
-import DataTable from "./Elements/DataTable";
-import { BiSolidDonateBlood } from "react-icons/bi";
+import { IoCalendar } from "react-icons/io5";
+import { MdArrowDropDown } from "react-icons/md";
+import { useContext, useRef, useState } from "react";
+import { colorTheme } from "../../../../App";
+import Header from "../../Header";
+import DataTable from "../Elements/DataTable";
+import DatePicker from "./DatePicker";
 
-const BloodUnit = () => {
+const Appointments = () => {
+  const [selectedTheme] = useContext(colorTheme);
   const location = useLocation();
   const pathname = location.pathname.slice(1);
   const title = pathname.charAt(0).toUpperCase() + pathname.slice(1);
+  const datepickerRef = useRef(null);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const records = [
     {
       "First Name": "Zoe",
@@ -194,22 +201,51 @@ const BloodUnit = () => {
     }
   ];
 
+  const toggleDate = () => {
+    if (isDatePickerOpen) {
+      setIsDatePickerOpen(false);
+      datepickerRef.current.close();
+    } else {
+      setIsDatePickerOpen(true);
+      datepickerRef.current.show();
+    }
+  };
+  
   return (
     <div className="w-full h-screen flex flex-col">
       <div className="flex flex-col p-2 mt-20 md:mt-28 lg:mt-32 mb-4 mx-2 md:mx-3 lg:mx-4">
         <div>
-          <Header title={ title } icon={ <BiSolidDonateBlood /> } />
+          <Header title={ title } icon={<IoCalendar />}/>
         </div>
         <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-60 md:mb-72 lg:mb-80">
-            <div className="col-span-2 w-34 h-36 bg-gray-50 rounded-xl">
-              <DataTable data={records} modalForm={pathname} enImport={false} />
+          <div className="flex flex-col justify-start items-center gap-3">
+
+            <div className="flex justify-between items-center w-full text-xs md:text-sm lg:text-base">
+              <div className="flex flex-col relative">
+                <button onClick={() => toggleDate()} className={`flex justify-between items-center gap-2 p-2 rounded-md font-semibold bg-${selectedTheme}-300 text-${selectedTheme}-600 hover:bg-${selectedTheme}-400 hover:text-${selectedTheme}-700 active:bg-${selectedTheme}-700 active:text-${selectedTheme}-300 hover:scale-105 active:scale-95 transition-all duration-300 ease-linear`}>
+                  Apr/1/2024-Apr/31/2024
+                  <MdArrowDropDown className={`size-2 md:size-3 lg:size-4 ${isDatePickerOpen && `rotate-180`}`}/>
+                </button>
+                <div className="absolute top-full left-0 z-50 mt-2">
+                  <DatePicker dateRef={datepickerRef} toggleDatePicker={toggleDate}/>
+                </div>
+              </div>
+              <div className="flex justify-end items-center">
+                <button className={`p-2 rounded-md font-semibold bg-${selectedTheme}-300 text-${selectedTheme}-600 hover:bg-${selectedTheme}-400 hover:text-${selectedTheme}-700 active:bg-${selectedTheme}-700 active:text-${selectedTheme}-300 hover:scale-105 active:scale-95 transition-all duration-300 ease-linear`}>
+                  <span>New Appointment</span>
+                </button>
+              </div>
             </div>
+            
+            <div className={`w-full`}>
+              <DataTable data={records} modalForm={pathname} enAdd={false} enImport={false} enExport={false} />
+            </div>
+
           </div>
         </div>
       </div>
     </div>
   );
 }
- 
-export default BloodUnit;
+
+export default Appointments;

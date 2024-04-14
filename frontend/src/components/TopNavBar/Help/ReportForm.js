@@ -21,6 +21,15 @@ const ReportForm = ({ reportFormRef, toggle }) => {
     e.preventDefault();
     window.location.reload(true);
   };
+  const toggleClose = (e) => {
+    e.preventDefault();
+    toggle();
+    setFormData({
+      details: '',
+      severity: '',
+      imageReport: null
+    });
+  };
 
   //  HANDLE SPAM BY ONLY MAKING THE USER SUBMIT ONLY ONE REPORT FOR THE ADMIN TO ACCEPT FOR THE USER REQUEST TO REFRESH BACK TO 1
   return (
@@ -80,7 +89,7 @@ const ReportForm = ({ reportFormRef, toggle }) => {
             Caution: You can only submit a single report per account. Use your report wisely. You can submit a report again after a developer reviews your complaint. You will be notified upon review.
           </p>
           <div className="flex justify-end items-center gap-2 mt-4">
-            <button onClick={(e) => { e.preventDefault(); toggle(); }} className={`py-2 px-4 hover:shadow-md font-semibold text-${selectedTheme}-600 rounded-lg hover:bg-${selectedTheme}-100 transition-colors duration-200`}>Cancel</button>
+            <button onClick={toggleClose} className={`py-2 px-4 hover:shadow-md font-semibold text-${selectedTheme}-600 rounded-lg hover:bg-${selectedTheme}-100 transition-colors duration-200`}>Cancel</button>
             <button type="submit" className={`py-2 px-4 hover:shadow-md font-semibold rounded-lg transition-colors duration-200 ${formData.details && formData.severity && formData.imageReport ? `text-${selectedTheme}-100 bg-${selectedTheme}-600 hover:cursor-pointer shadow-sm` : `shadow-inner text-${selectedTheme}-100 bg-${selectedTheme}-400 hover:cursor-not-allowed`}`} disabled={!formData.details && !formData.severity && !formData.imageReport}>Submit Report</button>
           </div>
         </form>

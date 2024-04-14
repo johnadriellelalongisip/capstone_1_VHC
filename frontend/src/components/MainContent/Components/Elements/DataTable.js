@@ -1,16 +1,17 @@
 import { TextInput } from "flowbite-react";
 import { useContext, useEffect, useRef, useState } from "react";
-import { MdSearch, MdOutlineChevronLeft, MdOutlineChevronRight, MdOutlineKeyboardDoubleArrowLeft, MdOutlineKeyboardDoubleArrowRight, MdArrowDropDown, MdArrowDropUp } from "react-icons/md";
+import { MdSearch, MdOutlineChevronLeft, MdOutlineChevronRight, MdOutlineKeyboardDoubleArrowLeft, MdOutlineKeyboardDoubleArrowRight, MdArrowDropUp } from "react-icons/md";
+import { TbFileExport } from "react-icons/tb";
 import FormModal from "./FormModal";
 import { colorTheme } from "../../../../App";
 
-const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
+const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = true, enExport = true, isLoading, toggleOption, error }) => {
   const [selectedTheme] = useContext(colorTheme);
-
   const [move, setMove] = useState(false);
   const [query, setQuery] = useState('');
   const [CurrentPage, setCurrentPage] = useState(1);
   const [Pages, setPages] = useState(0);
+  const [rowCount, setRowCount] = useState(10);
   const [sortedData, setSortedData] = useState([]);
   const inputRef = useRef(null);
   const formModalRef = useRef(null);
@@ -134,9 +135,9 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
   );
 
   useEffect(() => {
-    const NumOfPages = Math.ceil(filteredData.length / 10);
+    const NumOfPages = Math.ceil(filteredData.length / rowCount);
     setPages(NumOfPages);
-  }, [query,filteredData]);
+  }, [query,filteredData, rowCount]);
 
   const toggleForm = () => {
     if (!isFormOpen) {
@@ -148,55 +149,69 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
     }
   }
 
-  const displayedData = filteredData.slice((CurrentPage - 1) * 10, CurrentPage * 10);
+  const displayedData = filteredData.slice((CurrentPage - 1) * rowCount, CurrentPage * rowCount);
   
   return (
     <>
       <div className="flex justify-between items-center p-4 overflow-hidden">
         <div className="flex justify-center items-center gap-3">
-          <button 
-            className={`text-xs md:text-sm lg:text-sm whitespace-nowrap font-semibold ${!isLoading && !error ? `text-${selectedTheme}-50 bg-${selectedTheme}-600 drop-shadow-md` : `text-${selectedTheme}-600 bg-${selectedTheme}-200 shadow-inner`} rounded-lg p-2`}
-            onClick={() => toggleForm()}
-            disabled={isLoading || error}
-          >
-            Import File
-          </button>
-          <button 
-            className={`text-xs md:text-sm lg:text-sm whitespace-nowrap font-semibold ${!isLoading && !error ? `text-${selectedTheme}-50 bg-${selectedTheme}-600 drop-shadow-md` : `text-${selectedTheme}-600 bg-${selectedTheme}-200 shadow-inner`} rounded-lg p-2`}
-            onClick={() => toggleForm()}
-            disabled={isLoading || error}
-          >
-            Add New Data
-          </button>
+          {
+            enImport && (
+            <button 
+              className={`text-xs md:text-sm lg:text-sm whitespace-nowrap font-semibold ${!isLoading && !error ? `text-${selectedTheme}-50 bg-${selectedTheme}-600 drop-shadow-md` : `text-${selectedTheme}-600 bg-${selectedTheme}-200 shadow-inner`} rounded-lg p-2`}
+              onClick={() => toggleForm()}
+              disabled={isLoading || error}
+            >
+              Import File
+            </button>
+            )
+          }
+          {
+            enAdd && (
+            <button 
+              className={`text-xs md:text-sm lg:text-sm whitespace-nowrap font-semibold ${!isLoading && !error ? `text-${selectedTheme}-50 bg-${selectedTheme}-600 drop-shadow-md` : `text-${selectedTheme}-600 bg-${selectedTheme}-200 shadow-inner`} rounded-lg p-2`}
+              onClick={() => toggleForm()}
+              disabled={isLoading || error}
+            >
+              Add New Data
+            </button>
+            )
+          }
         </div>
         <div 
           className={`flex`}
         >
-          <button
-            onClick={() => {
-              setMove((prevMove) => !prevMove); 
-              setQuery(''); 
-              setSearchFocus();
-            }}
-            className={`text-${selectedTheme}-500 hover:text-${selectedTheme}-600 mr-4 md:mr-2 lg:mr-2 ${
-              move
-                ? 'transition-transform ease-in-out duration-200 translate-x-0'
-                : 'transition-transform ease-in-out duration-200 translate-x-[9rem] md:translate-x-[198px] lg:translate-x-[200px]'
-            }`}
-          >
-            <MdSearch className="w-6 h-6" />
-          </button>
-          <TextInput
-            id="tablesearch"
-            ref={inputRef}
-            type="text"
-            placeholder="Search here"
-            value={query}
-            onChange={(e) => searchTable(e)}
-            className={`${
-              move ? 'transition-opacity duration-100 ease-linear opacity-1 translate-x-0' : 
-              'transition-opacity duration-100 ease-linear opacity-0 translate-x-[9rem] md:translate-x-[198px] lg:translate-x-[200px]'}`}
-          />
+          {
+            enSearch && (
+              <>
+                <button
+                  onClick={() => {
+                    setMove((prevMove) => !prevMove); 
+                    setQuery(''); 
+                    setSearchFocus();
+                  }}
+                  className={`text-${selectedTheme}-500 hover:text-${selectedTheme}-600 mr-4 md:mr-2 lg:mr-2 ${
+                    move
+                      ? 'transition-transform ease-in-out duration-200 translate-x-0'
+                      : 'transition-transform ease-in-out duration-200 translate-x-[9rem] md:translate-x-[198px] lg:translate-x-[200px]'
+                  }`}
+                >
+                  <MdSearch className="w-6 h-6" />
+                </button>
+                <TextInput
+                  id="tablesearch"
+                  ref={inputRef}
+                  type="text"
+                  placeholder="Search here"
+                  value={query}
+                  onChange={(e) => searchTable(e)}
+                  className={`${
+                    move ? 'transition-opacity duration-100 ease-linear opacity-1 translate-x-0' : 
+                    'transition-opacity duration-100 ease-linear opacity-0 translate-x-[9rem] md:translate-x-[198px] lg:translate-x-[200px]'}`}
+                />
+              </>
+            )
+          }
         </div>
       </div>
       <div className="overflow-x-auto drop-shadow-lg">
@@ -293,26 +308,29 @@ const DataTable = ({ data, modalForm, isLoading, toggleOption, error }) => {
           <></>
         ) : (
         <div className="flex flex-row justify-between items-center">
-          <p> </p>
-          <div className="grid grid-cols-2 gap-4">
-            <p> </p>
-            <div className={`flex flex-row text-md font-semibold p-1 m-1 bg-${selectedTheme}-200 rounded-lg`}>
-              <button disabled={CurrentPage <= 2} onClick={() => setCurrentPage((prev) => prev - 2)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
-                <MdOutlineKeyboardDoubleArrowLeft />
-              </button>
-              <button disabled={CurrentPage <= 1} onClick={() => setCurrentPage((prev) => prev - 1)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
-                <MdOutlineChevronLeft />
-              </button>
-              <p className="text-xs md:text-sm lg:text-base mx-1">
-                {CurrentPage} of {Pages}
-              </p>
-              <button disabled={CurrentPage >= Pages} onClick={() => setCurrentPage((prev) => prev + 1)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
-                <MdOutlineChevronRight />
-              </button>
-              <button disabled={CurrentPage >= Pages - 1} onClick={() => setCurrentPage((prev) => prev + 2)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
-                <MdOutlineKeyboardDoubleArrowRight />
-              </button>
-            </div>
+          {
+            enExport ? (
+              <button className={`flex gap-2 p-1 px-3 items-center justify-center bg-${selectedTheme}-200 text-${selectedTheme}-600 font-semibold rounded-lg text-xs md:text-sm lg:text-base hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out`}>Export to file<TbFileExport className="size-2 md:size-3 lg:size-4"/></button>
+            ) : (
+              <p></p>
+            )
+          }
+          <div className={`flex flex-row text-md font-semibold p-1 m-1 bg-${selectedTheme}-200 rounded-lg`}>
+            <button disabled={CurrentPage <= 2} onClick={() => setCurrentPage((prev) => prev - 2)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
+              <MdOutlineKeyboardDoubleArrowLeft />
+            </button>
+            <button disabled={CurrentPage <= 1} onClick={() => setCurrentPage((prev) => prev - 1)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
+              <MdOutlineChevronLeft />
+            </button>
+            <p className="text-xs md:text-sm lg:text-base mx-1">
+              {CurrentPage} of {Pages}
+            </p>
+            <button disabled={CurrentPage >= Pages} onClick={() => setCurrentPage((prev) => prev + 1)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
+              <MdOutlineChevronRight />
+            </button>
+            <button disabled={CurrentPage >= Pages - 1} onClick={() => setCurrentPage((prev) => prev + 2)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
+              <MdOutlineKeyboardDoubleArrowRight />
+            </button>
           </div>
         </div>
         )

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 
 const useQuery = () => {
-  const BASE_URL = process.env.REACT_APP_BASE_URL;
+  const BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
   const [response, setResponse] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);

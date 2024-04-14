@@ -16,7 +16,7 @@ const Analytics = () => {
   const pathname = location.pathname.slice(1);
   const title = pathname.charAt(0).toUpperCase() + pathname.slice(1);
   // CREATE PROMPT TO USER WHETHER THE PAGE IS CONNECTED TO THE SOCKET OR REAL TIME, WITH BUTTON TO RECONNECT OR RETRY OR REFRESH
-  // const socket = io(process.env.REACT_APP_BASE_SOCKET);
+  // const socket = io("https://localhost:5000");
   // const secretKey = process.env.REACT_APP_KEY;
   
   // useEffect(() => {
@@ -24,7 +24,7 @@ const Analytics = () => {
   //     const decryptedData = AES.decrypt(data, secretKey).toString(enc.Utf8);
   //     console.log('Decrypted Data:', decryptedData);
   //   });
-  // }, [socket]);
+  // }, []);
 
   // const toggleSocket = (e) => {
   //   e.preventDefault();

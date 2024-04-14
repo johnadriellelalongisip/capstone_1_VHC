@@ -4,13 +4,18 @@ const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
 const routes = require('./routes/routes');
-const { Server } = require('socket.io');
-const initializeMessageSocket = require('./sockets/messageSocket');
+// const initializeMessageSocket = require('./sockets/messageSocket');
+const initializeDatabaseSocket = require('./sockets/databaseSocket');
 
 const app = express();
 const port = 5000;
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://localhost:3000',
+  methods: ['GET', 'POST'],       
+  allowedHeaders: ['Content-Type'],
+  credentials: true                
+}));
 app.use(express.json());
 
 const serverOptions = {
@@ -23,7 +28,8 @@ app.use('/api', routes);
 
 const server = https.createServer(serverOptions, app);
 
-const messageIO = initializeMessageSocket(server);
+// const messageIO = initializeMessageSocket(server);
+const databaseIO = initializeDatabaseSocket(server);
 
 server.listen(port, () => {
   console.log(`Server is running on port https://localhost:${port}`);

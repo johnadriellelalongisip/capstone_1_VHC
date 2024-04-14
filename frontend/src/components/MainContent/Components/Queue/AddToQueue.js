@@ -62,6 +62,15 @@ const AddToQueue = ({ ATref, ATonClick }) => {
     });
   };
 
+  function toggleClose() {
+    if (payload.name || payload.barangay) {
+      cleanUp();
+    } else {
+      ATonClick();
+      cleanUp();
+    }
+  }
+
   function setNewSuggestions(newData) {
     setSuggestions((prevSuggestions) => {
       const newSuggestions = newData.map((data) => String(data.citizen_full_name));
@@ -74,21 +83,7 @@ const AddToQueue = ({ ATref, ATonClick }) => {
   }
   
   useEffect(() => {
-    let timer;
-    if (payload.name.length >= 5) {
-      timer = setTimeout(() => {
-        searchItems('findFirstName', String(payload.name));
-      }, 800);
-    } else {
-      setSuggestions([]);
-    }
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [payload.name]);
-  
-  useEffect(() => {
     setIsBarangayValid(barangays.includes(payload.barangay.charAt(0).toUpperCase() + payload.barangay.slice(1)));
-    console.log(isBarangayValid)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payload.barangay]);
   
@@ -132,7 +127,8 @@ const AddToQueue = ({ ATref, ATonClick }) => {
     }
   };
 
-  const handleSelectName = (value) => {
+  const handleSelectName = (value, i) => {
+    console.log(searchResults)
     setPayload((prevFormData) => ({
       ...prevFormData,
       name: value,
@@ -155,7 +151,7 @@ const AddToQueue = ({ ATref, ATonClick }) => {
             <MdPeople className='w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8' />
             <strong className="font-semibold drop-shadow-md text-sm md:text-base lg:text-lg">Add to query<span className={`ml-2 text-${selectedTheme}-500 font-bold`}>Patient's Number: 55</span></strong>
           </div>
-          <button onClick={() => {ATonClick(); cleanUp();}} className={`transition-colors duration-200 rounded-3xl p-1 bg-${selectedTheme}-300 hover:bg-${selectedTheme}-400 active:bg-${selectedTheme}-200`}>
+          <button onClick={() => toggleClose()} className={`transition-colors duration-200 rounded-3xl p-1 bg-${selectedTheme}-300 hover:bg-${selectedTheme}-400 active:bg-${selectedTheme}-200`}>
             <MdClose className='w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7' />
           </button>
         </div>
@@ -177,10 +173,11 @@ const AddToQueue = ({ ATref, ATonClick }) => {
               onBlur={() => {setIsNameFocused(false); setSuggestions([]);}}
               onKeyDown={handleEnter}
               list="nameResults"
+              placeholder="Type then press ENTER to search the records"
             />
             <datalist id="nameResults">
               {suggestions && suggestions.slice(0, 5).map((name, index) => (
-                <option key={index} value={name} onClick={() => handleSelectName(name)} />
+                <option key={index} value={name} onClick={() => handleSelectName(name, index)} />
               ))}
             </datalist>
           </div>
@@ -199,7 +196,7 @@ const AddToQueue = ({ ATref, ATonClick }) => {
               list="barangaySuggestions"
             />
             <datalist id="barangaySuggestions">
-              {payload.barangay.length >= 4 && barangays.map((barangay, index) => (
+              {payload.barangay.length >= 2 && barangays.map((barangay, index) => (
                 <option key={index} value={barangay} onClick={() => handleSelectBarangay(barangay)} />
               ))}
             </datalist>

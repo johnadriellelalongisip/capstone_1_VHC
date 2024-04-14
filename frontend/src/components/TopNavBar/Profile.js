@@ -6,18 +6,17 @@ import { useContext, useState } from "react";
 import { colorTheme, isLoggedInContext } from "../../App";
 import useWindowSize from "../../hooks/useWindowSize";
 import OptionButton from "./OptionButton";
-import { redirect, useNavigate } from "react-router-dom";
+import { redirect } from "react-router-dom";
 
 const Profile = ({ prof, toggle, toggleOptions, toggleHelp }) => {
   // eslint-disable-next-line no-unused-vars
   const [isLoggedIn, setIsLoggedIn] = useContext(isLoggedInContext);
-  const navigate = useNavigate();
   const [selectedTheme] = useContext(colorTheme);
   const [rotateSetting, setRotateSetting] = useState(false);
   const {avatarSize} = useWindowSize();
   
   const Logout = () => {
-    navigate('/login');
+    redirect('/login');
     setIsLoggedIn(false);
     localStorage.setItem('isLoggedIn',false);
   };
@@ -44,7 +43,7 @@ const Profile = ({ prof, toggle, toggleOptions, toggleHelp }) => {
               </div>
             </button>
             <OptionButton Icon={MdHelp} label={'Help & Support'} isExtending={true} buttonClick={() => {toggleHelp(); toggle();}} />
-            <OptionButton Icon={ImExit} label={'Logout'} isExtending={false} buttonClick={() => Logout()} />
+            <OptionButton Icon={ImExit} label={'Logout'} isExtending={false} buttonClick={Logout} />
           </div>
         </div>
     </dialog>

@@ -9,11 +9,16 @@ function initializeMessageSocket(server) {
   });
 
   io.on("connection", (socket) => {
-    socket.on("newData", (data) => {
+
+    console.log("A Client ID:",socket.id);
+    
+    socket.on("newData", (data) => {      
+      if (data) {
+        console.log(data);
+      }
       socket.emit("data", data);
     })
   });
-
   return io;
 }
 
