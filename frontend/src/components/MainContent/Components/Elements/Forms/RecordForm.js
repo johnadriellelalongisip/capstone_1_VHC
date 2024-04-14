@@ -1,9 +1,10 @@
-import { Checkbox, Label, Radio, Spinner, TextInput } from 'flowbite-react';
+import { Checkbox, Label, Radio, Spinner } from 'flowbite-react';
 import { useState, useEffect, useContext } from 'react';
 import jsonData from '../../../../../common_names_by_gender.json';
 import { colorTheme } from '../../../../../App';
 import useQuery from '../../../../../hooks/useQuery';
 import useCurrentTime from '../../../../../hooks/useCurrentTime';
+import { socket } from '../../../../../socket';
 
 const RecordForm = ( { close, children } ) => {
   const [selectedTheme] = useContext(colorTheme);
@@ -58,6 +59,10 @@ const RecordForm = ( { close, children } ) => {
     setFamilyId(GenerateFamId(8).toUpperCase());
   }, []);
 
+  useEffect(() => {
+    socket.emit('updateRecords');
+  }, [response]);
+
   const GenerateFamId = (length) => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -111,7 +116,6 @@ const RecordForm = ( { close, children } ) => {
       date_added: mysqlTime,
       history: JSON.stringify(history)
     }
-    console.log(payload);
     e.preventDefault();
     if(dontCloseUponSubmission) {
       addData('addRecord',payload);

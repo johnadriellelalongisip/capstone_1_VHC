@@ -1,8 +1,10 @@
 import { useContext, useState } from "react";
 import { MdHome, MdSpaceDashboard, MdFolder, MdAnalytics, MdLocalPharmacy, MdPeople } from "react-icons/md";
+import { FaUsers } from "react-icons/fa";
 import { BiSolidDonateBlood } from "react-icons/bi";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { colorTheme } from "../../App";
+import { IoCalendar } from "react-icons/io5";
 
 const Menu = ({ path, Icon, label }) => {
   const [selectedTheme] = useContext(colorTheme);
@@ -55,12 +57,14 @@ const SideMenu = () => {
   return (
     <div className={`flex flex-col text-${selectedTheme}-700 font-semibold mt-24 md:mt-24 lg:mt-28`}>
       <Menu path="home" Icon={MdHome} label="Home" />
+      <Menu path="appointments" Icon={IoCalendar} label="Appointments" />
       <Menu path="queue" Icon={MdPeople} label="Queues" />
       <Menu path="dashboard" Icon={MdSpaceDashboard} label="Dashboard" />
       <Menu path="analytics" Icon={MdAnalytics} label="Analytics" />
       <Menu path="records" Icon={MdFolder} label="Records" />
       <Menu path="pharmacy" Icon={MdLocalPharmacy} label="Pharmacy" />
       <Menu path="blood_unit" Icon={BiSolidDonateBlood} label="Blood Unit" />
+      <Menu path="accounts" Icon={FaUsers} label="Accounts" />
       <Outlet />
     </div>
   );

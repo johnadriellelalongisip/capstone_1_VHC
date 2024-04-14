@@ -1,8 +1,11 @@
 import { useLocation } from "react-router-dom";
-import Header from "../Header";
+import Header from "../../Header";
 import { MdHome } from "react-icons/md";
+import { useContext } from "react";
+import { colorTheme } from "../../../../App";
 
 const Home = () => {
+  const [selectedTheme] = useContext(colorTheme);
   const location = useLocation();
   const pathname = location.pathname.slice(1);
   const title = pathname.charAt(0).toUpperCase() + pathname.slice(1);
@@ -15,7 +18,7 @@ const Home = () => {
         </div>
         <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-60 md:mb-72 lg:mb-80">
-            <div className="w-34 h-36 bg-sky-50 rounded-xl">
+            <div className={`w-34 h-36 bg-${selectedTheme}-50 rounded-xl`}>
               
             </div>
           </div>

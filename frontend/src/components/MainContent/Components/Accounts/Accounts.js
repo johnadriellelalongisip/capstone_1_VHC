@@ -1,9 +1,12 @@
 import { useLocation } from "react-router-dom";
-import Header from "../Header";
-import DataTable from "./Elements/DataTable";
-import { BiSolidDonateBlood } from "react-icons/bi";
+import Header from "../../Header";
+import { FaUsers } from "react-icons/fa";
+import { useContext } from "react";
+import { colorTheme } from "../../../../App";
+import DataTable from "../Elements/DataTable";
 
-const BloodUnit = () => {
+const Accounts = () => {
+  const [selectedTheme] = useContext(colorTheme);
   const location = useLocation();
   const pathname = location.pathname.slice(1);
   const title = pathname.charAt(0).toUpperCase() + pathname.slice(1);
@@ -198,18 +201,25 @@ const BloodUnit = () => {
     <div className="w-full h-screen flex flex-col">
       <div className="flex flex-col p-2 mt-20 md:mt-28 lg:mt-32 mb-4 mx-2 md:mx-3 lg:mx-4">
         <div>
-          <Header title={ title } icon={ <BiSolidDonateBlood /> } />
+          <Header title={ title } icon={<FaUsers />}/>
         </div>
         <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-60 md:mb-72 lg:mb-80">
-            <div className="col-span-2 w-34 h-36 bg-gray-50 rounded-xl">
-              <DataTable data={records} modalForm={pathname} enImport={false} />
+          <div className="flex flex-col justify-start items-center gap-3">
+
+            <div className="flex justify-between items-center w-full text-xs md:text-sm lg:text-base">
+            
             </div>
+            
+            <div className={` w-full`}>
+              <DataTable data={records} modalForm={pathname} enAdd={false} enImport={false} enExport={false} />
+            </div>
+            {/* push github */}
+
           </div>
         </div>
       </div>
     </div>
   );
 }
- 
-export default BloodUnit;
+
+export default Accounts;
