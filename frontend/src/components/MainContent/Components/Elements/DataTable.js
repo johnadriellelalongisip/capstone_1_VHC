@@ -1,17 +1,19 @@
 import { TextInput } from "flowbite-react";
 import { useContext, useEffect, useRef, useState } from "react";
-import { MdSearch, MdOutlineChevronLeft, MdOutlineChevronRight, MdOutlineKeyboardDoubleArrowLeft, MdOutlineKeyboardDoubleArrowRight, MdArrowDropUp } from "react-icons/md";
+import { MdSearch, MdOutlineChevronLeft, MdOutlineChevronRight, MdOutlineKeyboardDoubleArrowLeft, MdOutlineKeyboardDoubleArrowRight, MdArrowDropUp, MdArrowDropDown } from "react-icons/md";
 import { TbFileExport } from "react-icons/tb";
 import FormModal from "./FormModal";
 import { colorTheme } from "../../../../App";
 
-const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = true, enExport = true, isLoading, toggleOption, error }) => {
+const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = true, enExport = true, isLoading, toggleOption, optionPK, error }) => {
   const [selectedTheme] = useContext(colorTheme);
   const [move, setMove] = useState(false);
   const [query, setQuery] = useState('');
   const [CurrentPage, setCurrentPage] = useState(1);
   const [Pages, setPages] = useState(0);
   const [rowCount, setRowCount] = useState(10);
+  const [showEntries, setShowEntries] = useState(false);
+  const dataListOptions = [10, 25, 50, 100];
   const [sortedData, setSortedData] = useState([]);
   const inputRef = useRef(null);
   const formModalRef = useRef(null);
@@ -84,6 +86,11 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
     const order = sortState[field] ? 'desc' : 'asc';
     setSortedData(sortedRecord(field, order));
   };  
+
+  const handleOptionClick = (option) => {
+    setRowCount(option);
+    setShowEntries(false);
+  };
 
   const Header = ({ top }) => (
     <tr className={`flex flex-row justify-between items-center bg-${selectedTheme}-300 text-xs md:text-sm lg:text-md ${
@@ -223,80 +230,73 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
             <Header top={true} />
           </thead>
           <tbody className={`divide-y-2 divide-transparent text-xs md:text-sm lg:text-md`}>
-            {
-              data && (
-                <>
-                  {
-                    isLoading ? (
-                      <>
-                        {
-                          Array.from({ length: 10 }).map((_, rindex) => (
-                            <tr
-                              key={rindex}
-                              className={`flex flex-row justify-between items-center bg-${selectedTheme}-200 divide-x-2 divide-transparent`}
-                            >
-                              {
-                                Array.from({ length: 10 }).map((_, cindex) => (
-                                  <td key={cindex} className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden hover:overflow-visible hover:bg-${selectedTheme}-50 hover:text-gray-900 hover:drop-shadow-md hover:rounded-md transition-colors duration-300 hover:px-2`}>
-                                     
-                                  </td>
-                                ))
-                              }
-                            </tr>
-                          ))
-                        }
-                      </>
-                    ) : (
-                      <>
-                        {displayedData.map((row, rowi) => (
-                          <tr
-                            key={rowi}
-                            className={`flex flex-row justify-between items-center bg-${selectedTheme}-200 divide-x-2 divide-transparent`}
-                          >
-                            {
-                              Object.values(row).map((col, coli) => (
-                                <td key={coli} className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden hover:overflow-visible hover:bg-${selectedTheme}-50 hover:text-gray-900 hover:drop-shadow-md hover:rounded-md transition-colors duration-300 hover:px-2`}>
-                                  {col}
-                                </td>
-                              ))
-                            }
-                            <td className="w-full p-2 flex items-center justify-center">
-                              <button className={`font-semibold text-${selectedTheme}-500 hover:text-${selectedTheme}-600 hover:underline`} onClick={() => toggleOption( row["ItemID"] ? String(row["ItemID"]) : String(row["Family-ID"]))}>Options</button>
-                            </td>
-                          </tr>
+            {data && (
+              <>
+                {isLoading ? (
+                  <>
+                    {Array.from({ length: rowCount }).map((_, rindex) => (
+                      <tr
+                        key={rindex}
+                        className={`flex flex-row justify-between items-center bg-${selectedTheme}-200 divide-x-2 divide-transparent`}
+                      >
+                        {Array.from({ length: rowCount }).map((_, cindex) => (
+                          <td key={cindex} className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden hover:overflow-visible hover:bg-${selectedTheme}-50 hover:text-gray-900 hover:drop-shadow-md hover:rounded-md transition-colors duration-300 hover:px-2`}>
+                             
+                          </td>
                         ))}
-                        {Array.from({ length: Math.max(10 - displayedData.length, 0) }).map((_, rowIndex) => (
-                          <tr
-                            key={`empty-row-${rowIndex}`}
-                            className={`flex flex-row justify-between items-center bg-${selectedTheme}-300 divide-x-2 divide-transparent`}
-                          >
-                            {Object.keys(data[0]).map((_, colIndex) => (
-                              <td key={`empty-col-${colIndex}`} className="w-full p-2 text-transparent"> </td>
-                            ))}
-                          </tr>
+                      </tr>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    {displayedData.map((row, rowi) => (
+                      <tr
+                        key={rowi}
+                        className={`flex flex-row justify-between items-center bg-${selectedTheme}-200 divide-x-2 divide-transparent`}
+                      >
+                        {Object.values(row).map((col, coli) => (
+                          <td key={coli} className={`w-full p-2 font-semibold whitespace-nowrap overflow-hidden hover:overflow-visible hover:bg-${selectedTheme}-50 hover:text-gray-900 hover:drop-shadow-md hover:rounded-md transition-colors duration-300 hover:px-2`}>
+                            {col}
+                          </td>
                         ))}
-                      </>
-                    )
-                  }
-                </>
-              )
-            }
-            {
-              error && (
-                <>
-                  {Array.from({ length: 10 }).map((_, rowIndex) => (
-                    <tr
-                      key={`empty-row-${rowIndex}`}
-                      className={`flex flex-row justify-between items-center bg-${selectedTheme}-300 divide-x-2 divide-transparent`}
-                    >
-                      {Array.from({ length: 10 }).map((_, colIndex) => (
-                        <td key={`empty-col-${colIndex}`} className="w-full p-2 text-transparent"> </td>
-                      ))}
-                    </tr>
-                  ))}
-                </>
-              )
-            }
+                        <td className="w-full p-2 flex items-center justify-center">
+                          <button 
+                            className={`font-semibold text-${selectedTheme}-500 hover:text-${selectedTheme}-600 hover:underline`}
+                            onClick={() => toggleOption(row[`${optionPK}`]) }
+                          >
+                            Options
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {Array.from({ length: Math.max(rowCount - displayedData.length, 0) }).map((_, rowIndex) => (
+                      <tr
+                        key={`empty-row-${rowIndex}`}
+                        className={`flex flex-row justify-between items-center bg-${selectedTheme}-300 divide-x-2 divide-transparent`}
+                      >
+                        {Object.keys(data[0]).map((_, colIndex) => (
+                          <td key={`empty-col-${colIndex}`} className="w-full p-2 text-transparent"> </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </>
+                )}
+              </>
+            )}
+            {error && (
+              <>
+                {Array.from({ length: rowCount }).map((_, rowIndex) => (
+                  <tr
+                    key={`empty-row-${rowIndex}`}
+                    className={`flex flex-row justify-between items-center bg-${selectedTheme}-300 divide-x-2 divide-transparent`}
+                  >
+                    {Array.from({ length: rowCount }).map((_, colIndex) => (
+                      <td key={`empty-col-${colIndex}`} className="w-full p-2 text-transparent"> </td>
+                    ))}
+                  </tr>
+                ))}
+              </>
+            )}
           </tbody>
           <tfoot>
             <Header top={false} />
@@ -308,13 +308,28 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
           <></>
         ) : (
         <div className="flex flex-row justify-between items-center">
-          {
-            enExport ? (
-              <button className={`flex gap-2 p-1 px-3 items-center justify-center bg-${selectedTheme}-200 text-${selectedTheme}-600 font-semibold rounded-lg text-xs md:text-sm lg:text-base hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out`}>Export to file<TbFileExport className="size-2 md:size-3 lg:size-4"/></button>
-            ) : (
-              <p></p>
-            )
-          }
+          <div className="flex justify-evenly items-center">
+            {enExport && (
+              <button className={`flex gap-2 p-1 px-3 items-center justify-center bg-${selectedTheme}-200 text-${selectedTheme}-600 font-semibold rounded-lg text-xs md:text-sm lg:text-base hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out`}>Export to file<TbFileExport className="size-3 md:size-3 lg:size-4"/></button>
+            )}
+            {/* NEED TO GET THIS WORKING PROPERLY AND PREVENT OVERFLOW */}
+            <div className={`flex flex-row items-center justify-start gap-2 text-sm font-semibold p-1 m-1 bg-${selectedTheme}-200 rounded-lg relative`}>
+              {/* <select
+                id="pageentries"
+                className={`p-2 text-xs md:text-sm lg:text-sm bg-${selectedTheme}-200 text-${selectedTheme}-700 rounded-md`}
+                onChange={(e) => handleOptionClick(parseInt(e.target.value))}
+                onBlur={() => setShowEntries(false)}
+                value={rowCount}
+              >
+                {dataListOptions.map((option, index) => (
+                  <option key={index} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              <p className="hidden md:hidden lg:block text-xs">entries per page</p> */}
+            </div>
+          </div>
           <div className={`flex flex-row text-md font-semibold p-1 m-1 bg-${selectedTheme}-200 rounded-lg`}>
             <button disabled={CurrentPage <= 2} onClick={() => setCurrentPage((prev) => prev - 2)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
               <MdOutlineKeyboardDoubleArrowLeft />
@@ -322,8 +337,8 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
             <button disabled={CurrentPage <= 1} onClick={() => setCurrentPage((prev) => prev - 1)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
               <MdOutlineChevronLeft />
             </button>
-            <p className="text-xs md:text-sm lg:text-base mx-1">
-              {CurrentPage} of {Pages}
+            <p className="flex text-xs md:text-sm lg:text-base mx-1">
+              {CurrentPage} <span className="hidden md:block lg:block"> of{Pages}</span>
             </p>
             <button disabled={CurrentPage >= Pages} onClick={() => setCurrentPage((prev) => prev + 1)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
               <MdOutlineChevronRight />

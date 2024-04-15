@@ -111,7 +111,7 @@ const Pharmacy = () => {
 
   return (
     <div className="w-full h-screen flex flex-col">
-      <div className="flex flex-col p-2 mt-20 md:mt-28 lg:mt-32 mb-4 mx-2 md:mx-3 lg:mx-4">
+      <div className="flex flex-col p-2 mb-4 mx-2 md:mx-3 lg:mx-4 mt-4">
         <div>
           <Header title={ title } icon={<MdLocalPharmacy/>}/>
         </div>

@@ -117,7 +117,7 @@ class RecordController {
   async findFirstName(req, res) {
     try {
       const connection = await dbModel.getConnection();
-      const query = "SELECT `citizen_family_id`, CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) AS citizen_full_name, `citizen_gender`, `citizen_barangay` FROM `municipal_citizens` WHERE CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) LIKE CONCAT('%', ?, '%')";
+      const query = "SELECT `citizen_family_id`, CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) AS citizen_full_name, `citizen_gender`, `citizen_barangay`, `citizen_number` FROM `municipal_citizens` WHERE CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) LIKE CONCAT('%', ?, '%')";
       const nameInput = req.params.id;
       const response = await dbModel.query(query, nameInput);
       dbModel.releaseConnection(connection);

@@ -29,8 +29,8 @@ const Records = () => {
   };
   
   function tryThisShet(data) {
-    const storedRecords = sessionStorage.getItem("sessionRecords");
-    if(storedRecords !== data || storedRecords === undefined) {
+    const sesStorage = JSON.parse(sessionStorage.getItem("sessionRecords"));
+    if(sesStorage !== data || sesStorage === null) {
       const newData = data.map(obj => {
         const newObj = {};
         Object.keys(obj).forEach(key => {
@@ -49,19 +49,20 @@ const Records = () => {
   }
 
   useEffect(() => {
-    const storedRecords = sessionStorage.getItem("sessionRecords");
-    if(storedRecords !== records || storedRecords === undefined){
-      fetchData("getRecords");
-    } else {}
+    fetchData("getRecords");
     socket.on('newRecords', (data) => {
       tryThisShet(data);
-      console.log(data);
     });
     socket.on('newRecordsError', (error) => {
       console.error('Error retrieving new records:', error);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
+
+  // useEffect(() => {
+  //   const sesStorage = JSON.parse(sessionStorage.getItem("sessionRecords"));
+  //   setRecords(sesStorage);
+  // }, [socket]);
 
   useEffect(() => {
     if (response && response.status === 200) {
@@ -77,7 +78,7 @@ const Records = () => {
         return newObj;
       });
       setRecords(newResponse);
-      sessionStorage.setItem("sessionRecords",newResponse);
+      sessionStorage.setItem("sessionRecords",JSON.stringify(newResponse));
     }
     if (error) {
       console.log(error);
@@ -97,14 +98,14 @@ const Records = () => {
 
   return (
     <div className="w-full h-screen flex flex-col">
-      <div className="flex flex-col p-2 mt-20 md:mt-28 lg:mt-32 mb-4 mx-2 md:mx-3 lg:mx-4">
+      <div className="flex flex-col p-2 mb-4 mx-2 md:mx-3 lg:mx-4 mt-4">
         <div>
           <Header title={ title } icon={ <MdFolder /> }/>
         </div>
-        <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2">
+        <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2 mb-52">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-60 md:mb-72 lg:mb-80">
             <div className="col-span-2 w-34 h-36 bg-gray-50 rounded-xl">
-              <DataTable data={records} modalForm={pathname} isLoading={isLoading} toggleOption={toggleOptions} error={error} enImport={false} />
+              <DataTable data={records} modalForm={pathname} isLoading={isLoading} toggleOption={toggleOptions} optionPK={"Family-ID"} error={error} enImport={false} />
             </div>
           </div>
         </div>

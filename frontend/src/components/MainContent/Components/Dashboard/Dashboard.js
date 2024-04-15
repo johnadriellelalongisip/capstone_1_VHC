@@ -42,7 +42,7 @@ const Dashboard = () => {
   
   return (
     <div className="w-full h-screen flex flex-col">
-      <div className="flex flex-col p-2 mt-20 md:mt-28 lg:mt-32 mb-4 mx-2 md:mx-3 lg:mx-4">
+      <div className="flex flex-col p-2 mb-4 mx-2 md:mx-3 lg:mx-4 mt-4">
         <Header title={ title } icon={<MdDashboard />}/>
         <div className="min-h-[80vh] h-[80vh] overflow-y-auto scroll-smooth p-2 mt-2">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-60 md:mb-72 lg:mb-80">
@@ -58,7 +58,7 @@ const Dashboard = () => {
             <PatientChart title="Patient Frequency"/>
             <DonorChart title="Most Frequent Donor"/>
 
-            <div className={`col-span-2 bg-${selectedTheme}-50 rounded-md`} >
+            {/* <div className={`col-span-2 bg-${selectedTheme}-50 rounded-md`} >
               <div className="p-4">
 
                 <table className="w-full h-full text-left">
@@ -91,7 +91,7 @@ const Dashboard = () => {
                 </table>
 
               </div>
-            </div>
+            </div> */}
 
           </div>
         </div>

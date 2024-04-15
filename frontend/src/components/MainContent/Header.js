@@ -10,7 +10,7 @@ const Header = ({ title, icon }) => {
   const capitalizedArray = titleArray.map(word => word.charAt(0).toUpperCase() + word.slice(1));
   const headTitle = capitalizedArray.map(word => word + " ");
   return (
-    <div className="mt-5 md:mt-0 lg:mt-0 flex flex-row justify-between items-center">
+    <div className="flex flex-row justify-between items-center">
       <p
         className={`flex gap-1 items-center text-xl md:text-2xl lg:text-3xl font-bold antialiased text-${selectedTheme}-700`}
       >

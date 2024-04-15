@@ -105,7 +105,7 @@ const AddToQueue = ({ ATref, ATonClick }) => {
     }
   };
   const handleEnter = (event) => {
-    if (event.key === 'Enter' && isNameFocused) {
+    if (event.key === 'Enter' && isNameFocused && payload.name) {
       searchItems('findFirstName', String(payload.name));
       setNewSuggestions([]);
     }

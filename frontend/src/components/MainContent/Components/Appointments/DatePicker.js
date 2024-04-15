@@ -23,6 +23,38 @@ const DatePicker = ({ dateRef, toggleDatePicker }) => {
     }
   };
 
+  const handleDateChange = (e) => {
+    const { name, value } = e.target;
+    const currentDate = new Date(); 
+    if (name === 'startDate') {
+      const selectedDate = new Date(value);
+      if (selectedDate < currentDate.setHours(0, 0, 0, 0)) {
+        setErrorPrompt("Start date cannot be before this day!");
+        setTimeout(() => {
+          setErrorPrompt("");
+        }, 3000);
+      } else if (selectedDate <= new Date(endDate)) {
+        setStartDate(value);
+      } else {
+        setErrorPrompt("Start date cannot be after the end date!");
+        setTimeout(() => {
+          setErrorPrompt("");
+        }, 3000);
+      }
+    } else if (name === 'endDate') {
+      const selectedDate = new Date(value);
+      if (selectedDate >= new Date(startDate)) {
+        setEndDate(value);
+      } else {
+        setErrorPrompt("End date cannot be before the start date!");
+        setTimeout(() => {
+          setErrorPrompt("");
+        }, 3000);
+      }
+    }
+  };
+  
+
   return (
     <dialog ref={dateRef} className={`bg-${selectedTheme}-300 rounded-lg`} >
       <div className="flex flex-col text-xs md:text-sm lg:text-sm">
@@ -35,10 +67,11 @@ const DatePicker = ({ dateRef, toggleDatePicker }) => {
             <label htmlFor="startDate" className="font-semibold">From:</label>
             <input
               id="startDate"
+              name="startDate"
               type="date"
               value={startDate}
               autoComplete="off"
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={handleDateChange}
               className={`p-2 text-xs md:text-sm lg:text-sm bg-${selectedTheme}-200 text-${selectedTheme}-700 rounded-md my-2`}
             />
           </div>
@@ -46,10 +79,11 @@ const DatePicker = ({ dateRef, toggleDatePicker }) => {
             <label htmlFor="endDate" className="font-semibold">To:</label>
             <input
               id="endDate"
+              name="endDate"
               type="date"
               autoComplete="off"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={handleDateChange}
               className={`p-2 text-xs md:text-sm lg:text-sm bg-${selectedTheme}-200 text-${selectedTheme}-700 rounded-md mb-2`}
             />
           </div>

@@ -36,7 +36,7 @@ const Analytics = () => {
 
   return (
     <div className="w-full h-screen flex flex-col">
-      <div className="flex flex-col p-2 mt-20 md:mt-28 lg:mt-32 mb-4">
+      <div className="flex flex-col p-2 mt-4 mb-4">
         <Header title={ title } icon={<MdAnalytics />}/>
         <div className="min-h-[80vh] h-[80vh] overflow-y-auto scroll-smooth p-2 mt-2">
           <div className="flex flex-col gap-4 justify-start items-center">
