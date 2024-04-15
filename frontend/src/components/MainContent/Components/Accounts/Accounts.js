@@ -1,15 +1,17 @@
 import { useLocation } from "react-router-dom";
 import Header from "../../Header";
 import { FaUsers } from "react-icons/fa";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { colorTheme } from "../../../../App";
 import DataTable from "../Elements/DataTable";
+import useQuery from "../../../../hooks/useQuery";
 
 const Accounts = () => {
   const [selectedTheme] = useContext(colorTheme);
   const location = useLocation();
   const pathname = location.pathname.slice(1);
   const title = pathname.charAt(0).toUpperCase() + pathname.slice(1);
+  const [accounts, setAccounts] = useState([{}]);
   const records = [
     {
       "First Name": "Zoe",
@@ -196,6 +198,9 @@ const Accounts = () => {
       "Barangay": "Lakeside"
     }
   ];
+  const { response, isLoading, error, fetchData } = useQuery;
+
+
 
   return (
     <div className="w-full h-screen flex flex-col">
@@ -210,8 +215,8 @@ const Accounts = () => {
             
             </div>
             
-            <div className={` w-full`}>
-              <DataTable data={records} modalForm={pathname} enAdd={false} enImport={false} enExport={false} />
+            <div className={`w-full`}>
+              <DataTable data={records} modalForm={pathname} enImport={false} enExport={false} />
             </div>
             {/* push github */}
 

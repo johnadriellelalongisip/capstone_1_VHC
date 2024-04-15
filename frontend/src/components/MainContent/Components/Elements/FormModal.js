@@ -4,6 +4,7 @@ import DonorForm from './Forms/DonorForm';
 import { MdClose, MdCreate } from "react-icons/md";
 import { useContext } from 'react';
 import { colorTheme } from '../../../../App';
+import NewAppointmentForm from './Forms/NewAppointmentForm';
 
 const SelectedForm = ({ formType, toggle }) => {
   const [selectedTheme] = useContext(colorTheme);
@@ -31,7 +32,7 @@ const SelectedForm = ({ formType, toggle }) => {
           <div className={`fixed top-0 left-0 right-0 flex justify-between items-center p-5 bg-${selectedTheme}-300 text-${selectedTheme}-800 border-b-[1px] shadow-md drop-shadow-md border-${selectedTheme}-950`}>
             <div className='flex items-center'>
               <MdCreate className='mr-2 w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6'/>
-              <p className='font-bold text-base md:text-lg lg:text-xl'>Add new record</p>
+              <p className='font-bold text-base md:text-lg lg:text-xl'>Add new product</p>
             </div>
             <button onClick={() => toggle()} className={`transition-colors duration-300 p-2 rounded-3xl bg-${selectedTheme}-400 hover:bg-${selectedTheme}-500 active:bg-${selectedTheme}-200`}>
               <MdClose className='w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6'/>
@@ -46,13 +47,29 @@ const SelectedForm = ({ formType, toggle }) => {
         <DonorForm close={toggle} />
       </div>
     );
+  } else if (formType === 'appointments') {
+    return (
+      <div>
+        <NewAppointmentForm close={toggle}>
+          <div className={`fixed top-0 left-0 right-0 flex justify-between items-center p-5 bg-${selectedTheme}-300 text-${selectedTheme}-800 border-b-[1px] shadow-md drop-shadow-md border-${selectedTheme}-950`}>
+            <div className='flex items-center'>
+              <MdCreate className='mr-2 w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6'/>
+              <p className='font-bold text-base md:text-lg lg:text-xl'>Add new appointment</p>
+            </div>
+            <button onClick={() => toggle()} className={`transition-colors duration-300 p-2 rounded-3xl bg-${selectedTheme}-400 hover:bg-${selectedTheme}-500 active:bg-${selectedTheme}-200`}>
+              <MdClose className='w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6'/>
+            </button>
+          </div>
+        </NewAppointmentForm>
+      </div>
+    )
   }
 }
 
 const FormModal = ({ formRef, toggleForm, formType}) => {
   
   return ( 
-    <dialog ref={formRef} className='relative text-xs md:text-sm lg:text-base rounded-lg drop-shadow-lg'>
+    <dialog ref={formRef} className='relative text-xs md:text-sm lg:text-base rounded-lg drop-shadow-lg z-52'>
       <SelectedForm formType={formType} toggle={toggleForm}/>
     </dialog>
   )

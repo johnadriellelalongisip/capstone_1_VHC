@@ -1,21 +1,10 @@
 import { useContext, useState } from "react";
 import { colorTheme } from "../../../../App";
+import { appointmentDate } from "./Appointments";
 
 const DatePicker = ({ dateRef, toggleDatePicker }) => {
+  const [startDate, endDate, setStartDate, setEndDate] = useContext(appointmentDate);
   const [selectedTheme] = useContext(colorTheme);
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1;
-  const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
-  const formatDateString = (value) => {
-    return value < 10 ? '0' + value : '' + value;
-  };
-  const newStartDate = `${currentYear}-${formatDateString(currentMonth)}-01`;
-  const newEndDate = `${currentYear}-${formatDateString(currentMonth)}-${daysInMonth}`;
-
-  const [startDate, setStartDate] = useState(newStartDate);
-  const [endDate, setEndDate] = useState(newEndDate);
-
   const [errorPrompt, setErrorPrompt] = useState("");
 
   const handleSubmitDates = () => {

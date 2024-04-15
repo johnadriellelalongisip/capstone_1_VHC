@@ -1,11 +1,13 @@
 import { useLocation } from "react-router-dom";
 import { IoCalendar } from "react-icons/io5";
 import { MdArrowDropDown } from "react-icons/md";
-import { useContext, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { colorTheme } from "../../../../App";
 import Header from "../../Header";
 import DataTable from "../Elements/DataTable";
 import DatePicker from "./DatePicker";
+
+export const appointmentDate = createContext();
 
 const Appointments = () => {
   const [selectedTheme] = useContext(colorTheme);
@@ -13,6 +15,8 @@ const Appointments = () => {
   const pathname = location.pathname.slice(1);
   const title = pathname.charAt(0).toUpperCase() + pathname.slice(1);
   const datepickerRef = useRef(null);
+  const newAppointmentRef = useRef(null);
+  const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const records = [
     {
@@ -200,6 +204,18 @@ const Appointments = () => {
       "Barangay": "Lakeside"
     }
   ];
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
+  const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+  const formatDateString = (value) => {
+    return value < 10 ? '0' + value : '' + value;
+  };
+  const newStartDate = `${currentYear}-${formatDateString(currentMonth)}-01`;
+  const newEndDate = `${currentYear}-${formatDateString(currentMonth)}-${daysInMonth}`;
+
+  const [startDate, setStartDate] = useState(newStartDate);
+  const [endDate, setEndDate] = useState(newEndDate);
 
   const toggleDate = () => {
     if (isDatePickerOpen) {
@@ -210,6 +226,23 @@ const Appointments = () => {
       datepickerRef.current.show();
     }
   };
+
+  const toggleNewApp = () => {
+    if (isNewAppointmentOpen) {
+      setIsNewAppointmentOpen(false);
+      newAppointmentRef.current.close();
+    } else {
+      setIsNewAppointmentOpen(true);
+      newAppointmentRef.current.showModal();
+    }
+  }
+
+  useEffect(() => {
+    console.log("Start Date", startDate);
+    console.log("End Date", endDate);
+  }, [startDate, endDate]);
+
+  // ADD 2 MORE ELEMENTS TO THE COMPONENT - CUSTOM CALENDAR & UPCOMMING APPOINTMENTS
   
   return (
     <div className="w-full h-screen flex flex-col">
@@ -220,25 +253,20 @@ const Appointments = () => {
         <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2">
           <div className="flex flex-col justify-start items-center gap-3">
 
-            <div className="flex justify-between items-center w-full text-xs md:text-sm lg:text-base">
-              <div className="flex flex-col relative">
-                <button onClick={() => toggleDate()} className={`flex justify-between items-center gap-2 p-2 rounded-md font-semibold bg-${selectedTheme}-300 text-${selectedTheme}-600 hover:bg-${selectedTheme}-400 hover:text-${selectedTheme}-700 active:bg-${selectedTheme}-700 active:text-${selectedTheme}-300 hover:scale-105 active:scale-95 transition-all duration-300 ease-linear`}>
-                  Apr/1/2024-Apr/31/2024
-                  <MdArrowDropDown className={`size-2 md:size-3 lg:size-4 ${isDatePickerOpen && `rotate-180`}`}/>
-                </button>
-                <div className="absolute top-full left-0 z-50 mt-2">
+            <div className="place-self-end relative">
+              <button onClick={() => toggleDate()} className={`flex justify-between items-center gap-2 p-2 rounded-md font-semibold bg-${selectedTheme}-300 text-${selectedTheme}-600 hover:bg-${selectedTheme}-400 hover:text-${selectedTheme}-700 active:bg-${selectedTheme}-700 active:text-${selectedTheme}-300 hover:scale-105 active:scale-95 transition-all duration-300 ease-linear`}>
+                Apr/1/2024-Apr/31/2024
+                <MdArrowDropDown className={`size-2 md:size-3 lg:size-4 ${isDatePickerOpen && `rotate-180`}`}/>
+              </button>
+              <div className="absolute top-full left-0 z-50 mt-2">
+                <appointmentDate.Provider value={[ startDate, endDate, setStartDate, setEndDate ]}>
                   <DatePicker dateRef={datepickerRef} toggleDatePicker={toggleDate}/>
-                </div>
-              </div>
-              <div className="flex justify-end items-center">
-                <button className={`p-2 rounded-md font-semibold bg-${selectedTheme}-300 text-${selectedTheme}-600 hover:bg-${selectedTheme}-400 hover:text-${selectedTheme}-700 active:bg-${selectedTheme}-700 active:text-${selectedTheme}-300 hover:scale-105 active:scale-95 transition-all duration-300 ease-linear`}>
-                  <span>New Appointment</span>
-                </button>
+                </appointmentDate.Provider>
               </div>
             </div>
-            
-            <div className={`w-full`}>
-              <DataTable data={records} modalForm={pathname} enAdd={false} enImport={false} enExport={false} />
+          
+            <div className={`z-0 w-full`}>
+              <DataTable data={records} modalForm={pathname} enImport={false} enExport={false} />
             </div>
 
           </div>
