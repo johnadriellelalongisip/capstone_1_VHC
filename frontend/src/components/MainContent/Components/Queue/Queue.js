@@ -120,74 +120,68 @@ const Queue = () => {
                 </p>
               </div>
               <div className="h-72 min-h-72 overflow-y-auto">
-              {
-                queue.length !== 0 && queue.map((q, i) => {
-                  if (q.patient_status === displayedData[viewStateIndex]) {
-                    return (
-                      <div key={i} className="flex flex-col gap-3 mx-2 my-3">
-                        <div className={`flex justify-between items-center px-10 bg-${selectedTheme}-100 rounded-lg font-semibold p-2 drop-shadow-md`}>
-                          <p>{q.queue_number}</p>
-                          <p>{q.patient_name}</p>
-                          <button onClick={handleDismiss(i)} className={`p-1 rounded-lg bg-${selectedTheme}-600 text-${selectedTheme}-200 font-semibold text-xs md:text-sm lg:text-base`}>Dismiss</button>
-                        </div>
-                      </div>
-                    )
-                  } else {
-                    return null;
-                  }
-                })
-              }
-              </div>
-            </div>
-            {
-              queue && queue.length !== 0 && queue.map((q, i) => {
-                if (q.patient_status === 'emergency') {
+              {queue.length !== 0 && queue.map((q, i) => {
+                if (q.patient_status === displayedData[viewStateIndex]) {
                   return (
-                    <div key={i} className={`relative w-full md:w-full lg:grow flex flex-col h-auto bg-red-300 animate-pulse rounded-lg drop-shadow-md text-xs md:text-sm lg:text-base`}>
-                      <div className={`text-center border-b-[1px] border-red-800 shadow-md`}>
-                        <p className={`flex items-center justify-center gap-2 text-${selectedTheme}-600 font-bold text-base md:text-lg lg:text-xl`}>NO.{q.queue_number}<IoMdAlert /></p>
+                    <div key={i} className="flex flex-col gap-3 mx-2 my-3">
+                      <div className={`flex justify-between items-center px-10 bg-${selectedTheme}-100 rounded-lg font-semibold p-2 drop-shadow-md`}>
+                        <p>{q.queue_number}</p>
+                        <p>{q.patient_name}</p>
+                        <button onClick={handleDismiss(i)} className={`p-1 rounded-lg bg-${selectedTheme}-600 text-${selectedTheme}-200 font-semibold text-xs md:text-sm lg:text-base`}>Dismiss</button>
                       </div>
-                      <div className="flex flex-col gap-2 p-2 my-3">
-                        <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
-                          <p className="truncate">{q.patient_name}</p>
-                        </div>
-                        <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
-                          <p>{q.barangay_from}</p>
-                        </div>  
-                        <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
-                          <p>{q.patient_gender}</p>
-                        </div>
-                      </div>
-                      <p className="absolute bottom-0 right-0 p-1 text-xs md:text-sm lg:text-base font-thin">{getMeridianTime(q.time_arrived)}</p>
                     </div>
                   )
                 } else {
                   return null;
                 }
-              })
-            }
+              })}
+              </div>
+            </div>
+            {queue && queue.length > 0 && queue.map((q, i) => {
+              if (q.patient_status === 'emergency') {
+                return (
+                  <div key={i} className={`relative w-full md:w-full lg:grow flex flex-col h-auto bg-red-300 animate-pulse rounded-lg drop-shadow-md text-xs md:text-sm lg:text-base`}>
+                    <div className={`text-center border-b-[1px] border-red-800 shadow-md`}>
+                      <p className={`flex items-center justify-center gap-2 text-${selectedTheme}-600 font-bold text-base md:text-lg lg:text-xl`}>NO.{q.queue_number}<IoMdAlert /></p>
+                    </div>
+                    <div className="flex flex-col gap-2 p-2 my-3">
+                      <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
+                        <p className="truncate">{q.patient_name}</p>
+                      </div>
+                      <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
+                        <p>{q.barangay_from}</p>
+                      </div>  
+                      <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
+                        <p>{q.patient_gender}</p>
+                      </div>
+                    </div>
+                    <p className="absolute bottom-0 right-0 p-1 text-xs md:text-sm lg:text-base font-thin">{getMeridianTime(q.time_arrived)}</p>
+                  </div>
+                )
+              } else {
+                return null;
+              }
+            })}
 
-            {
-              waiting && waiting.length !== 0 && waiting.map((w, i) => (
-                <div key={i} className={`relative w-full md:w-full lg:grow flex flex-col h-auto bg-${selectedTheme}-50 rounded-lg drop-shadow-md text-xs md:text-sm lg:text-base`}>
-                  <div className={`text-center border-b-[1px] border-${selectedTheme}-800 shadow-md`}>
-                    <p className={`text-${selectedTheme}-600 font-bold text-base md:text-lg lg:text-xl`}>NO.{w.queue_number}</p>
-                  </div>
-                  <div className="flex flex-col gap-2 p-2 my-3">
-                    <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
-                      <p className="truncate">{w.patient_name}</p>
-                    </div>
-                    <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
-                      <p>{w.barangay_from}</p>
-                    </div>  
-                    <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
-                      <p>{w.patient_gender}</p>
-                    </div>
-                  </div>
-                  <p className="absolute bottom-0 right-0 p-1 text-xs md:text-sm lg:text-base font-thin">{getMeridianTime(w.time_arrived)}</p>
+            {waiting && waiting.length !== 0 && waiting.map((w, i) => (
+              <div key={i} className={`relative w-full md:w-full lg:grow flex flex-col h-auto bg-${selectedTheme}-50 rounded-lg drop-shadow-md text-xs md:text-sm lg:text-base`}>
+                <div className={`text-center border-b-[1px] border-${selectedTheme}-800 shadow-md`}>
+                  <p className={`text-${selectedTheme}-600 font-bold text-base md:text-lg lg:text-xl`}>NO.{w.queue_number}</p>
                 </div>
-              ))
-            }
+                <div className="flex flex-col gap-2 p-2 my-3">
+                  <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
+                    <p className="truncate">{w.patient_name}</p>
+                  </div>
+                  <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
+                    <p>{w.barangay_from}</p>
+                  </div>  
+                  <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
+                    <p>{w.patient_gender}</p>
+                  </div>
+                </div>
+                <p className="absolute bottom-0 right-0 p-1 text-xs md:text-sm lg:text-base font-thin">{getMeridianTime(w.time_arrived)}</p>
+              </div>
+            ))}
 
           </div>
 

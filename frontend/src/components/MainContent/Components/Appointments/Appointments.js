@@ -7,7 +7,7 @@ import Header from "../../Header";
 import DataTable from "../Elements/DataTable";
 import DatePicker from "./DatePicker";
 import useQuery from "../../../../hooks/useQuery";
-import Calendar from "./Calendar";
+// import Calendar from "./Calendar";
 import AppointmentOptions from "./AppointmentOptions";
 
 export const appointmentDate = createContext();
@@ -105,13 +105,7 @@ const Appointments = () => {
       setIsAppointmentOptionsOpen(false);
       appointmentOptionsRef.current.close();
     }
-  }
-
-  // useEffect(() => {
-  //   console.log("Start Date", startDate);
-  //   console.log("End Date", endDate);
-  //   console.log(new Date());
-  // }, [startDate, endDate]);
+  };
 
   // ADD 2 MORE ELEMENTS TO THE COMPONENT - CUSTOM CALENDAR & UPCOMMING APPOINTMENTS
   
@@ -124,13 +118,12 @@ const Appointments = () => {
         <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2 pb-52">
           <div className="flex flex-col justify-start gap-3">
 
-            <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 mb-3 w-full">
+            {/* <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 mb-3 w-full">
               <div>
               
               </div>
               <Calendar />
-            </div>
-
+            </div> */}
             <div className="place-self-end relative">
               <button onClick={() => toggleDate()} className={`flex justify-between items-center gap-2 p-2 rounded-md font-semibold bg-${selectedTheme}-300 text-${selectedTheme}-600 hover:bg-${selectedTheme}-400 hover:text-${selectedTheme}-700 active:bg-${selectedTheme}-700 active:text-${selectedTheme}-300 hover:scale-105 active:scale-95 transition-all duration-300 ease-linear text-xs md:text-sm lg:text-base`}>
                 {getDate(startDate)}/{getDate(endDate)}
@@ -146,7 +139,6 @@ const Appointments = () => {
             <div className={`z-0 w-full`}>
               <DataTable data={appointments} modalForm={pathname} toggleOption={toggleAppointmentOption} enImport={false} enExport={false} isLoading={isLoading} error={error} optionPK={"Number"}/>
             </div>
-
           </div>
         </div>
       </div>

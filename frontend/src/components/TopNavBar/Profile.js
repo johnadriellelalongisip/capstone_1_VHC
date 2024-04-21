@@ -3,22 +3,18 @@ import { IoMdSettings } from "react-icons/io";
 import { MdHelp, MdKeyboardArrowRight } from "react-icons/md";
 import { ImExit } from "react-icons/im";
 import { useContext, useState } from "react";
-import { colorTheme, isLoggedInContext } from "../../App";
+import { colorTheme } from "../../App";
 import useWindowSize from "../../hooks/useWindowSize";
 import OptionButton from "./OptionButton";
-import { redirect } from "react-router-dom";
 
 const Profile = ({ prof, toggle, toggleOptions, toggleHelp }) => {
   // eslint-disable-next-line no-unused-vars
-  const [isLoggedIn, setIsLoggedIn] = useContext(isLoggedInContext);
   const [selectedTheme] = useContext(colorTheme);
   const [rotateSetting, setRotateSetting] = useState(false);
   const {avatarSize} = useWindowSize();
   
   const Logout = () => {
-    redirect('/login');
-    setIsLoggedIn(false);
-    localStorage.setItem('isLoggedIn',false);
+
   };
 
   return (

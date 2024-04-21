@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, redirect } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { createContext, useEffect, useMemo, useRef, useState } from "react";
 
 import Notfound from './components/Notfound';
@@ -14,9 +14,6 @@ import Pharmacy from './components/MainContent/Components/Pharmacy/Pharmacy.js';
 import BloodUnit from './components/MainContent/Components/BloodUnit';
 import Queue from "./components/MainContent/Components/Queue/Queue.js";
 
-import Login from "./components/Login.js";
-import Register from "./components/Register.js";
-
 import { socket } from "./socket.js";
 import Appointments from "./components/MainContent/Components/Appointments/Appointments.js";
 import Accounts from "./components/MainContent/Components/Accounts/Accounts.js";
@@ -25,7 +22,7 @@ export const colorTheme = createContext();
 export const messaging = createContext();
 export const isLoggedInContext = createContext();
 
-const AppContent = () => {
+const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const loadingScreen = useRef(null);
 
@@ -40,6 +37,13 @@ const AppContent = () => {
     }, 1800);
     return () => clearTimeout(loadScreenTimeout, isLoadingTimeout);
   },[]);
+
+  useEffect(() => {
+    socket.connect();
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   if (localStorage.getItem('theme') === null) {
     localStorage.setItem('theme','blue');
@@ -95,45 +99,6 @@ const AppContent = () => {
     </div>
     </>
   );
-}
-
-const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn'));
-  useEffect(() => {
-    if (window.location.pathname !== '/login' && !localStorage.getItem('isLoggedIn')) {
-      redirect('/login');
-    }
-    setIsLoggedIn(localStorage.getItem('isLoggedIn'));
-  }, [isLoggedIn]);
-  
-  useEffect(() => {
-    socket.connect();
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
-  if (!isLoggedIn) {
-    return (
-      <BrowserRouter basename="/">
-        <Routes>
-          <Route path="login" element={
-            <isLoggedInContext.Provider value={[isLoggedIn, setIsLoggedIn]}><Login /></isLoggedInContext.Provider>
-          }/>
-          <Route path="register" element={<Register />}/>
-          <Route exact path="*" element={
-            <isLoggedInContext.Provider value={[isLoggedIn, setIsLoggedIn]}><Login /></isLoggedInContext.Provider>
-          } />
-        </Routes>
-      </BrowserRouter>
-    )
-  } else {
-    return (
-      <isLoggedInContext.Provider value={[isLoggedIn, setIsLoggedIn]}>
-        <AppContent />
-      </isLoggedInContext.Provider>
-    )
-  }
-}
+};
 
 export default App;

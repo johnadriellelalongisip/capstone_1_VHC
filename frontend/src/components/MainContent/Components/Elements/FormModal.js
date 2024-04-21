@@ -2,9 +2,10 @@ import RecordForm from './Forms/RecordForm';
 import PharmacyForm from './Forms/PharmacyForm';
 import DonorForm from './Forms/DonorForm';
 import { MdClose, MdCreate } from "react-icons/md";
-import { useContext } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { colorTheme } from '../../../../App';
 import NewAppointmentForm from './Forms/NewAppointmentForm';
+import ConfirmForm from '../../../../hooks/ConfirmForm';
 
 const SelectedForm = ({ formType, toggle }) => {
   const [selectedTheme] = useContext(colorTheme);
@@ -60,19 +61,62 @@ const SelectedForm = ({ formType, toggle }) => {
               <MdClose className='w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6'/>
             </button>
           </div>
-        </NewAppointmentForm>
+        </NewAppointmentForm> 
       </div>
     )
   }
-}
+};
 
-const FormModal = ({ formRef, toggleForm, formType}) => {
+export const confirmationContext = createContext();
+
+const FormModal = ({ formRef, toggleForm, formType }) => {
+  const confirmDialog = useRef(null);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [cancelMessage, setCancelMessage] = useState("");
+  const [backMessage, setBackMessage] = useState("");
+  const [selectedOption, setSelectedOption] = useState(false);
+
+  useEffect(() => {
+    
+  }, []);
+
+  const toggleConfirmDialog = () => {
+    console.log(isConfirmDialogOpen);
+    if (message) {
+      if (isConfirmDialogOpen) {
+        setIsConfirmDialogOpen(false);
+        confirmDialog.current.close();
+      } else {
+        setIsConfirmDialogOpen(true);
+        confirmDialog.current.showModal();
+      }
+    }
+  };
+
+  const onConfirm = () => {
+    setSelectedOption(true);
+  };
+
+  const onCancel = () => {
+    setSelectedOption(false);
+  };
+
+  const onBack = () => {
+    setSelectedOption(false);
+  };
   
   return ( 
-    <dialog ref={formRef} className='relative text-xs md:text-sm lg:text-base rounded-lg drop-shadow-lg z-52'>
-      <SelectedForm formType={formType} toggle={toggleForm}/>
-    </dialog>
+    <>
+      <dialog ref={formRef} className='relative text-xs md:text-sm lg:text-base rounded-lg drop-shadow-lg z-52'>
+        <confirmationContext.Provider value={[ message, setMessage, confirmMessage, setConfirmMessage, cancelMessage, setCancelMessage, backMessage, setBackMessage, toggleConfirmDialog, selectedOption ]}>
+          <SelectedForm formType={formType} toggle={toggleForm}/>
+        </confirmationContext.Provider>
+      </dialog>
+      <ConfirmForm confirmRef={confirmDialog} message={message} onConfirm={onConfirm} confirmMessage={confirmMessage} onCancel={onCancel} cancelMessage={cancelMessage} onBack={onBack} backMessage={backMessage} />
+    </>
   )
-}
+};
  
 export default FormModal;

@@ -17,7 +17,7 @@ class AppointmentController {
   async newAppointment(req, res) {
     try {
       const connection = await dbModel.getConnection();
-      const query = "INSERT INTO `appointments`(`citizen_id`, `fullname`, `phone_number`, `appointed_datetime`, `description`, `status`, `created_at`) VALUES (?, ?, ?, ?, ?, ?, ?) ";
+      const query = "INSERT INTO `appointments`(`citizen_id`, `fullname`, `phone_number`, `appointed_datetime`, `description`, `status`, `created_at`, `appointment_logs`) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ";
       const payload = req.body;
       const data = [
         payload.appointmentID ? appointmentID : null,
@@ -26,7 +26,8 @@ class AppointmentController {
         payload.appointedTime,
         payload.description,
         payload.status,
-        payload.appointedAt
+        payload.appointedAt,
+        `Added at : ${payload.appointedAt}`
       ];
       const response = await dbModel.query(query, data);
       dbModel.releaseConnection(connection);
