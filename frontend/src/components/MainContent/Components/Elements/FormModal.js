@@ -78,12 +78,7 @@ const FormModal = ({ formRef, toggleForm, formType }) => {
   const [backMessage, setBackMessage] = useState("");
   const [selectedOption, setSelectedOption] = useState(false);
 
-  useEffect(() => {
-    
-  }, []);
-
   const toggleConfirmDialog = () => {
-    console.log(isConfirmDialogOpen);
     if (message) {
       if (isConfirmDialogOpen) {
         setIsConfirmDialogOpen(false);
@@ -93,6 +88,7 @@ const FormModal = ({ formRef, toggleForm, formType }) => {
         confirmDialog.current.showModal();
       }
     }
+    setSelectedOption(false);
   };
 
   const onConfirm = () => {
@@ -101,10 +97,12 @@ const FormModal = ({ formRef, toggleForm, formType }) => {
 
   const onCancel = () => {
     setSelectedOption(false);
+    toggleConfirmDialog();
   };
 
   const onBack = () => {
     setSelectedOption(false);
+    toggleConfirmDialog();
   };
   
   return ( 

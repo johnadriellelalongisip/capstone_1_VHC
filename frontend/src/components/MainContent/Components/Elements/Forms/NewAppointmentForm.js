@@ -16,6 +16,7 @@ const NewAppointmentForm = ({ close, children }) => {
   const [inputState, setInputState] = useState(false);
   const { mysqlTime } = useCurrentTime();
 
+  // eslint-disable-next-line no-unused-vars
   const [message, setMessage, confirmMessage, setConfirmMessage, cancelMessage, setCancelMessage, backMessage, setBackMessage, toggleConfirmDialog, selectedOption, setSelectedOption] = useContext(confirmationContext);
   const { searchResults, isLoading, error, addData, searchItems } = useQuery();
 
@@ -29,6 +30,9 @@ const NewAppointmentForm = ({ close, children }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const appointmentLogs = {};
+    const JKey = String(mysqlTime);
+    appointmentLogs[JKey] = "Appointment Added";
     const payload = {
       appointmentID: appointmentID,
       fullname: fullname,
@@ -36,7 +40,8 @@ const NewAppointmentForm = ({ close, children }) => {
       appointedTime: appointment,
       description: description,
       status: "to be scheduled",
-      appointedAt: String(mysqlTime),
+      createdAt: mysqlTime,
+      logs: JSON.stringify(appointmentLogs)
     };
     const convertToMySQLDateTime = (dateTimeString) => {
         const date = new Date(dateTimeString);
@@ -72,7 +77,7 @@ const NewAppointmentForm = ({ close, children }) => {
   }, [error]);
 
   const handleNameChange = (e) => {
-    const specialCharacterPattern = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?0123456789]/g;
+    const specialCharacterPattern = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>?0123456789]/g;
     if (!specialCharacterPattern.test(e.target.value)) {
       setFullname(e.target.value);
     } else {
@@ -81,7 +86,7 @@ const NewAppointmentForm = ({ close, children }) => {
   };
 
   const toggleConfirm = () => {
-    setMessage(inputState ? "This will leave your Name unchanged, proceed?" : "This will leave your FamilyID unchanged, proceed?");
+    setMessage(!inputState ? "This will leave your Name unchanged, proceed?" : "This will leave your FamilyID unchanged, proceed?");
     setConfirmMessage("Proceed");
     setCancelMessage("Cancel");
     setBackMessage("Go Back?");
@@ -92,28 +97,28 @@ const NewAppointmentForm = ({ close, children }) => {
     if (selectedOption) {
       if (inputState) {
         setAppointmentID("");
+        toggleConfirmDialog();
       } else {
         setFullname("");
+        toggleConfirmDialog();
       }
       setInputState(prev => !prev);
-      toggleConfirmDialog();
-    } 
-    if (!selectedOption) {
-      toggleConfirmDialog();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedOption]);
   
-  const toggleInputState = (e) => {
-    e.preventDefault();
+  const toggleInputState = () => {
     if (appointmentID.length > 0) {
       toggleConfirm();
+    } else {
       setInputState(prev => !prev);
     }
     if (fullname.length > 0) {
       toggleConfirm();
+    } else {
       setInputState(prev => !prev);
     }
+    setInputState(prev => !prev);
   };
 
   const handleNumberChange = (e) => {
@@ -146,85 +151,92 @@ const NewAppointmentForm = ({ close, children }) => {
   return (
     <>
       {children}
-      <form className="flex flex-col gap-4 m-5 mt-20 md:mt-24 lg:mt-24 max-h-[450px] min-h-[450px] overflow-y-auto" onSubmit={handleSubmit}>
+      <div className="flex flex-col gap-4 m-5 mt-20 md:mt-24 lg:mt-24">
         <button onClick={toggleInputState} className={`font-semibold mt-2 p-2 rounded-md transition-colors duration-200 text-${selectedTheme}-100 bg-${selectedTheme}-700 hover:drop-shadow-md hover:bg-${selectedTheme}-800 focus:bg-${selectedTheme}-600 active:bg-${selectedTheme}-300 active:text-${selectedTheme}-600 active:shadow-inner active:ring-2 active:ring-${selectedTheme}-600`}>
           {inputState ? 'Add By FamilyID' : 'Add By Name'}
         </button>
-        <div>
-          <label htmlFor={inputState ? 'familyID' : 'fullname'} className='mb-2 text-xs md:text-sm lg:text-base font-semibold'>{inputState ? 'FamilyID' : 'Name'}:<span className="text-red-600 font-bold">*</span></label>
-          <input
-              type="text"
-              name={inputState ? 'familyID' : 'fullname'}
-              id={inputState ? 'familyID' : 'fullname'}
-              list="recordSuggestions"
-              required
-              value={inputState ? appointmentID : fullname}
-              onChange={inputState ? (e) => setAppointmentID(e.target.value) : handleNameChange}
+        <form className="flex flex-col gap-4 max-h-[500px] min-h-[500px] overflow-y-auto" onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor={inputState ? 'familyID' : 'fullname'} className='mb-2 text-xs md:text-sm lg:text-base font-semibold'>{inputState ? 'FamilyID' : 'Name'}:<span className="text-red-600 font-bold">*</span></label>
+            <input
+                type="text"
+                name={inputState ? 'familyID' : 'fullname'}
+                id={inputState ? 'familyID' : 'fullname'}
+                list="recordSuggestions"
+                required
+                value={inputState ? appointmentID : fullname}
+                onChange={inputState ? (e) => setAppointmentID(e.target.value) : handleNameChange}
+                autoComplete="off"
+                className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
+                placeholder={inputState ? "Enter patient's FamilyID. . . . ." : "Enter appointee's full name. . . . ."}
+                maxLength={100}
+              />
+            {/* <datalist id="recordSuggestions">
+              {suggestions && suggestions.slice(0,5).map((name, i) => (
+                <option key={i}>{name}</option>
+              ))}
+            </datalist>
+            <p className={`text-xs text-${selectedTheme}-700 font-thin mt-2 p-2 bg-${selectedTheme}-50 rounded-lg text-center`}>
+              Type a name and press enter to search existing citizen.
+            </p> */}
+          </div>
+          <div>
+            <label htmlFor="phoneNumber" className='mb-2 text-xs md:text-sm lg:text-base font-semibold'>Contact Number:</label>
+            <input 
+              type="text" 
+              name="phoneNumber" 
+              id="phoneNumber"
               autoComplete="off"
+              value={phoneNumber}
+              onChange={handleNumberChange}
               className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
-              placeholder={inputState ? "Enter patient's FamilyID. . . . ." : "Enter appointee's full name. . . . ."}
-              maxLength={100}
+              placeholder="Enter personal contact number. . . . ."
+              maxLength={12}
             />
-          {/* <datalist id="recordSuggestions">
-            {suggestions && suggestions.slice(0,5).map((name, i) => (
-              <option key={i}>{name}</option>
-            ))}
-          </datalist>
-          <p className={`text-xs text-${selectedTheme}-700 font-thin mt-2 p-2 bg-${selectedTheme}-50 rounded-lg text-center`}>
-            Type a name and press enter to search existing citizen.
-          </p> */}
-        </div>
-        <div>
-          <label htmlFor="phoneNumber" className='mb-2 text-xs md:text-sm lg:text-base font-semibold'>Contact Number:</label>
-          <input 
-            type="text" 
-            name="phoneNumber" 
-            id="phoneNumber"
-            autoComplete="off"
-            value={phoneNumber}
-            onChange={handleNumberChange}
-            className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
-            placeholder="Enter personal contact number. . . . ."
-            maxLength={12}
-          />
-        </div>
-        <div>
-          <label htmlFor="description" className='text-xs md:text-sm lg:text-base font-semibold'>Description & Reason:<span className="text-red-600 font-bold">*</span></label>
-          <textarea 
-            name="description"
-            id="description"
-            required
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
-            placeholder="Reason for appointment. . . . ."
-            rows={4}
-            maxLength={255}
-          />
-        </div>
-        <div>
-          <label htmlFor="appointmentdatetime" className='text-xs md:text-sm lg:text-base font-semibold'>Appointed Date & Time:<span className="text-red-600 font-bold">*</span><span className="text-xs text-red font-thin text-red text-nowrap w-min">{errorPrompt && errorPrompt}</span></label>
-          <input 
-            type="datetime-local"
-            name="appointmentdatetime"
-            id="appointmentdatetime"
-            required
-            value={appointment}
-            onChange={handleDateChange}
-            className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
-          />
-        </div>
-        {inputState ? (
-          <p className={`text-wrap text-xs md:text-sm lg:text-sm text-${selectedTheme}-700 font-thin p-1 bg-${selectedTheme}-50 rounded-lg text-center`}>
-            Creating an appointment without the patient's ID will automatically add as a new record.
-          </p>
-        ):(
-          <p className={`text-xs md:text-sm lg:text-sm text-${selectedTheme}-700 font-thin p-1 bg-${selectedTheme}-50 rounded-lg text-center`}>
-            Proceeding to create this appointment will add this action to the record's history.
-          </p>
-        )}
-        <button disabled={isLoading} type="submit" className={`font-semibold p-2 rounded-md w-full transition-colors duration-200 ${!isLoading ? `text-${selectedTheme}-100 bg-${selectedTheme}-700 hover:drop-shadow-md hover:bg-${selectedTheme}-800 focus:bg-${selectedTheme}-600 active:bg-${selectedTheme}-300 active:text-${selectedTheme}-600 active:shadow-inner active:ring-2 active:ring-${selectedTheme}-600` : `text-${selectedTheme}-700 bg-${selectedTheme}-100 shadow-inner` }`}><p className="drop-shadow-lg">{!isLoading ? 'Create new appointment' : <Spinner/>}</p></button>
-      </form>
+          </div>
+          <div>
+            <label htmlFor="description" className='text-xs md:text-sm lg:text-base font-semibold'>Description & Reason:<span className="text-red-600 font-bold">*</span></label>
+            <textarea 
+              name="description"
+              id="description"
+              required
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
+              placeholder="Reason for appointment. . . . ."
+              rows={4}
+              maxLength={255}
+            />
+          </div>
+          <div className="relative">
+            <label htmlFor="appointmentdatetime" className='relative text-xs md:text-sm lg:text-base font-semibold'>
+              Appointed Date & Time:<span className="text-red-600 font-bold">*</span>
+              {errorPrompt && 
+                <p className="absolute left-0 text-xs border-[1px] border-red bg-red-100 rounded-lg p-1 text-red font-thin text-red text-nowrap w-min">{errorPrompt && errorPrompt}</p>
+              }
+            </label>
+            <input 
+              type="datetime-local"
+              name="appointmentdatetime"
+              id="appointmentdatetime"
+              required
+              value={appointment}
+              onChange={handleDateChange}
+              className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
+            />
+          </div>
+          {inputState ? (
+            <p className={`text-wrap text-xs md:text-sm lg:text-sm text-${selectedTheme}-700 font-thin p-1 bg-${selectedTheme}-50 rounded-lg text-center`}>
+              Creating an appointment without the patient's ID will automatically add as a new record.
+            </p>
+          ):(
+            <p className={`text-xs md:text-sm lg:text-sm text-${selectedTheme}-700 font-thin p-1 bg-${selectedTheme}-50 rounded-lg text-center`}>
+              Proceeding to create this appointment will add this action to the record's history.
+            </p>
+          )}
+          <button disabled={isLoading} type="submit" className={`font-semibold p-2 rounded-md w-full transition-colors duration-200 ${!isLoading ? `text-${selectedTheme}-100 bg-${selectedTheme}-700 hover:drop-shadow-md hover:bg-${selectedTheme}-800 focus:bg-${selectedTheme}-600 active:bg-${selectedTheme}-300 active:text-${selectedTheme}-600 active:shadow-inner active:ring-2 active:ring-${selectedTheme}-600` : `text-${selectedTheme}-700 bg-${selectedTheme}-100 shadow-inner` }`}><p className="drop-shadow-lg">{!isLoading ? 'Create new appointment' : <Spinner/>}</p></button>
+        </form>
+      </div>
     </>
   )
 }

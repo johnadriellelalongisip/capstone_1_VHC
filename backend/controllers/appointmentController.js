@@ -26,8 +26,8 @@ class AppointmentController {
         payload.appointedTime,
         payload.description,
         payload.status,
-        payload.appointedAt,
-        `Added at : ${payload.appointedAt}`
+        payload.createdAt,
+        payload.logs,
       ];
       const response = await dbModel.query(query, data);
       dbModel.releaseConnection(connection);
