@@ -22,7 +22,7 @@ const AddToQueue = ({ ATref, ATonClick }) => {
   const [isChecked, setIsChecked] = useState(true);
   const barangays = [
     'Alcate',
-    'Antonino (Malinao)',
+    'Antonino',
     'Babangonan',
     'Bagong Buhay',
     'Bagong Silang',

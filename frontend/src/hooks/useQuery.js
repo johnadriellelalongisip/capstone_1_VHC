@@ -50,10 +50,10 @@ const useQuery = () => {
     }
   };
 
-  const deleteData = async (route, id, token) => {
+  const deleteData = async (route, payload, id, token) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${BASE_URL}${route}`, id, headers(token));
+      const response = await axios.post(`${BASE_URL}${route}/${id}`, payload, headers(token));
       setResponse(response.data);
       setIsLoading(false);
     } catch (error) {

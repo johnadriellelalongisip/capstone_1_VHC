@@ -71,7 +71,7 @@ class RecordController {
   async findRecord(req, res) {
     try {
       const connection = await dbModel.getConnection();
-      const query = "SELECT `citizen_history`, `citizen_firstname`,`citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_birthdate` FROM `municipal_citizens` WHERE `citizen_family_id` = ?";
+      const query = "SELECT `citizen_history`, `citizen_firstname`,`citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_number`, `citizen_birthdate` FROM `municipal_citizens` WHERE `citizen_family_id` = ?";
       const family_id = req.params.id;
       const response = await dbModel.query(query, family_id);
       dbModel.releaseConnection(connection);

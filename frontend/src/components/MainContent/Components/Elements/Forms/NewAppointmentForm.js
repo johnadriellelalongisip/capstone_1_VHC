@@ -1,9 +1,10 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { colorTheme } from "../../../../../App";
 import { Spinner } from "flowbite-react";
 import useQuery from "../../../../../hooks/useQuery";
 import useCurrentTime from "../../../../../hooks/useCurrentTime";
 import { confirmationContext } from "../FormModal";
+import { MdOutlineRadioButtonChecked, MdOutlineRadioButtonUnchecked } from "react-icons/md";
 
 const NewAppointmentForm = ({ close, children }) => {
   const [selectedTheme] = useContext(colorTheme);
@@ -14,11 +15,12 @@ const NewAppointmentForm = ({ close, children }) => {
   const [appointment, setAppointment] = useState("");
   const [errorPrompt, setErrorPrompt] = useState("");
   const [inputState, setInputState] = useState(false);
+  const [useRecordNum, setUseRecordNum] = useState(false);
   const { mysqlTime } = useCurrentTime();
 
   // eslint-disable-next-line no-unused-vars
   const [message, setMessage, confirmMessage, setConfirmMessage, cancelMessage, setCancelMessage, backMessage, setBackMessage, toggleConfirmDialog, selectedOption, setSelectedOption] = useContext(confirmationContext);
-  const { searchResults, isLoading, error, addData, searchItems } = useQuery();
+  const { searchResults, isLoading, error, addData, searchData } = useQuery();
 
   function cleanUp() {
     setFullname("");
@@ -36,7 +38,7 @@ const NewAppointmentForm = ({ close, children }) => {
     const payload = {
       appointmentID: appointmentID,
       fullname: fullname,
-      phonenumber: !phoneNumber ? searchResults?.data[0].citizen_number : phoneNumber,
+      phonenumber: phoneNumber,
       appointedTime: appointment,
       description: description,
       status: "to be scheduled",
@@ -44,14 +46,14 @@ const NewAppointmentForm = ({ close, children }) => {
       logs: JSON.stringify(appointmentLogs)
     };
     const convertToMySQLDateTime = (dateTimeString) => {
-        const date = new Date(dateTimeString);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      const date = new Date(dateTimeString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     };
     const convertedPayload = {
         ...payload,
@@ -59,7 +61,11 @@ const NewAppointmentForm = ({ close, children }) => {
         appointedAt: convertToMySQLDateTime(payload.appointedAt)
     };
     if (new Date(appointment) > new Date()) {
-      addData("newAppointment", convertedPayload);
+      if (inputState) {
+        addData("newAppointmentByFamID", convertedPayload);
+      } else {
+        addData("newAppointment", convertedPayload);
+      }
       cleanUp();
       close();
     } else {
@@ -118,6 +124,7 @@ const NewAppointmentForm = ({ close, children }) => {
     } else {
       setInputState(prev => !prev);
     }
+    setPhoneNumber("");
     setInputState(prev => !prev);
   };
 
@@ -130,30 +137,30 @@ const NewAppointmentForm = ({ close, children }) => {
     }
   };
 
-  const handleDateChange = (e) => {
-    const value = e.target.value;
-    if (!value) {
-      setAppointment("");
-      return;
-    }
-    const currentDate = new Date(value);
-    if (currentDate < new Date()) {
-      setErrorPrompt("Appointment can't be before or the current day!");
-      setTimeout(() => {
-        setErrorPrompt(""); 
-      }, 3000);
-    } else {
-      const formattedDate = currentDate.toISOString().slice(0, 16);
-      setAppointment(formattedDate);
-    }
-  };
+  // const handleDateChange = (e) => {
+  //   const value = e.target.value;
+  //   if (!value) {
+  //     setAppointment("");
+  //     return;
+  //   }
+  //   const currentDate = new Date(value);
+  //   if (currentDate < new Date()) {
+  //     setErrorPrompt("Appointment can't be before or the current day!");
+  //     setTimeout(() => {
+  //       setErrorPrompt(""); 
+  //     }, 3000);
+  //   } else {
+  //     const formattedDate = currentDate.toISOString().slice(0, 16);
+  //     setAppointment(formattedDate);
+  //   }
+  // };
 
   return (
     <>
       {children}
       <div className="flex flex-col gap-4 m-5 mt-20 md:mt-24 lg:mt-24">
         <button onClick={toggleInputState} className={`font-semibold mt-2 p-2 rounded-md transition-colors duration-200 text-${selectedTheme}-100 bg-${selectedTheme}-700 hover:drop-shadow-md hover:bg-${selectedTheme}-800 focus:bg-${selectedTheme}-600 active:bg-${selectedTheme}-300 active:text-${selectedTheme}-600 active:shadow-inner active:ring-2 active:ring-${selectedTheme}-600`}>
-          {inputState ? 'Add By FamilyID' : 'Add By Name'}
+          {!inputState ? 'Add By FamilyID' : 'Add By Name'}
         </button>
         <form className="flex flex-col gap-4 max-h-[500px] min-h-[500px] overflow-y-auto" onSubmit={handleSubmit}>
           <div>
@@ -182,17 +189,29 @@ const NewAppointmentForm = ({ close, children }) => {
           </div>
           <div>
             <label htmlFor="phoneNumber" className='mb-2 text-xs md:text-sm lg:text-base font-semibold'>Contact Number:</label>
-            <input 
-              type="text" 
-              name="phoneNumber" 
-              id="phoneNumber"
-              autoComplete="off"
-              value={phoneNumber}
-              onChange={handleNumberChange}
-              className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
-              placeholder="Enter personal contact number. . . . ."
-              maxLength={12}
-            />
+            <div className="flex gap-1 flex-row justify-start items-center">
+              <input 
+                type="text" 
+                name="phoneNumber" 
+                id="phoneNumber"
+                autoComplete="off"
+                value={phoneNumber}
+                onChange={handleNumberChange}
+                className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
+                placeholder={inputState ? (!useRecordNum ? 'Enter personal contact number. . . .' : 'Proceeding will use the contact number of this citizen') : 'Enter personal contact number. . . . .'}
+                maxLength={12}
+                disabled={inputState ? useRecordNum : false}
+              />
+              {inputState && 
+                <button onClick={(e) => {e.preventDefault(); setPhoneNumber(""); setUseRecordNum(prev => !prev)}}>
+                  {useRecordNum ? (
+                    <MdOutlineRadioButtonChecked className="size-6 md:size-7 lg:size-8" />
+                  ):(
+                    <MdOutlineRadioButtonUnchecked className="size-6 md:size-7 lg:size-8"/>
+                  )}
+                </button>
+              }
+            </div>
           </div>
           <div>
             <label htmlFor="description" className='text-xs md:text-sm lg:text-base font-semibold'>Description & Reason:<span className="text-red-600 font-bold">*</span></label>
@@ -221,13 +240,13 @@ const NewAppointmentForm = ({ close, children }) => {
               id="appointmentdatetime"
               required
               value={appointment}
-              onChange={handleDateChange}
+              onChange={(e) => setAppointment(e.target.value)}
               className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
             />
           </div>
-          {inputState ? (
-            <p className={`text-wrap text-xs md:text-sm lg:text-sm text-${selectedTheme}-700 font-thin p-1 bg-${selectedTheme}-50 rounded-lg text-center`}>
-              Creating an appointment without the patient's ID will automatically add as a new record.
+          {!inputState ? (
+            <p className={`text-wrap text-red-700 text-xs md:text-sm lg:text-sm font-thin p-1 bg-${selectedTheme}-50 rounded-lg text-center`}>
+              Note: If there's no provided FAMILY ID, create or search the name on the records.
             </p>
           ):(
             <p className={`text-xs md:text-sm lg:text-sm text-${selectedTheme}-700 font-thin p-1 bg-${selectedTheme}-50 rounded-lg text-center`}>

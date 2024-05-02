@@ -1,6 +1,6 @@
 import io from 'socket.io-client';
 import { AES, enc } from 'crypto-js';
-import { useEffect } from 'react';
+// import { useEffect } from 'react';
 
 const useSocket = () => {
   const socket = io(String(process.env.REACT_APP_BASE_SOCKET), {
@@ -39,14 +39,14 @@ const useSocket = () => {
     });
   }
 
-  useEffect(() => {
-    return () => {
-      if (socket.connected) {
-        socket.disconnect();
-      }
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socket]);
+  // useEffect(() => {
+  //   return () => {
+  //     if (socket.connected) {
+  //       socket.disconnect();
+  //     }
+  //   };
+  // // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [socket]);
 
   return {
     socketReconnect,

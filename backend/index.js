@@ -4,7 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
 const routes = require('./routes/routes');
-// const initializeMessageSocket = require('./sockets/messageSocket');
 const initializeDatabaseSocket = require('./sockets/databaseSocket');
 
 const app = express();
@@ -28,7 +27,6 @@ app.use('/api', routes);
 
 const server = https.createServer(serverOptions, app);
 
-// const messageIO = initializeMessageSocket(server);
 const databaseIO = initializeDatabaseSocket(server);
 
 server.listen(port, () => {

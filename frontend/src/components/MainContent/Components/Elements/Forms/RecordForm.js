@@ -20,7 +20,7 @@ const RecordForm = ( { close, children } ) => {
   const { mysqlTime } = useCurrentTime();
   const barangays = [
     'Alcate',
-    'Antonino (Malinao)',
+    'Antonino',
     'Babangonan',
     'Bagong Buhay',
     'Bagong Silang',

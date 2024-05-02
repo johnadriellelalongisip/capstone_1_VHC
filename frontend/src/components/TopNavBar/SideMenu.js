@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { MdHome, MdSpaceDashboard, MdFolder, MdAnalytics, MdLocalPharmacy, MdPeople } from "react-icons/md";
-import { FaUsers } from "react-icons/fa";
+import { FaMapMarkedAlt, FaUsers } from "react-icons/fa";
 import { BiSolidDonateBlood } from "react-icons/bi";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { colorTheme } from "../../App";
@@ -64,6 +64,7 @@ const SideMenu = () => {
       <Menu path="records" Icon={MdFolder} label="Records" />
       <Menu path="pharmacy" Icon={MdLocalPharmacy} label="Pharmacy" />
       <Menu path="blood_unit" Icon={BiSolidDonateBlood} label="Blood Unit" />
+      <Menu path="mapping" Icon={FaMapMarkedAlt} label="Mapping" />
       <Menu path="accounts" Icon={FaUsers} label="Accounts" />
       <Outlet />
     </div>

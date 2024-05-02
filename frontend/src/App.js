@@ -17,6 +17,7 @@ import Queue from "./components/MainContent/Components/Queue/Queue.js";
 import { socket } from "./socket.js";
 import Appointments from "./components/MainContent/Components/Appointments/Appointments.js";
 import Accounts from "./components/MainContent/Components/Accounts/Accounts.js";
+import Mapping from "./components/MainContent/Components/Mapping/Mapping.js";
 
 export const colorTheme = createContext();
 export const messaging = createContext();
@@ -25,6 +26,20 @@ export const isLoggedInContext = createContext();
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const loadingScreen = useRef(null);
+  const currentPath = window.location.pathname.slice(1);
+  // const validPaths = [
+  //   "dashboard",
+  //   "users",
+  //   "accounts",
+  //   "appointments",
+  //   "home",
+  //   "queue",
+  //   "analytics",
+  //   "records",
+  //   "pharmacy",
+  //   "blood_unit",
+  //   "mapping"
+  // ];
 
   useEffect(() => {
     setIsLoading(true);
@@ -39,6 +54,10 @@ const App = () => {
   },[]);
 
   useEffect(() => {
+    // console.log(currentPath);
+    // if (!validPaths.includes(currentPath)) {
+    //   window.location.href = '/home';
+    // }
     socket.connect();
     return () => {
       socket.disconnect();
@@ -90,6 +109,7 @@ const App = () => {
                 <Route path='records' element={<Records />}/>
                 <Route path='pharmacy' element={<Pharmacy />}/>
                 <Route path='blood_unit' element={<BloodUnit />}/>
+                <Route path='mapping' element={<Mapping />}/>
                 <Route path='*' element={<Notfound />}/>
               </Routes>
             </div>
