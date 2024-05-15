@@ -9,9 +9,9 @@ class UserController {
       const response = await dbModel.query(query, [user.firstname, user.lastname]);
       const data = await dbModel.query('SELECT * FROM ??', 'users');
       dbModel.releaseConnection(connection);
-      res.status(200).json({ response, data });
+      return res.status(200).json({ response, data });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error
@@ -24,9 +24,9 @@ class UserController {
       const connection = await dbModel.getConnection();
       const data = await dbModel.query('SELECT * FROM users');
       dbModel.releaseConnection(connection);
-      res.status(200).json({ data });
+      return res.status(200).json({ data });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error
@@ -40,9 +40,9 @@ class UserController {
       const userId = req.params.id;
       const data = await dbModel.query('SELECT * FROM users WHERE id = ?', userId);
       dbModel.releaseConnection(connection);
-      res.status(202).json({ data });
+      return res.status(202).json({ data });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error
@@ -57,9 +57,9 @@ class UserController {
       const response = await dbModel.query('DELETE FROM users WHERE id = ?', userId);
       const data = await dbModel.query('SELECT * FROM users');
       dbModel.releaseConnection(con);
-      res.status(202).json({ response,data });
+      return res.status(202).json({ response,data });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error
@@ -79,9 +79,9 @@ class UserController {
       const response = await dbModel.query('UPDATE users SET first_name = ?, last_name = ? WHERE id = ?', values);
       const data = await dbModel.query('SELECT * FROM users');
       dbModel.releaseConnection(con);
-      res.status(202).json({ response, data });
+      return res.status(202).json({ response, data });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error

@@ -59,10 +59,6 @@ const RecordForm = ( { close, children } ) => {
     setFamilyId(GenerateFamId(8).toUpperCase());
   }, []);
 
-  useEffect(() => {
-    socket.emit('updateRecords');
-  }, [response]);
-
   const GenerateFamId = (length) => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -115,7 +111,7 @@ const RecordForm = ( { close, children } ) => {
       phone_number: phoneNumber,
       date_added: mysqlTime,
       history: JSON.stringify(history)
-    }
+    };
     e.preventDefault();
     if(dontCloseUponSubmission) {
       addData('addRecord',payload);
@@ -125,6 +121,9 @@ const RecordForm = ( { close, children } ) => {
       addData('addRecord',payload);
       cleanUp();
     }
+    setTimeout(() => {
+      socket.emit('updateRecords');
+    },[500])
   }
 
   // THIS FORM SHOULD AUTO COMPLETE THE BARANGAY DEPENDING ON THE FAMILY NAME THAT IS ALSO WITHIN WHAT BARANGAY THE FAMILY NAME IS IN
@@ -176,7 +175,7 @@ const RecordForm = ( { close, children } ) => {
             value={lastname} onChange={(e) => setLastName(e.target.value)}
           />
         </div>
-        <div className="flex gap-4 justify-between items-center">
+        <div className="flex flex-col md:flex-row lg:flex-row gap-4 justify-between items-start">
           <fieldset className="flex flex-row gap-3 p-2">
             <legend className="mr-4 text-xs md:text-sm lg:text-base">Choose a gender</legend>
             <div className="flex items-center gap-2">
@@ -252,7 +251,7 @@ const RecordForm = ( { close, children } ) => {
               value={phoneNumber} 
               onChange={parsePhoneNumber} 
               maxLength={12} 
-              minLength={11}
+              minLength={10}
             />
           </div>
         </div>

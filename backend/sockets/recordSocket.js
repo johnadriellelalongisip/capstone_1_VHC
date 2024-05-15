@@ -1,16 +1,7 @@
-const { Server } = require('socket.io');
 const dbModel = require('../models/database_model');
 
-function initializeDatabaseSocket(server) {
-  const io = new Server(server, {
-    cors: {
-      origin: "https://localhost:3000",
-      methods: ["GET"],
-    },
-  });
-
-  io.on("connection", (socket) => {
-    console.log(`Client connected: ${socket.id}`);
+module.exports = function(io) {
+  io.on('connection', (socket) => {
     socket.on('updateRecords', async () => {
       try {
         const connection = await dbModel.getConnection();
@@ -22,22 +13,18 @@ function initializeDatabaseSocket(server) {
           const month = String(date.getMonth() + 1).padStart(2, '0');
           const day = String(date.getDate()).padStart(2, '0');
           const formattedDate = `${month}-${day}-${year}`;
-      
           return {
               citizen_family_id: res.citizen_family_id,
               ...res,
               citizen_birthdate: formattedDate
           };
         });
+        socket.emit('newRecords', newResponse);
         socket.broadcast.emit('newRecords', newResponse);
       } catch (error) {
-        console.error("Error retrieving records:", error);
         socket.emit('newRecordsError', error.message);
+        socket.broadcast.emit('newRecordsError', error.message);
       }
     });
   });
-
-  return io;
-}
-
-module.exports = initializeDatabaseSocket;
+};

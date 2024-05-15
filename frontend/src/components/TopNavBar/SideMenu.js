@@ -57,14 +57,14 @@ const SideMenu = () => {
   return (
     <div className={`flex flex-col text-${selectedTheme}-700 font-semibold`}>
       <Menu path="home" Icon={MdHome} label="Home" />
-      <Menu path="appointments" Icon={IoCalendar} label="Appointments" />
-      <Menu path="queue" Icon={MdPeople} label="Queues" />
       <Menu path="dashboard" Icon={MdSpaceDashboard} label="Dashboard" />
       <Menu path="analytics" Icon={MdAnalytics} label="Analytics" />
+      <Menu path="mapping" Icon={FaMapMarkedAlt} label="Mapping" />
+      <Menu path="appointments" Icon={IoCalendar} label="Appointments" />
+      <Menu path="queue" Icon={MdPeople} label="Queues" />
       <Menu path="records" Icon={MdFolder} label="Records" />
       <Menu path="pharmacy" Icon={MdLocalPharmacy} label="Pharmacy" />
       <Menu path="blood_unit" Icon={BiSolidDonateBlood} label="Blood Unit" />
-      <Menu path="mapping" Icon={FaMapMarkedAlt} label="Mapping" />
       <Menu path="accounts" Icon={FaUsers} label="Accounts" />
       <Outlet />
     </div>

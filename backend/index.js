@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
 const routes = require('./routes/routes');
-const initializeDatabaseSocket = require('./sockets/databaseSocket');
+const initializeWebSocket = require('./sockets/eventDispatcher');
 
 const app = express();
 const port = 5000;
@@ -27,7 +27,7 @@ app.use('/api', routes);
 
 const server = https.createServer(serverOptions, app);
 
-const databaseIO = initializeDatabaseSocket(server);
+initializeWebSocket(server);
 
 server.listen(port, () => {
   console.log(`Server is running on port https://localhost:${port}`);

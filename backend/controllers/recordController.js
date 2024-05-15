@@ -21,14 +21,14 @@ class RecordController {
       ];
       const response = await dbModel.query(query, data)
       dbModel.releaseConnection(connection);
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
         message: 'Record added successfully',
         response: response,
         payload: data,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error
@@ -54,13 +54,13 @@ class RecordController {
             citizen_birthdate: formattedDate
         };
       });
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
         message: "Data retrieved successfully",
         data: newResponse
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error.message
@@ -75,13 +75,13 @@ class RecordController {
       const family_id = req.params.id;
       const response = await dbModel.query(query, family_id);
       dbModel.releaseConnection(connection);
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
         message: "Data retrieved successfully",
         data: response,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error.message
@@ -100,13 +100,13 @@ class RecordController {
       const query = 'UPDATE `municipal_citizens` SET `citizen_history` = ? WHERE `citizen_family_id` = ?';
       const response = await dbModel.query(query, [JSON.stringify(newHistory), family_id]);
       dbModel.releaseConnection(connection);
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
         message: "Data updated successfully",
         response: response
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error.message
@@ -122,20 +122,20 @@ class RecordController {
       const response = await dbModel.query(query, nameInput);
       dbModel.releaseConnection(connection);
       if (response.length !== 0) {
-        res.status(200).json({
+        return res.status(200).json({
           status: 200,
           message: "Data retrieved successfully",
           data: response,
         });
       } else {
-        res.status(204).json({
+        return res.status(204).json({
           status: 204,
           message: "Nothing data found",
           data: response,
         });
       }
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error.message

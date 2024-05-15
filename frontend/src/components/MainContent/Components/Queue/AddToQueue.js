@@ -4,6 +4,7 @@ import { MdClose, MdPeople } from "react-icons/md";
 import { Checkbox, Label, Radio, Spinner } from "flowbite-react";
 import useQuery from "../../../../hooks/useQuery";
 import useCurrentTime from "../../../../hooks/useCurrentTime";
+import { socket } from "../../../../socket";
 
 const AddToQueue = ({ ATref, ATonClick }) => {
   const [selectedTheme] = useContext(colorTheme);
@@ -103,6 +104,9 @@ const AddToQueue = ({ ATref, ATonClick }) => {
       cleanUp();
       ATonClick();
     }
+    setTimeout(() => {
+      socket.emit("updateQueue");
+    },500);
   };
   const handleEnter = (event) => {
     if (event.key === 'Enter' && isNameFocused && payload.name) {

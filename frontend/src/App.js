@@ -26,20 +26,6 @@ export const isLoggedInContext = createContext();
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const loadingScreen = useRef(null);
-  const currentPath = window.location.pathname.slice(1);
-  // const validPaths = [
-  //   "dashboard",
-  //   "users",
-  //   "accounts",
-  //   "appointments",
-  //   "home",
-  //   "queue",
-  //   "analytics",
-  //   "records",
-  //   "pharmacy",
-  //   "blood_unit",
-  //   "mapping"
-  // ];
 
   useEffect(() => {
     setIsLoading(true);
@@ -54,10 +40,6 @@ const App = () => {
   },[]);
 
   useEffect(() => {
-    // console.log(currentPath);
-    // if (!validPaths.includes(currentPath)) {
-    //   window.location.href = '/home';
-    // }
     socket.connect();
     return () => {
       socket.disconnect();

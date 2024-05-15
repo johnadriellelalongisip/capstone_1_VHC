@@ -42,13 +42,13 @@ class AppointmentController {
       ];
       const response = await dbModel.query(query, data);
       dbModel.releaseConnection(connection);
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
-        message: "Data retrieved successfully",
+        message: "Data added successfully",
         data: response,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error,
@@ -90,15 +90,15 @@ class AppointmentController {
       const query = "INSERT INTO `appointments`(`citizen_id`, `fullname`, `phone_number`, `appointed_datetime`, `description`, `status`, `created_at`, `appointment_logs`) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ";
       const createResponse = await dbModel.query(query, data);
       dbModel.releaseConnection(connection);
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
-        message: "Data retrieved successfully",
+        message: "Data added successfully",
         createResponse: createResponse,
         retrieveResponse: retrieveResponse, 
         updateResponse: updateResponse
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error,
@@ -118,19 +118,20 @@ class AppointmentController {
           created_at: convertDate(res.created_at)
         }
       });
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
         message: "Data retrieved successfully",
         data: newResponse
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error
       });
     }
   }
+  
   async editAppointment(req, res) {
     try {
       const connection = await dbModel.getConnection();
@@ -143,13 +144,13 @@ class AppointmentController {
           created_at: convertDate(res.created_at)
         }
       });
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
         message: "Data retrieved successfully",
         data: newResponse
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error
@@ -160,9 +161,9 @@ class AppointmentController {
   async handleCancelAppointment(req, res) {
     try {
       const connection = await dbModel.getConnection();
-      const retrieveQuery = "SELECT `appointment_logs` FROM `appointments` WHERE `appointment_id` = ?";
-      const retreiveResponse = await dbModel.query(retrieveQuery, req.params.id);
-      const oldLogs = JSON.parse(retreiveResponse[0].appointment_logs);
+      const retrieveQuery = "SELECT `status`, `appointment_logs` FROM `appointments` WHERE `appointment_id` = ?";
+      const retrieveResponse = await dbModel.query(retrieveQuery, req.params.id);
+      const oldLogs = JSON.parse(retrieveResponse[0].appointment_logs);
       const newLogs = {};
       const LKey = String(convertDate(new Date));
       newLogs[LKey] = "Appointment Cancelled"
@@ -175,19 +176,29 @@ class AppointmentController {
         JSON.stringify(newAppointmentLog),
         req.params.id
       ];
-      const updateQuery = "UPDATE `appointments` SET `status` = ?, `appointment_logs` = ? WHERE `appointment_id` = ?";
-      const updateResponse = await dbModel.query(updateQuery, updatePayload);
-      const newData = new Date();
-      console.log(newData);
-      dbModel.releaseConnection(connection);
-      res.status(200).json({
-        status: 200,
-        message: "Appointment successfully cancelled!",
-        retrieveResponse: retreiveResponse,
-        updateResponse: updateResponse
-      });
+      console.log(retrieveResponse);
+      if (retrieveResponse[0].status === "appointment cancelled") {
+        return res.status(200).json({
+          status:200,
+          message: "Appointment already cancelled!",
+        })
+      } else if (retrieveResponse[0].status === "scheduled") {
+        return res.status(200).json({
+          status:200,
+          message: "Appointment already approved!",
+        })
+      } else {
+        const updateQuery = "UPDATE `appointments` SET `status` = ?, `appointment_logs` = ? WHERE `appointment_id` = ?";
+        const updateResponse = await dbModel.query(updateQuery, updatePayload);
+        dbModel.releaseConnection(connection);
+        return res.status(200).json({
+          status: 200,
+          message: "Appointment successfully cancelled!",
+          updateResponse: updateResponse
+        });
+      }
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error
@@ -197,9 +208,45 @@ class AppointmentController {
 
   async handleApproveAppointment(req, res) {
     try {
-      
+      const connection = await dbModel.getConnection();
+      const retrieveQuery = "SELECT `status`, `appointment_logs` FROM `appointments` WHERE `appointment_id` = ?";
+      const retrieveResponse = await dbModel.query(retrieveQuery, req.params.id);
+      const oldLogs = JSON.parse(retrieveResponse[0].appointment_logs);
+      const newLogs = {};
+      const LKey = String(convertDate(new Date));
+      newLogs[LKey] = "Appointment Approved"
+      const newAppointmentLog = {
+        ...oldLogs,
+        ...newLogs
+      };
+      const updatePayload = [
+        "scheduled",
+        JSON.stringify(newAppointmentLog),
+        req.params.id
+      ];
+      console.log(retrieveResponse);
+      if (retrieveResponse[0].status === "scheduled") {
+        return res.status(200).json({
+          status:200,
+          message: "Appointment already approved!",
+        })
+      } else if (retrieveResponse[0].status === "appointment cancelled") {
+        return res.status(200).json({
+          status:200,
+          message: "Appointment already cancelled!",
+        })
+      } else {
+        const updateQuery = "UPDATE `appointments` SET `status` = ?, `appointment_logs` = ? WHERE `appointment_id` = ?";
+        const updateResponse = await dbModel.query(updateQuery, updatePayload);
+        dbModel.releaseConnection(connection);
+        return res.status(200).json({
+          status: 200,
+          message: "Appointment successfully approved!",
+          updateResponse: updateResponse
+        });
+      }
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error
@@ -220,13 +267,13 @@ class AppointmentController {
           appointed_datetime: convertDate(res.appointed_datetime),
         }
       });
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
         message: "Data retrieved successfully",
         data: newResponse
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error
@@ -243,7 +290,7 @@ class AppointmentController {
 
       dbModel.releaseConnection(connection);
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error

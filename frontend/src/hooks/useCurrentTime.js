@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 
 const useCurrentTime = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const weeks = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -29,7 +31,9 @@ const useCurrentTime = () => {
     formattedTime,
     formattedDate,
     currentTime,
-    mysqlTime
+    mysqlTime,
+    weeks,
+    months
   };
 };
  

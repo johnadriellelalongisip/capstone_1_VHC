@@ -1,60 +1,73 @@
-import io from 'socket.io-client';
-import { AES, enc } from 'crypto-js';
-// import { useEffect } from 'react';
+import { useEffect, useState } from "react";
+import useQuery from "./useQuery";
+import { socket } from "../socket";
 
-const useSocket = () => {
-  const socket = io(String(process.env.REACT_APP_BASE_SOCKET), {
-    reconnection: false,
-    reconnectionAttempts: 3,
-    reconnectionDelay: 2000,
-    secure: true,
-  });
-  const secretKey = process.env.REACT_APP_KEY;
+const useSocket = ({ SSName, keyMap, fetchUrl, socketUrl, socketEmit, socketError }) => {
+  const [data, setData] = useState([{}]);
+  const [SockError, setSockError] = useState(null);
+  const { response, error, fetchData } = useQuery();
+  const storedRecords = JSON.parse(sessionStorage.getItem(SSName));
 
-  const encryptData = (data) => {
-    return AES.encrypt(data, secretKey).toString();
-  };
-
-  const decryptData = (data) => {
-    return AES.decrypt(data, secretKey).toString(enc.Utf8);
-  };
-
-  const socketListen = (channel, handleData) => {
-    socket.on(channel, handleData)
+  function convertData(data) {
+    const newData = data.map(obj => {
+      const newObj = {};
+      Object.keys(obj).forEach(key => {
+        if (keyMap[key]) {
+          newObj[keyMap[key]] = obj[key];
+        } else {
+          newObj[key] = obj[key];
+        }
+      });
+      return newObj;
+    });
+    return newData;
   }
 
-  const socketEmit = (channel,data) => {
-    socket.emit(channel, encryptData(data));
+  function tryThisShet(data) {
+    if(JSON.stringify(convertData(data)) !== JSON.stringify(storedRecords)) {
+      sessionStorage.setItem(SSName,JSON.stringify(convertData(data)));
+      setData(convertData(data));
+    } else {
+      setData(storedRecords);
+    }
   };
 
-  const socketDisconnect = (channel) => {
-    socket.on(channel, (reason) => {
-      console.log('Socket disconnected:', reason);
+  useEffect(() => {
+    if(storedRecords === undefined || storedRecords === null) {
+      fetchData(fetchUrl);
+    } else {
+      setData(storedRecords);
+    }
+    socket.on(socketUrl, (Sdata) => {
+      tryThisShet(Sdata);
     });
-  };
-
-  const socketReconnect = () => {
-    socket.on('reconnect_attempt', (attemptNumber) => {
-      console.log(`Attempting to reconnect (attempt ${attemptNumber})...`);
+    socket.on(socketError, (error) => {
+      setSockError(error);
+      console.error('Error retrieving data:', error);
     });
-  }
+    setTimeout(() => {
+      socket.emit(socketEmit);
+    },500)
+    return () => {
+      socket.off(socketUrl);
+      socket.off(socketError);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // useEffect(() => {
-  //   return () => {
-  //     if (socket.connected) {
-  //       socket.disconnect();
-  //     }
-  //   };
-  // // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [socket]);
+  useEffect(() => {
+    if (response && response.status === 200 && response.data) {
+      setData(convertData(response.data));
+      sessionStorage.setItem(SSName,JSON.stringify(convertData(response.data)));
+    }
+    if (error) {
+      console.log(error);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [response,error]);
 
-  return {
-    socketReconnect,
-    socketListen,
-    socketDisconnect,
-    socketEmit,
-    decryptData,
-  };
-};
-
+  return { data, SockError }
+  
+}
+ 
 export default useSocket;

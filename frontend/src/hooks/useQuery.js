@@ -25,6 +25,7 @@ const useQuery = () => {
       setIsLoading(false);
     } catch (error) {
       handleError(error);
+      setIsLoading(false);
     }
   };
 
@@ -36,6 +37,7 @@ const useQuery = () => {
       setIsLoading(false);
     } catch (error) {
       handleError(error);
+      setIsLoading(false);
     }
   };
 
@@ -47,17 +49,19 @@ const useQuery = () => {
       setIsLoading(false);
     } catch (error) {
       handleError(error);
+      setIsLoading(false);
     }
   };
 
-  const deleteData = async (route, payload, id, token) => {
+  const deleteData = async (route, id, token) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${BASE_URL}${route}/${id}`, payload, headers(token));
+      const response = await axios.post(`${BASE_URL}${route}/${id}`, headers(token));
       setResponse(response.data);
       setIsLoading(false);
     } catch (error) {
       handleError(error);
+      setIsLoading(false);
     }
   };
 
@@ -69,6 +73,7 @@ const useQuery = () => {
       setIsLoading(false);
     } catch (error) {
       handleError(error);
+      setIsLoading(false);
     }
   };
 
@@ -80,6 +85,7 @@ const useQuery = () => {
       setIsLoading(false);
     } catch (error) {
       handleError(error);
+      setIsLoading(false);
     }
   };
 

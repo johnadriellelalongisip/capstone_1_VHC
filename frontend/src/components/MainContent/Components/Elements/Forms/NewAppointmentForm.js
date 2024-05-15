@@ -5,6 +5,7 @@ import useQuery from "../../../../../hooks/useQuery";
 import useCurrentTime from "../../../../../hooks/useCurrentTime";
 import { confirmationContext } from "../FormModal";
 import { MdOutlineRadioButtonChecked, MdOutlineRadioButtonUnchecked } from "react-icons/md";
+import { socket } from "../../../../../socket";
 
 const NewAppointmentForm = ({ close, children }) => {
   const [selectedTheme] = useContext(colorTheme);
@@ -20,7 +21,7 @@ const NewAppointmentForm = ({ close, children }) => {
 
   // eslint-disable-next-line no-unused-vars
   const [message, setMessage, confirmMessage, setConfirmMessage, cancelMessage, setCancelMessage, backMessage, setBackMessage, toggleConfirmDialog, selectedOption, setSelectedOption] = useContext(confirmationContext);
-  const { searchResults, isLoading, error, addData, searchData } = useQuery();
+  const { isLoading, error, addData } = useQuery();
 
   function cleanUp() {
     setFullname("");
@@ -28,6 +29,17 @@ const NewAppointmentForm = ({ close, children }) => {
     setAppointment("");
     setAppointmentID("");
     setPhoneNumber("");
+  };
+
+  const convertToMySQLDateTime = (dateTimeString) => {
+    const date = new Date(dateTimeString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
   const handleSubmit = async (e) => {
@@ -45,16 +57,6 @@ const NewAppointmentForm = ({ close, children }) => {
       createdAt: mysqlTime,
       logs: JSON.stringify(appointmentLogs)
     };
-    const convertToMySQLDateTime = (dateTimeString) => {
-      const date = new Date(dateTimeString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      const seconds = String(date.getSeconds()).padStart(2, '0');
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    };
     const convertedPayload = {
         ...payload,
         appointedTime: convertToMySQLDateTime(payload.appointedTime),
@@ -66,6 +68,9 @@ const NewAppointmentForm = ({ close, children }) => {
       } else {
         addData("newAppointment", convertedPayload);
       }
+      setTimeout(() => {
+        socket.emit('updateAppointment', convertedPayload);
+      },[500]);
       cleanUp();
       close();
     } else {
@@ -200,6 +205,7 @@ const NewAppointmentForm = ({ close, children }) => {
                 className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
                 placeholder={inputState ? (!useRecordNum ? 'Enter personal contact number. . . .' : 'Proceeding will use the contact number of this citizen') : 'Enter personal contact number. . . . .'}
                 maxLength={12}
+                minLength={10}
                 disabled={inputState ? useRecordNum : false}
               />
               {inputState && 

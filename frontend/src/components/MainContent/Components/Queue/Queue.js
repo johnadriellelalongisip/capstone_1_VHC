@@ -8,6 +8,8 @@ import useQuery from "../../../../hooks/useQuery";
 import { IoMdAlert } from "react-icons/io";
 import AddToQueue from "./AddToQueue";
 import Attended from "./Attended";
+import { socket } from "../../../../socket";
+import useSocket from "../../../../hooks/useSocket";
 
 const Queue = () => {
   const [selectedTheme] = useContext(colorTheme);
@@ -15,34 +17,31 @@ const Queue = () => {
   const attendedRef = useRef(null);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [isAttendedOpen, setIsAttendedOpen] = useState(false);
-  const { response, isLoading, error, fetchData } = useQuery();
-  const [queue, setQueue] = useState([{}]);
+  const { isLoading } = useQuery();
   const [waiting, setWaiting] = useState([{}]);
   const displayedData = ['priority', 'emergency', 'serving'];
   const [viewStateIndex, setViewStateIndex] = useState(displayedData.indexOf('serving'));
   const location = useLocation();
   const pathname = location.pathname.slice(1);
   const title = pathname.charAt(0).toUpperCase() + pathname.slice(1);
+  const keyMap = {
+    "queue_number": "queue_number",
+    "patient_name": "patient_name",
+    "patient_gender": "patient_gender",
+    "barangay_from": "barangay_from",
+    "time_arrived": "time_arrived",
+    "patient_status" : "patient_status" ,
+  }
+  const { data: queue } = useSocket({ SSName: "sessionQueue", keyMap: keyMap, fetchUrl: "getQueue", socketUrl: "newQueue", socketEmit: "updateQueue", socketError: "newQueueError" });
 
   useEffect(() => {
-    fetchData('getQueue');
-  }, []);
-
-  useEffect(() => {
-    if (response && response.status === 200 && response.type === 'get') {
-      setQueue(response.data);
-      setWaiting(response.data.reduce((acc, curr) => {
-        if (curr.patient_status === 'waiting') {
-          acc.push(curr);
-        }
-        return acc;
-      }, []));
-    } else if (response && response.status === 200 && response.type === 'add') {
-      console.log(response);
-    } else if (error) {
-      console.log(error);
-    }
-  }, [response, error]);
+    setWaiting(queue.reduce((acc, curr) => {
+      if(curr.patient_status === 'waiting') {
+        acc.push(curr);
+      }
+      return acc;
+    }, []))
+  }, [queue]);
 
   const toggleForm = () => {
     if (isFormDialogOpen) {
@@ -89,14 +88,31 @@ const Queue = () => {
     const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
     const time12Hour = `${meridianHours}:${formattedMinutes} ${meridian}`;
     return time12Hour;
-}
+  };
   
   return (
     <div className="w-full h-screen flex flex-col">
       <div className="flex flex-col p-2 mb-4 mx-2 md:mx-3 lg:mx-4 mt-4">
-        <div>
+        <div onClick={() => socket.emit("updateQueue")}>
           <Header title={ title } icon={<MdPeople />}/>
         </div>
+        {isLoading && queue[0] ? (
+          <>
+            <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2 animate-pulse ease-linear">
+              <div className="flex items-center justify-end gap-3 m-1 my-2">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className={`p-2 rounded-lg bg-${selectedTheme}-400 text-xs md:text-sm lg:text-base font-semibold w-16`}> </div>
+                ))}
+              </div>
+              <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 place-items-center gap-4 mb-60 md:mb-72 lg:mb-80`}>
+                <div className={`flex flex-col w-full h-[21rem] col-span-2 row-span-2 bg-${selectedTheme}-400 rounded-lg text-xs md:text-sm lg:text-base drop-shadow-md`}></div>
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <div key={index} className={`relative w-full md:w-full lg:grow flex flex-col h-[10rem] bg-${selectedTheme}-400 rounded-lg drop-shadow-md text-xs md:text-sm lg:text-base`}></div>
+                ))}
+              </div>
+            </div>
+          </>
+        ):(
         <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2">
           <div className="flex items-center justify-end gap-3 m-1 my-2">
             <button onClick={toggleAttended} className={`p-2 rounded-lg bg-${selectedTheme}-600 text-${selectedTheme}-200 transition-colors text-xs md:text-sm lg:text-base font-semibold px-4 hover:text-${selectedTheme}-300 hover:bg-${selectedTheme}-700 focus:bg-${selectedTheme}-800 focus:text-${selectedTheme}-400 active:bg-${selectedTheme}-300 active:text-${selectedTheme}-600 border-[1px] border-${selectedTheme}-600`}>
@@ -120,7 +136,7 @@ const Queue = () => {
                 </p>
               </div>
               <div className="h-72 min-h-72 overflow-y-auto">
-              {queue.length !== 0 && queue.map((q, i) => {
+              {queue.length >= 0 && queue.map((q, i) => {
                 if (q.patient_status === displayedData[viewStateIndex]) {
                   return (
                     <div key={i} className="flex flex-col gap-3 mx-2 my-3">
@@ -174,7 +190,7 @@ const Queue = () => {
                   </div>
                   <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
                     <p>{w.barangay_from}</p>
-                  </div>  
+                  </div>
                   <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
                     <p>{w.patient_gender}</p>
                   </div>
@@ -189,6 +205,7 @@ const Queue = () => {
           <Attended ATref={attendedRef} ATonClick={toggleAttended} />
 
         </div>
+        )}
       </div>
     </div>
   );

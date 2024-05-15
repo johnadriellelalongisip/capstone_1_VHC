@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://localhost:5000",
+  "proxy": "https://127.0.0.1:5000/api/",
   "dependencies": {
     "@fontsource/roboto": "^5.0.8",
     "@testing-library/jest-dom": "^5.17.0",

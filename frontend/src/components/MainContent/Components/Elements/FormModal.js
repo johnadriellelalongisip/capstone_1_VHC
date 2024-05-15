@@ -2,69 +2,65 @@ import RecordForm from './Forms/RecordForm';
 import PharmacyForm from './Forms/PharmacyForm';
 import DonorForm from './Forms/DonorForm';
 import { MdClose, MdCreate } from "react-icons/md";
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useRef, useState } from 'react';
 import { colorTheme } from '../../../../App';
 import NewAppointmentForm from './Forms/NewAppointmentForm';
 import ConfirmForm from '../../../../hooks/ConfirmForm';
+import NewAccountForm from './Forms/NewAccountForm';
 
 const SelectedForm = ({ formType, toggle }) => {
   const [selectedTheme] = useContext(colorTheme);
 
-  if (formType === 'records') {
+  const Baseform = ({ FormTitle, Formcontent }) => {
     return (
-      <>
-        <RecordForm close={toggle}>
+      <div>
+        <Formcontent close={toggle}>
           <div className={`fixed top-0 left-0 right-0 flex justify-between items-center p-5 bg-${selectedTheme}-300 text-${selectedTheme}-800 border-b-[1px] shadow-md drop-shadow-md border-${selectedTheme}-950`}>
             <div className='flex items-center'>
               <MdCreate className='mr-2 w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6'/>
-              <p className='font-bold text-base md:text-lg lg:text-xl'>Add new record</p>
+              <p className='font-bold text-base md:text-lg lg:text-xl'>{FormTitle}</p>
             </div>
             <button onClick={() => toggle()} className={`transition-colors duration-300 p-2 rounded-3xl bg-${selectedTheme}-400 hover:bg-${selectedTheme}-500 active:bg-${selectedTheme}-200`}>
               <MdClose className='w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6'/>
             </button>
           </div>
-        </RecordForm>
-      </>
-    );
-  } else if (formType === 'pharmacy') {
-    return (
-      <div>
-        <PharmacyForm close={toggle}>
-          <div className={`fixed top-0 left-0 right-0 flex justify-between items-center p-5 bg-${selectedTheme}-300 text-${selectedTheme}-800 border-b-[1px] shadow-md drop-shadow-md border-${selectedTheme}-950`}>
-            <div className='flex items-center'>
-              <MdCreate className='mr-2 w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6'/>
-              <p className='font-bold text-base md:text-lg lg:text-xl'>Add new product</p>
-            </div>
-            <button onClick={() => toggle()} className={`transition-colors duration-300 p-2 rounded-3xl bg-${selectedTheme}-400 hover:bg-${selectedTheme}-500 active:bg-${selectedTheme}-200`}>
-              <MdClose className='w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6'/>
-            </button>
-          </div>
-        </PharmacyForm>
-      </div>
-    );
-  } else if (formType === 'blood_unit') {
-    return (
-      <div>
-        <DonorForm close={toggle} />
-      </div>
-    );
-  } else if (formType === 'appointments') {
-    return (
-      <div>
-        <NewAppointmentForm close={toggle}>
-          <div className={`fixed top-0 left-0 right-0 flex justify-between items-center p-5 bg-${selectedTheme}-300 text-${selectedTheme}-800 border-b-[1px] shadow-md drop-shadow-md border-${selectedTheme}-950`}>
-            <div className='flex items-center'>
-              <MdCreate className='mr-2 w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6'/>
-              <p className='font-bold text-base md:text-lg lg:text-xl'>Add new appointment</p>
-            </div>
-            <button onClick={() => toggle()} className={`transition-colors duration-300 p-2 rounded-3xl bg-${selectedTheme}-400 hover:bg-${selectedTheme}-500 active:bg-${selectedTheme}-200`}>
-              <MdClose className='w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6'/>
-            </button>
-          </div>
-        </NewAppointmentForm> 
+        </Formcontent>
       </div>
     )
-  }
+  };
+
+  return (
+    <>
+    {formType && formType === 'records' ? (
+      <Baseform
+        FormTitle="Add new record"
+        Formcontent={RecordForm}
+      />
+    ) : formType === 'pharmacy' ? (
+      <Baseform
+        FormTitle="Add new product"
+        Formcontent={PharmacyForm}
+      />
+    ) : formType === 'blood_unit' ? (
+      <Baseform
+        FormTitle="Add new donatee"
+        Formcontent={DonorForm}
+      />
+    ) : formType === 'appointments' ? (
+      <Baseform
+        FormTitle="Create new appointment"
+        Formcontent={NewAppointmentForm}
+      />
+    ) : formType === 'accounts' ? (
+      <Baseform
+        FormTitle="Add new user"
+        Formcontent={NewAccountForm}
+      />
+    ) : (
+      <></>
+    )}
+    </>
+  )
 };
 
 export const confirmationContext = createContext();

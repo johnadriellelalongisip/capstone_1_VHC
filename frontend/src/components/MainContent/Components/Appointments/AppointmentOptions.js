@@ -5,6 +5,7 @@ import { MdCheck, MdClose, MdDelete, MdEdit, MdKeyboardDoubleArrowDown } from "r
 import useQuery from "../../../../hooks/useQuery";
 import { Tooltip } from "flowbite-react";
 import ConfirmForm from "../../../../hooks/ConfirmForm";
+import { socket } from "../../../../socket";
 
 const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
   const [selectedTheme] = useContext(colorTheme);
@@ -46,16 +47,23 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
   };
 
   const handleUpdate = (data) => {
-
+    
   };
 
   const handleCancelAppointment = () => {
-    deleteData(
-      8iapoaqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+    deleteData("handleCancelAppointment", PK);
+    setTimeout(() => {
+      socket.emit('updateAppointment');
+    },[500])
+    toggle();
   };
 
   const handleApproveAppointment = () => {
-    editData('handleApproveAppointment', "scheduled", PK);
+    editData('handleApproveAppointment', [{}], PK);
+    setTimeout(() => {
+      socket.emit('updateAppointment');
+    },[500])
+    toggle();
   }
 
   useEffect(() => {
@@ -225,9 +233,9 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
                 </form>
                 <div className="flex justify-evenly items-center my-4">
 
-                  <Tooltip content={editing ? 'Update?' : 'Edit?'} animation="duration-500">
+                  {/* <Tooltip content={editing ? 'Update?' : 'Edit?'} animation="duration-500">
                     <button onClick={() => handleToggleEdit()} className={`drop-shadow-md p-3 text-center rounded-full font-semibold ${!editing ? `bg-${selectedTheme}-300 text-${selectedTheme}-600` : `bg-${selectedTheme}-600 text-${selectedTheme}-300`} hover:bg-${selectedTheme}-400 hover:text-${selectedTheme}-700 active:bg-${selectedTheme}-700 active:text-${selectedTheme}-400 transition-colors duration-300 ease-linear`}><MdEdit className="size-5 md:size-6 lg:size-7"/></button>
-                  </Tooltip>
+                  </Tooltip> */}
 
                   <Tooltip content="Cancel Appointment?" animation="duration-500">
                     <button onClick={() => handleCancelAppointment()} className={`drop-shadow-md p-3 text-center rounded-full font-semibold bg-${selectedTheme}-300 text-${selectedTheme}-600 hover:bg-${selectedTheme}-400 hover:text-${selectedTheme}-700 active:bg-${selectedTheme}-700 active:text-${selectedTheme}-400 transition-colors duration-300 ease-linear`}><MdClose className="size-5 md:size-6 lg:size-7"/></button>

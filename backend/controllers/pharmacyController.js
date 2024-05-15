@@ -25,13 +25,13 @@ class PharmacyController {
         );
       }  
       dbModel.releaseConnection(connection);
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
         message: "Data inserted successfully",
       });
     } catch (error) {
       console.error("Error inserting data:", error);
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error,
@@ -53,13 +53,13 @@ class PharmacyController {
           exp_date: formattedExpDate,
         };
       });
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
         message: "Data retrieved successfully",
         data: formattedResponse,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error
@@ -83,13 +83,13 @@ class PharmacyController {
             exp_date: formattedExpDate,
         };
       });
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
         message: "Data retrieved successfully",
         data: formattedResponse,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         message: error.message,
         error: error

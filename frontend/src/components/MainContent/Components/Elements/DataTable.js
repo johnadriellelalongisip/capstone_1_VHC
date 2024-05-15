@@ -12,8 +12,6 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
   const [CurrentPage, setCurrentPage] = useState(1);
   const [Pages, setPages] = useState(0);
   const [rowCount, setRowCount] = useState(10);
-  // const [showEntries, setShowEntries] = useState(false);
-  // const dataListOptions = [10, 25, 50, 100];
   const [sortedData, setSortedData] = useState([]);
   const inputRef = useRef(null);
   const formModalRef = useRef(null);
@@ -87,10 +85,10 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
     setSortedData(sortedRecord(field, order));
   };  
 
-  const handleOptionClick = (option) => {
-    setRowCount(option);
+  // const handleOptionClick = (option) => {
+  //   setRowCount(option);
     // setShowEntries(false);
-  };
+  // };
 
   const filteredData = sortedData.filter((row) =>
     Object.values(row).some((col) =>
@@ -118,32 +116,21 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
 
   const displayedData = filteredData.slice((CurrentPage - 1) * rowCount, CurrentPage * rowCount);
 
-  if (error) {
-    return (
-      <>
-
-      </>
-    )
-  }
-
   if (isLoading) {
     return (
-      <>
-        <div className={`flex flex-col gap-3 w-full animate-pulse ease-linear drop-shadow-md`}>
-          <div className="flex justify-between m-2 md:m-3 lg:m-4">
-            <div className="flex justify-between items-center gap-3">
-              <div className={`bg-${selectedTheme}-400 rounded-lg h-6 md:h-8 lg:h-10 w-24 md:w-26 lg:w-28`}></div>
-            </div>
+      <div className={`flex flex-col gap-3 w-full animate-pulse ease-linear drop-shadow-md`}>
+        <div className="flex justify-between m-2 md:m-3 lg:m-4">
+          <div className="flex justify-between items-center gap-3">
             <div className={`bg-${selectedTheme}-400 rounded-lg h-6 md:h-8 lg:h-10 w-24 md:w-26 lg:w-28`}></div>
           </div>
-          <div className={`bg-${selectedTheme}-400 rounded-lg h-96`}></div>
-          <div className="flex justify-between items-center">
-            <div className={`bg-${selectedTheme}-400 rounded-lg w-16 md:w-18 lg:w-20 h-6 md:h-8 lg:h-10`}></div>
-            <div className={`bg-${selectedTheme}-400 rounded-lg w-26 md:w-28 lg:w-32 h-6 md:h-8 lg:h-10`}></div>
-          </div>
-          
+          <div className={`bg-${selectedTheme}-400 rounded-lg h-6 md:h-8 lg:h-10 w-24 md:w-26 lg:w-28`}></div>
         </div>
-      </>
+        <div className={`bg-${selectedTheme}-400 rounded-lg h-96`}></div>
+        <div className="flex justify-between items-center">
+          <div className={`bg-${selectedTheme}-400 rounded-lg w-16 md:w-18 lg:w-20 h-6 md:h-8 lg:h-10`}></div>
+          <div className={`bg-${selectedTheme}-400 rounded-lg w-26 md:w-28 lg:w-32 h-6 md:h-8 lg:h-10`}></div>
+        </div>
+      </div>
     )
   }
 
@@ -180,8 +167,7 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
     <>
       <div className="flex justify-between items-center p-4 overflow-hidden">
         <div className="flex justify-center items-center gap-3">
-          {
-            enImport && (
+          {enImport && (
             <button 
               className={`text-xs md:text-sm lg:text-sm whitespace-nowrap font-semibold ${!error ? `text-${selectedTheme}-50 bg-${selectedTheme}-600 drop-shadow-md` : `text-${selectedTheme}-600 bg-${selectedTheme}-200 shadow-inner`} rounded-lg p-2`}
               onClick={() => toggleForm()}
@@ -189,10 +175,8 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
             >
               Import File
             </button>
-            )
-          }
-          {
-            enAdd && (
+          )}
+          {enAdd && (
             <button 
               className={`text-xs md:text-sm lg:text-sm whitespace-nowrap font-semibold ${!error ? `text-${selectedTheme}-50 bg-${selectedTheme}-600 drop-shadow-md` : `text-${selectedTheme}-600 bg-${selectedTheme}-200 shadow-inner`} rounded-lg p-2`}
               onClick={() => toggleForm()}
@@ -200,43 +184,39 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
             >
               Add New Data
             </button>
-            )
-          }
+          )}
         </div>
         <div 
           className={`flex`}
         >
-          {
-            enSearch && (
-              <>
-                <button
-                  onClick={() => {
-                    setMove((prevMove) => !prevMove); 
-                    setQuery(''); 
-                    setSearchFocus();
-                  }}
-                  className={`text-${selectedTheme}-500 hover:text-${selectedTheme}-600 mr-4 md:mr-2 lg:mr-2 ${
-                    move
-                      ? 'transition-transform ease-in-out duration-200 translate-x-0'
-                      : 'transition-transform ease-in-out duration-200 translate-x-[9rem] md:translate-x-[198px] lg:translate-x-[200px]'
-                  }`}
-                >
-                  <MdSearch className="w-6 h-6" />
-                </button>
-                <TextInput
-                  id="tablesearch"
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Search here"
-                  value={query}
-                  onChange={(e) => searchTable(e)}
-                  className={`${
-                    move ? 'transition-opacity duration-100 ease-linear opacity-1 translate-x-0' : 
-                    'transition-opacity duration-100 ease-linear opacity-0 translate-x-[9rem] md:translate-x-[198px] lg:translate-x-[200px]'}`}
-                />
-              </>
-            )
-          }
+          {enSearch && (
+            <>
+              <button
+                onClick={() => {
+                  setMove((prevMove) => !prevMove); 
+                  setQuery(''); 
+                  setSearchFocus();
+                }}
+                className={`text-${selectedTheme}-500 hover:text-${selectedTheme}-600 mr-4 md:mr-2 lg:mr-2 ${
+                  move
+                    ? 'transition-transform ease-in-out duration-200 translate-x-0'
+                    : 'transition-transform ease-in-out duration-200 translate-x-[9rem] md:translate-x-[198px] lg:translate-x-[200px]'
+                }`}
+              >
+                <MdSearch className="w-6 h-6" />
+              </button>
+              <TextInput
+                id="tablesearch"
+                ref={inputRef}
+                type="text"
+                placeholder="Search here"
+                value={query}
+                onChange={(e) => searchTable(e)}
+                className={`${
+                  move ? 'transition-opacity duration-100 ease-linear opacity-1 translate-x-0' : 
+                  'transition-opacity duration-100 ease-linear opacity-0 translate-x-[9rem] md:translate-x-[198px] lg:translate-x-[200px]'}`}
+              />
+            </>)}
         </div>
       </div>
       <div className="overflow-x-auto drop-shadow-lg">
@@ -281,9 +261,11 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
                 ))}
               </>
             ) : (
-              <tr className={`flex justify-center items-center text-center bg-blue-300 rounded-md h-96 p-2 font-bold`}>
-                <MdInfo className="size-6 md:size-7 lg:size-8"/>
-                Table is empty. Add new data.
+              <tr>
+                <td className={`flex justify-center items-center text-center bg-blue-300 rounded-md h-96 p-2 font-bold`}>
+                  <MdInfo className="size-6 md:size-7 lg:size-8"/>
+                  <p>Table is empty. Add new data.</p>
+                </td>
               </tr>
             )}
             {error && (
@@ -311,23 +293,6 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
           {enExport && (
             <button className={`flex gap-2 p-1 px-3 items-center justify-center bg-${selectedTheme}-200 text-${selectedTheme}-600 font-semibold rounded-lg text-xs md:text-sm lg:text-base hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out`}>Export to file<TbFileExport className="size-3 md:size-3 lg:size-4"/></button>
           )}
-          {/* NEED TO GET THIS WORKING PROPERLY AND PREVENT OVERFLOW */}
-          {/* <div className={`flex flex-row items-center justify-start gap-2 text-sm font-semibold p-1 m-1 bg-${selectedTheme}-200 rounded-lg relative`}>
-            <select
-              id="pageentries"
-              className={`p-2 text-xs md:text-sm lg:text-sm bg-${selectedTheme}-200 text-${selectedTheme}-700 rounded-md`}
-              onChange={(e) => handleOptionClick(parseInt(e.target.value))}
-              onBlur={() => setShowEntries(false)}
-              value={rowCount}
-            >
-              {dataListOptions.map((option, index) => (
-                <option key={index} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            <p className="hidden md:hidden lg:block text-xs">entries per page</p>
-          </div> */}
         </div>
         <div className={`flex flex-row text-md font-semibold p-1 m-1 bg-${selectedTheme}-200 rounded-lg`}>
           <button disabled={CurrentPage <= 2} onClick={() => setCurrentPage((prev) => prev - 2)} className={`text-${selectedTheme}-600 hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out hover:scale-150`}>
