@@ -5,6 +5,7 @@ const path = require('path');
 const cors = require('cors');
 const routes = require('./routes/routes');
 const initializeWebSocket = require('./sockets/eventDispatcher');
+require('dotenv').config();
 
 const app = express();
 const port = 5000;

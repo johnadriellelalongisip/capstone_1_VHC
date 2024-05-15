@@ -4,9 +4,11 @@ module.exports = function(io) {
   io.on('connection', (socket) => {
 
     socket.on('updateStaff', async () => {
+      console.log('EMAIL_USER:', process.env.EMAIL_USER);
+      console.log('EMAIL_PASS:', process.env.EMAIL_PASS);
       try {
         const connection = await dbModel.getConnection();
-        const query = "SELECT `staff_id`, `staff_username`, `staff_email`, `staff_role`, `account_created_at`, `account_last_updated_at`, `staff_last_activity` FROM `medicalstaff`";
+        const query = "SELECT `staff_id`, `staff_username`, `staff_email`, `isVerified`, `staff_role`, `account_created_at`, `account_last_updated_at`, `staff_last_activity` FROM `medicalstaff`";
         const response = await dbModel.query(query);
         dbModel.releaseConnection(connection);
         const convertDateTime = (Ddate) => {
@@ -23,6 +25,7 @@ module.exports = function(io) {
         const newResponse = response.map((res) => {
           return {
               ...res,
+              isVerified: res.isVerified ? 'Verified' : 'Unverified',
               account_created_at: convertDateTime(res.account_created_at),
               account_last_updated_at: convertDateTime(res.account_last_updated_at),
               staff_last_activity: convertDateTime(res.staff_last_activity),

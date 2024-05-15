@@ -19,6 +19,7 @@ const Accounts = () => {
     "staff_id" : "Staff-ID",
     "staff_username" : "Username",
     "staff_email" : "Email",
+    "isVerified" : "Verified?",
     "staff_role" : "Role",
     "account_created_at" : "Created At",
     "account_last_updated_at" : "Last Updated",

@@ -1,15 +1,78 @@
 const dbModel = require('../models/database_model');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const saltRounds = 10;
+const { google } = require('googleapis');
+const OAuth2 = google.auth.OAuth2;
+
+function hashData(...values) {
+  const combinedString = values.map(value => JSON.stringify(value)).join('');
+  const hash = crypto.createHash('sha256').update(combinedString).digest('hex');
+  return hash;
+}
 
 class StaffController {
+  async sendEmail(req, res) {
+    try {
+      console.log(`user ${process.env.EMAIL_USER}`);
+      console.log(`clientid ${process.env.CLIENT_ID}`);
+      console.log(`clientsecret ${process.env.CLIENT_SECRET}`);
+      console.log(`refreshtoken ${process.env.REFRESH_TOKEN}`);
 
-  //  ADD USERNAME AND EMAIL CHECKING IF IT ALREADY EXISTS IN THE DATABASE
+      const oauth2Client = new OAuth2(
+        process.env.CLIENT_ID,
+        process.env.CLIENT_SECRET,
+        'https://developers.google.com/oauthplayground'
+      );
 
+      oauth2Client.setCredentials({
+        refresh_token: process.env.REFRESH_TOKEN
+      });
+
+      const accessToken = await oauth2Client.getAccessToken();
+
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          type: 'OAuth2',
+          user: process.env.EMAIL_USER,
+          clientId: process.env.CLIENT_ID,
+          clientSecret: process.env.CLIENT_SECRET,
+          refreshToken: process.env.REFRESH_TOKEN,
+          accessToken: accessToken.token
+        }
+      });
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: 'ayanpohi@gmail.com',
+        subject: 'Hello from Node.js',
+        text: 'Hello world!',
+        html: '<b>Hello world!</b>'
+      };
+
+      const info = await transporter.sendMail(mailOptions);
+
+      return res.status(200).json({
+        status: 200,
+        messageId: info.messageId,
+        previewUrl: nodemailer.getTestMessageUrl(info)
+      });
+    } catch (error) {
+      console.error('Error sending email:', error);
+      return res.status(500).json({
+        status: 500,
+        message: error.message,
+        error: error
+      });
+    }
+  }
+  
   async getStaff(req, res) {
     try {
       const connection = await dbModel.getConnection();
-      const query = "SELECT `staff_id`, `staff_username`, `staff_email`, `staff_role`, `account_created_at`, `account_last_updated_at`, `staff_last_activity` FROM `medicalstaff`";
+      const query = "SELECT `staff_id`, `staff_username`, `staff_email`, `isVerified`, `staff_role`, `account_created_at`, `account_last_updated_at`, `staff_last_activity` FROM `medicalstaff`";
       const response = await dbModel.query(query);
       dbModel.releaseConnection(connection);
       return res.status(200).json({
@@ -17,7 +80,6 @@ class StaffController {
         message: 'Data retrieved successfully',
         data: response
       });
-      dbModel.releaseConnection(connection);
     } catch (error) {
       console.error('Error retrieving staff:', error);
       return res.status(500).json({
@@ -116,11 +178,13 @@ class StaffController {
                 }
               }
             };
-            const query = 'INSERT INTO medicalstaff (staff_username, staff_password, staff_email, staff_role, account_created_at, account_last_updated_at, staff_last_activity, staff_accessibility, staff_history) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            const query = 'INSERT INTO medicalstaff (staff_username, staff_password, staff_email,verification_token, isVerified, staff_role, account_created_at, account_last_updated_at, staff_last_activity, staff_accessibility, staff_history) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
             const data = [
               payload.username, 
               hash, 
-              payload.email, 
+              payload.email,
+              hashData(payload.username, hash, payload.email, payload.role, payload.current_datetime),
+              0,
               payload.role, 
               payload.current_datetime, 
               payload.current_datetime, 
