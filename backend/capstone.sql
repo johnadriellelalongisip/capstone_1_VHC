@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 15, 2024 at 06:28 AM
+-- Generation Time: May 20, 2024 at 08:20 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -39,13 +39,6 @@ CREATE TABLE `appointments` (
   `appointment_logs` json NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `appointments`
---
-
-INSERT INTO `appointments` (`appointment_id`, `citizen_id`, `fullname`, `phone_number`, `appointed_datetime`, `description`, `status`, `created_at`, `appointment_logs`) VALUES
-(52, 'FAMILY_ID-VB9SMNX5', 'John Filhmar D. Ola', '977735309', '2024-05-13 10:00:00', 'Masyadong pogi kelangan magpapanget', 'to be scheduled', '2024-05-11 17:14:30', '{\"2024-05-11 17:14:30\": \"Appointment Added\"}');
-
 -- --------------------------------------------------------
 
 --
@@ -56,8 +49,8 @@ CREATE TABLE `medicalstaff` (
   `staff_id` int NOT NULL,
   `staff_username` varchar(50) NOT NULL,
   `staff_password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `refresh_token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `staff_email` varchar(50) NOT NULL,
-  `verification_token` varchar(255) NOT NULL,
   `isVerified` tinyint(1) NOT NULL,
   `staff_role` varchar(30) NOT NULL,
   `account_created_at` datetime NOT NULL,
@@ -71,9 +64,8 @@ CREATE TABLE `medicalstaff` (
 -- Dumping data for table `medicalstaff`
 --
 
-INSERT INTO `medicalstaff` (`staff_id`, `staff_username`, `staff_password`, `staff_email`, `verification_token`, `isVerified`, `staff_role`, `account_created_at`, `account_last_updated_at`, `staff_last_activity`, `staff_accessibility`, `staff_history`) VALUES
-(35, 'Sabet', '$2b$10$ayq3iIzAGNlxSnt3cYbpJ.uU5pqXsX7MoHV.bJ8oiCCJ2EHfgwrxq', 'asd@masd.com', 'caba6c6a14ba4d415f4b1c8977eb8667dd0000630f4428d673b1d5091f1d08d0', 0, 'user', '2024-05-15 13:01:52', '2024-05-15 13:01:52', '2024-05-15 13:01:52', '{\"accessibility\": {\"home\": {\"edit\": false, \"view\": true}, \"queue\": {\"edit\": false, \"view\": true}, \"users\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"mapping\": {\"edit\": false, \"view\": true}, \"records\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"accounts\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"notfound\": {\"view\": true}, \"pharmacy\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"analytics\": {\"edit\": false, \"view\": true}, \"dashboard\": {\"edit\": false, \"view\": true}, \"blood_unit\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"appointments\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}}}', '{\"2024-05-15 13:01:52\": \"Account Added\"}'),
-(36, 'filhmar', '$2b$10$pNz7roiFTv6WCPjRikrF7uHWXBZjlaSAR5zfQv3BlHBV26ldfu0EW', 'olajohnfilhmar@gmail.com', '6ef6e74fecca4cb363443966dac5e355ced67d27aaf7fefeca2f3e0821ecd06a', 0, 'user', '2024-05-15 13:04:50', '2024-05-15 13:04:50', '2024-05-15 13:04:50', '{\"accessibility\": {\"home\": {\"edit\": false, \"view\": true}, \"queue\": {\"edit\": false, \"view\": true}, \"users\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"mapping\": {\"edit\": false, \"view\": true}, \"records\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"accounts\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"notfound\": {\"view\": true}, \"pharmacy\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"analytics\": {\"edit\": false, \"view\": true}, \"dashboard\": {\"edit\": false, \"view\": true}, \"blood_unit\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"appointments\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}}}', '{\"2024-05-15 13:04:50\": \"Account Added\"}');
+INSERT INTO `medicalstaff` (`staff_id`, `staff_username`, `staff_password`, `refresh_token`, `staff_email`, `isVerified`, `staff_role`, `account_created_at`, `account_last_updated_at`, `staff_last_activity`, `staff_accessibility`, `staff_history`) VALUES
+(44, 'asdf', '$2a$10$eUdk.EtnGAXsMjrDqx3kPulzwZC9d1LWi93B.rUTYNLslYPQmYMCi', NULL, 'asdf@adsf.asdf', 0, 'admin', '2024-05-19 19:18:55', '2024-05-19 19:18:55', '2024-05-19 19:18:55', '{\"accessibility\": {\"home\": {\"edit\": false, \"view\": true}, \"queue\": {\"edit\": false, \"view\": true}, \"users\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"mapping\": {\"edit\": false, \"view\": true}, \"records\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"accounts\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"notfound\": {\"view\": true}, \"pharmacy\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"analytics\": {\"edit\": false, \"view\": true}, \"dashboard\": {\"edit\": false, \"view\": true}, \"blood_unit\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}, \"appointments\": {\"edit\": false, \"view\": true, \"create\": false, \"delete\": false}}}', '{\"2024-05-19 19:18:55\": \"Account Added\"}');
 
 -- --------------------------------------------------------
 
@@ -99,9 +91,9 @@ CREATE TABLE `municipal_citizens` (
 --
 
 INSERT INTO `municipal_citizens` (`citizen_family_id`, `citizen_firstname`, `citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_birthdate`, `citizen_barangay`, `date_added`, `citizen_number`, `citizen_history`) VALUES
-('FAMILY_ID-4XNZW8BC', 'QWE', 'QWE', 'QWE', 'male', '2001-01-01', 'QWE', '2024-05-14 11:25:15', '977735309', '{\"2024-05-14 11:25:15\": \"Record Added\"}'),
-('FAMILY_ID-SSR6RIC4', 'asdf', 'asdfasdf', 'asdfasdf', 'male', '2001-01-01', 'asdf', '2024-05-14 16:30:09', '977735309', '{\"2024-05-14 16:30:09\": \"Record Added\"}'),
-('FAMILY_ID-UNHFMN2J', 'asdf', 'asdf', 'asdf', 'male', '2001-01-01', '213', '2024-05-07 23:14:36', '213312321321', '{\"2024-05-08 14:31\": \"Created an Appointment\", \"2024-05-07 23:14:36\": \"Record Added\"}'),
+('FAMILY_ID-DBTE48G4', 'aaaaaaaaaa', 'aaaaaaaaaa', 'aaaaaaaaaa', 'male', '2001-01-01', 'aaaaaaaaaa', '2024-05-20 11:27:12', '222222222222', '{\"2024-05-20 11:27:12\": \"Record Added\"}'),
+('FAMILY_ID-OQUVCOOU', 'sadf', 'sadf', 'asdf', 'male', '2001-01-01', 'sadf', '2024-05-19 19:13:12', '124214214214', '{\"2024-05-19 19:13:12\": \"Record Added\"}'),
+('FAMILY_ID-UBWQGDNV', 'xxxxxxxxxxxx', 'xxxxxxxxxxxx', 'xxxxxxxxxxxx', 'male', '2001-01-01', 'xxxxxxxxxxxx', '2024-05-19 19:14:32', '222222222222', '{\"2024-05-19 19:14:32\": \"Record Added\"}'),
 ('FAMILY_ID-VB9SMNX5', 'John Filhmar', 'De Los Reyes', 'Ola', 'male', '2001-01-01', 'Canubing 1', '2024-05-07 22:58:23', '977735309', '{\"2024-05-07 22:58\": \"Created an Appointment\", \"2024-05-08 19:24\": \"Created an Appointment\", \"2024-05-11 17:14\": \"Created an Appointment\", \"2024-05-07 22:58:23\": \"Record Added\"}'),
 ('FAMILY_ID-VFKPOP4N', 'asdf', 'asdf', 'asdf', 'male', '2001-01-01', 'asdf', '2024-05-08 17:31:04', '214214421421', '{\"2024-05-08 17:31:04\": \"Record Added\"}'),
 ('FAMILY_ID-WRBYPLFH', 'asdf', 'asdf', 'asf', 'male', '2001-01-01', '231', '2024-05-14 15:49:33', '321231321321', '{\"2024-05-14 15:49:33\": \"Record Added\"}');
@@ -240,7 +232,7 @@ ALTER TABLE `appointments`
 -- AUTO_INCREMENT for table `medicalstaff`
 --
 ALTER TABLE `medicalstaff`
-  MODIFY `staff_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `staff_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `patient_queue`
