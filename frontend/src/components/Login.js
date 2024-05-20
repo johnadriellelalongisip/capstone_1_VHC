@@ -1,66 +1,41 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
-import { redirect, useNavigate } from "react-router-dom";
 import useQuery from "../hooks/useQuery";
 import { Spinner } from "flowbite-react";
-import useCurrentTime from "../hooks/useCurrentTime";
-import { isLoggedInContext } from "../App";
+import { useNavigate } from "react-router-dom";
 
-function Login() {
-  const home = process.env.REACT_APP_HOME;
-  const [isLoggedIn, setIsLoggedIn] = useContext(isLoggedInContext);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [honeypot, setHoneyPot] = useState('');
-  const navigate = useNavigate();
-  const { mysqlTime } = useCurrentTime();
-
-  const { response, isLoading, error, addData } = useQuery();
+const Login = ({ setIsLoggedIn }) => {
+  const [payload, setPayload] = useState({
+    username: "",
+    password: ""
+  });
   const [passwordVisibility, setPasswordVisibility] = useState(true);
+  const { response, isLoading, error, userAuth } = useQuery();
+  const navigate = useNavigate();
 
-  function cleanUp() {
-    setUsername('');
-    setPassword('');
-  }
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const payload = {
-      username: username,
-      password: password,
-      current_datetime: mysqlTime,
-      logged_in: mysqlTime
-    };
-    addData('authStaff',payload);
-  }
+    userAuth(payload);
+  };
 
   useEffect(() => {
-    if (response) {
-      if (response.status === 200) {
-        console.log("Login Successful:", response.message);
-        cleanUp();
-        setIsLoggedIn(true);
-        localStorage.setItem('isLoggedIn',true);
-        redirect('/home');
-      } else {
-        console.log(response)
-      }
-    } else if (error) {
-      console.log(error)
+    if (response && response.status === 200) {
+      localStorage.setItem('accessToken', response.accessToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
+      setIsLoggedIn(true);
+      localStorage.setItem('isLoggedIn', 'true');
+      navigate("/home");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [response, error]);
 
-  // const goToRegister = () => {
-  //   if (username === '' && password === '') {
-  //     navigate('/register');
-  //   } else {
-  //     var answer = window.confirm("Are you sure to leave? This will leave your progress.");
-  //     if(answer) {
-  //       navigate('/register');
-  //     }
-  //   }
-  // };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setPayload(prevPayload => ({
+      ...prevPayload,
+      [name]: value
+    }));
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-no-repeat bg-cover bg-center text-sm md:text-base lg:text-md">
@@ -79,11 +54,10 @@ function Login() {
                 type="text" 
                 name="username" 
                 id="username" 
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={payload.username}
+                onChange={handleChange}
                 className="bg-sky-700/90 text-sky-50 rounded-xl p-2 font-semibold drop-shadow-sm"
                 maxLength={20}
-                minLength={8}
                 autoComplete="username"
               />
             </div>
@@ -94,27 +68,12 @@ function Login() {
                 type={!passwordVisibility ? 'text' : 'password'} 
                 name="password" 
                 id="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={payload.password}
+                onChange={handleChange}
                 className="bg-sky-700/90 text-sky-50 rounded-xl p-2 font-semibold drop-shadow-sm" 
                 maxLength={20}
-                minLength={8}
                 autoComplete="off"
               />
-            {/* <div className="hidden">
-              <label className="font-semibold text-sky-900" htmlFor="username">Honeypot:</label>
-              <input 
-                required
-                type="text" 
-                name="honeypot" 
-                id="honeypot" 
-                value={honeypot}
-                onChange={(e) => setHoneyPot(e.target.value)}
-                maxLength={20}
-                minLength={8}
-                autoComplete="honeypot"
-              />
-            </div> */}
               <button className="absolute right-0 p-1 drop-shadow-md" onClick={(e) => {e.preventDefault(); setPasswordVisibility(prev => !prev);}}>
                 {
                   passwordVisibility ? (
@@ -127,9 +86,6 @@ function Login() {
             </div>
             <button disabled={isLoading} type="submit" className={`font-semibold p-2 rounded-md w-full transition-colors duration-200 ${!isLoading ? 'text-sky-100 bg-sky-700 hover:drop-shadow-md hover:bg-sky-800 focus:bg-sky-600 active:bg-sky-300 active:text-sky-600 active:shadow-inner active:ring-2 active:ring-sky-600' : 'text-sky-700 bg-sky-100 shadow-inner' }`}><p className="drop-shadow-lg">{!isLoading ? 'Login' : <Spinner/>}</p></button>
           </form>
-          {/* <div className="text-center font-normal text-xs">
-            <p>Don't have an account? <button onClick={goToRegister} className="font-semibold hover:underline hover:text-sky-800">Create an account here</button></p>
-          </div> */}
         </div>
       </div>
     </div>

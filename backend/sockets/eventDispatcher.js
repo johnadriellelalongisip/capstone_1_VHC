@@ -5,20 +5,25 @@ const appointmentSocket = require('./appointmentSocket');
 const queueSocket = require('./queueSocket');
 const staffSocket = require('./staffSocket');
 const pharmacySocket = require('./pharmacySocket');
+const authenticationSocket = require('./authenticationSocket');
+const { authenticationMiddleware } = require('../middlewares/authenticationMiddleware');
 
 function initializeWebSocket(server) {
   const io = new Server(server, {
     cors: {
       origin: "https://localhost:3000",
-      methods: ["GET"],
+      methods: ["GET", "POST"],
     },
   });
+
+  io.use(authenticationMiddleware);
   
   recordSocket(io);
   appointmentSocket(io);
   queueSocket(io);
   staffSocket(io);
   pharmacySocket(io);
+  authenticationSocket(io);
 
   return io;
 }

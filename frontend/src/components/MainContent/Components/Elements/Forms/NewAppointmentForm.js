@@ -142,24 +142,6 @@ const NewAppointmentForm = ({ close, children }) => {
     }
   };
 
-  // const handleDateChange = (e) => {
-  //   const value = e.target.value;
-  //   if (!value) {
-  //     setAppointment("");
-  //     return;
-  //   }
-  //   const currentDate = new Date(value);
-  //   if (currentDate < new Date()) {
-  //     setErrorPrompt("Appointment can't be before or the current day!");
-  //     setTimeout(() => {
-  //       setErrorPrompt(""); 
-  //     }, 3000);
-  //   } else {
-  //     const formattedDate = currentDate.toISOString().slice(0, 16);
-  //     setAppointment(formattedDate);
-  //   }
-  // };
-
   return (
     <>
       {children}
@@ -183,14 +165,6 @@ const NewAppointmentForm = ({ close, children }) => {
                 placeholder={inputState ? "Enter patient's FamilyID. . . . ." : "Enter appointee's full name. . . . ."}
                 maxLength={100}
               />
-            {/* <datalist id="recordSuggestions">
-              {suggestions && suggestions.slice(0,5).map((name, i) => (
-                <option key={i}>{name}</option>
-              ))}
-            </datalist>
-            <p className={`text-xs text-${selectedTheme}-700 font-thin mt-2 p-2 bg-${selectedTheme}-50 rounded-lg text-center`}>
-              Type a name and press enter to search existing citizen.
-            </p> */}
           </div>
           <div>
             <label htmlFor="phoneNumber" className='mb-2 text-xs md:text-sm lg:text-base font-semibold'>Contact Number:</label>

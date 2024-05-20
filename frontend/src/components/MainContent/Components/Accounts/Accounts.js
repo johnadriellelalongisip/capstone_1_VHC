@@ -54,7 +54,7 @@ const Accounts = () => {
               <DataTable data={records} modalForm={pathname} isLoading={isLoading} error={error} enImport={false} enExport={false} toggleOption={toggleOptions} optionPK={"Staff-ID"} />
             </div>
 
-            <AccountOptions />
+            <AccountOptions AOref={AccountOptionRef} close={toggleOptions} />
 
           </div>
         </div>

@@ -4,8 +4,6 @@ module.exports = function(io) {
   io.on('connection', (socket) => {
 
     socket.on('updateStaff', async () => {
-      console.log('EMAIL_USER:', process.env.EMAIL_USER);
-      console.log('EMAIL_PASS:', process.env.EMAIL_PASS);
       try {
         const connection = await dbModel.getConnection();
         const query = "SELECT `staff_id`, `staff_username`, `staff_email`, `isVerified`, `staff_role`, `account_created_at`, `account_last_updated_at`, `staff_last_activity` FROM `medicalstaff`";

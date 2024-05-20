@@ -1,26 +1,18 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../axios';
+import { socket } from '../socket';
+import { jwtDecode } from 'jwt-decode';
 
 const useQuery = () => {
-  const BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
   const [response, setResponse] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchResults, setSearchResults] = useState(null);
 
-  const headers = (token) => {
-    return {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token ? `Bearer ${token}` : undefined,
-      },
-    };
-  };
-
-  const fetchData = async (route, token) => {
+  const fetchData = async (route) => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`${BASE_URL}${route}`, headers(token));
+      const response = await api.get(`/${route}`);
       setResponse(response.data);
       setIsLoading(false);
     } catch (error) {
@@ -29,10 +21,10 @@ const useQuery = () => {
     }
   };
 
-  const addData = async (route, payload, token) => {
+  const addData = async (route, payload) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${BASE_URL}${route}`, payload, headers(token));
+      const response = await api.post(`/${route}`, payload);
       setResponse(response.data);
       setIsLoading(false);
     } catch (error) {
@@ -41,10 +33,10 @@ const useQuery = () => {
     }
   };
 
-  const editData = async (route, payload, id, token) => {
+  const editData = async (route, payload, id) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${BASE_URL}${route}/${id}`, payload, headers(token));
+      const response = await api.post(`/${route}/${id}`, payload);
       setResponse(response.data);
       setIsLoading(false);
     } catch (error) {
@@ -53,10 +45,10 @@ const useQuery = () => {
     }
   };
 
-  const deleteData = async (route, id, token) => {
+  const deleteData = async (route, id) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${BASE_URL}${route}/${id}`, headers(token));
+      const response = await api.post(`/${route}/${id}`);
       setResponse(response.data);
       setIsLoading(false);
     } catch (error) {
@@ -65,10 +57,10 @@ const useQuery = () => {
     }
   };
 
-  const searchData = async (route, id, token) => {
+  const searchData = async (route, id) => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`${BASE_URL}${route}/${id}`, headers(token));
+      const response = await api.get(`/${route}/${id}`);
       setSearchResults(response.data.data[0]);
       setIsLoading(false);
     } catch (error) {
@@ -77,10 +69,10 @@ const useQuery = () => {
     }
   };
 
-  const searchItems = async (route, id, token) => {
+  const searchItems = async (route, id) => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`${BASE_URL}${route}/${id}`, headers(token));
+      const response = await api.get(`/${route}/${id}`);
       setSearchResults(response.data);
       setIsLoading(false);
     } catch (error) {
@@ -88,6 +80,69 @@ const useQuery = () => {
       setIsLoading(false);
     }
   };
+
+  const userAuth = async (payload) => {
+    setIsLoading(true);
+    try {
+      const response = await api.post(`/authStaff`, payload);
+      console.log(response);
+      if (response && response.data && response.data.accessToken) {
+        localStorage.setItem('accessToken', response.data.accessToken);
+        socket.auth.token = response.data.accessToken;
+        localStorage.setItem('isLoggedIn', JSON.stringify({ isLoggedIn: true }));
+      } 
+      if (response && response.data && response.data.refreshToken) {
+        localStorage.setItem('refreshToken', response.data.refreshToken);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
+      setIsLoading(false);
+    }
+  };
+
+  const verifyToken = async () => {
+    setIsLoading(true);
+    const refreshToken = localStorage.getItem('refreshToken');
+    const accessToken = localStorage.getItem("accessToken");
+    const decoded = jwtDecode(accessToken);
+    if (accessToken) {
+      if (refreshToken !== null || accessToken !== null) {
+        try {
+          const response = await api.post('/authToken', { token: refreshToken, staff_username: decoded.staff_username });
+          if (response && response.data && response.data.accessToken) {
+            localStorage.setItem('accessToken', response.data.accessToken);
+            socket.auth.token = response.data.accessToken;
+          }
+          setIsLoading(false);
+        } catch (error) {
+          handleError(error);
+          setIsLoading(false);
+        }
+      } else {
+        setIsLoading(false);
+      }
+    } else {
+      setIsLoading(false);
+    }
+  };
+  
+  const logoutUser = async (payload) => {
+    setIsLoading(true);
+    try {
+      const response = await api.post('/logoutUser', payload);
+      if (response && response.data && response.data.status === 200) {
+        setResponse(response.data.message);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.setItem('isLoggedIn', JSON.stringify({ isLoggedIn: false }));
+      }
+      setIsLoading(false);
+    } catch (error) {
+      handleError(error);
+      setIsLoading(false);
+    }
+  }
 
   const handleError = (error) => {
     if (!error.response) {
@@ -110,6 +165,10 @@ const useQuery = () => {
     deleteData,
     searchData,
     searchItems,
+
+    userAuth,
+    verifyToken,
+    logoutUser,
   };
 };
 
