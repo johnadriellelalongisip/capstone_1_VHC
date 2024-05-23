@@ -5,6 +5,8 @@ import { BiSolidDonateBlood } from "react-icons/bi";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { colorTheme } from "../../App";
 import { IoCalendar } from "react-icons/io5";
+import { decryptData } from "../../hooks/useCrypto";
+import { jwtDecode } from "jwt-decode";
 
 const Menu = ({ path, Icon, label }) => {
   const [selectedTheme] = useContext(colorTheme);
@@ -55,6 +57,7 @@ const SideMenu = () => {
   const [isDevMenuOpen, setIsDevMenuOpen] = useState(false);
   const location = useLocation();
   const loc = location.pathname;
+  const { accessToken } = decryptData(localStorage.getItem('safeStorageData'));
 
   const [selectedTheme] = useContext(colorTheme);
   return (
@@ -70,21 +73,25 @@ const SideMenu = () => {
       <Menu path="blood_unit" Icon={BiSolidDonateBlood} label="Blood Unit" />
       <Menu path="accounts" Icon={FaUsers} label="Accounts" />
 
-      <button onClick={() => setIsDevMenuOpen(prev => !prev)} className={`m-2 px-2 md:px-8 lg:px-14 gap-2 rounded-lg transition-colors bg-${selectedTheme}-300 hover:text-${selectedTheme}-600 hover:bg-${selectedTheme}-50 hover:drop-shadow-md p-2 first-line duration-300 ease-linear ${
-        isDevMenuOpen || loc === '/playground-jwt' || loc === '/playground-socket' ? `bg-${selectedTheme}-50 drop-shadow-xl` : `bg-transparent`
-      }`}>
-        <div className={`flex flex-row justify-start items-center`}>
-          <FaCode className={`w-6 h-6 md:mr-2 lg:mr-2`} />
-          <p className={`hidden md:block lg:block`}>
-            Developer
-          </p>
-          <MdKeyboardArrowDown className={`${isDevMenuOpen && 'rotate-180'} size-6 hidden md:block lg:block md:ml-2 lg:ml-2`} />
-        </div>
-      </button>
-      {isDevMenuOpen && (
+      {accessToken && jwtDecode(accessToken).role === 'developer' && (
         <>
-          <Menu path="playground-jwt" Icon={MdOutlineSmartToy} label="JWT" />
-          <Menu path="playground-socket" Icon={MdOutlineSmartToy} label="SOCKET" />
+          <button onClick={() => setIsDevMenuOpen(prev => !prev)} className={`m-2 px-2 md:px-8 lg:px-14 gap-2 rounded-lg transition-colors bg-${selectedTheme}-300 hover:text-${selectedTheme}-600 hover:bg-${selectedTheme}-50 hover:drop-shadow-md p-2 first-line duration-300 ease-linear ${
+            isDevMenuOpen || loc === '/playground-jwt' || loc === '/playground-socket' ? `bg-${selectedTheme}-50 drop-shadow-xl` : `bg-transparent`
+          }`}>
+            <div className={`flex flex-row justify-start items-center`}>
+              <FaCode className={`w-6 h-6 md:mr-2 lg:mr-2`} />
+              <p className={`hidden md:block lg:block`}>
+                Developer
+              </p>
+              <MdKeyboardArrowDown className={`${isDevMenuOpen && 'rotate-180'} size-6 hidden md:block lg:block md:ml-2 lg:ml-2`} />
+            </div>
+          </button>
+          {isDevMenuOpen && (
+            <>
+              <Menu path="playground-jwt" Icon={MdOutlineSmartToy} label="JWT" />
+              <Menu path="playground-socket" Icon={MdOutlineSmartToy} label="SOCKET" />
+            </>
+          )}
         </>
       )}
       <Outlet />

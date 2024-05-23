@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { createContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 
 import Notfound from './components/Notfound';
 import TopNav from './components/TopNavBar/TopNav';
@@ -19,6 +19,10 @@ import Mapping from "./components/MainContent/Components/Mapping/Mapping.js";
 import { socket } from "./socket.js";
 import JsonWebToken from "./components/MainContent/Components/Playground/JsonWebToken.js";
 import SocketIo from "./components/MainContent/Components/Playground/SocketIo.js";
+import Login from "./components/Login.js";
+import Register from "./components/Register.js";
+import { decryptData } from "./hooks/useCrypto.js";
+import { jwtDecode } from "jwt-decode";
 
 export const colorTheme = createContext();
 export const messaging = createContext();
@@ -27,29 +31,19 @@ export const isLoggedInContext = createContext();
 const App = () => {
   const [selectedTheme, setSelectedTheme] = useState(localStorage.getItem('theme'));
   const [currentChat, setCurrentChats] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const loadingScreen = useRef(null);
+  const safeStorageData = localStorage.getItem('safeStorageData');
+  const [isLoggedIn, setIsLoggedIn] = useState(safeStorageData ? decryptData(safeStorageData) : false);
+  const { accessToken, isLoggedIn : loggedIn } = decryptData(localStorage.getItem('safeStorageData'));
 
   useEffect(() => {
-    setIsLoading(true);
-    loadingScreen.current.showModal();
-    const isLoadingTimeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    const loadScreenTimeout = setTimeout(() => {
-      loadingScreen.current.close();
-    }, 1800);
-    return () => clearTimeout(loadScreenTimeout, isLoadingTimeout);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    setTimeout(() => {
-      socket.connect();
-    },500);
+    if (safeStorageData) {
+      setIsLoggedIn(loggedIn || false);
+    }
+    socket.connect();
     return () => {
       socket.disconnect();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (localStorage.getItem('theme') === null) {
@@ -57,7 +51,7 @@ const App = () => {
   }
   useMemo(() => {
     if (localStorage.getItem('theme') === null) {
-      localStorage.setItem('theme','blue');
+      localStorage.setItem('theme','gray');
     } else {
       localStorage.setItem('theme',selectedTheme);
     }
@@ -68,41 +62,50 @@ const App = () => {
 
   return (
     <>
-    <dialog ref={loadingScreen} className={`rounded-md shadow-lg w-screen h-screen bg-${selectedTheme}-300 transition-all duration-500 animate-ease-linear ${isLoading ? `translate-y-0` : `translate-y-[100vh]`}`}>
-      <div className="min-h-full flex justify-center items-center">
-        <img src="MHO_logo.png" className='size-24 md:size-28 lg:size-32 animate-bounce drop-shadow-lg' alt="..."/>
-      </div>
-    </dialog>
     <div className="flex flex-col h-screen">
       <colorTheme.Provider value={[selectedTheme, setSelectedTheme, colors]}>
         <BrowserRouter basename='/'>
-          <messaging.Provider value={[ currentChat, setCurrentChats ]}>
-            <TopNav />
-          </messaging.Provider>
-          <div className="flex">
-            <div className={`w-auto h-full bg-${selectedTheme}-300`}>
-              <SideMenu />
-            </div>
-            <div className={`basis-11/12 h-auto bg-${selectedTheme}-100 overflow-y-hidden`}>
-              <Routes>
-                <Route path='home' element={<Home />}/>
-                <Route path='dashboard' element={<Dashboard />}/>
-                <Route path='accounts' element={<Accounts />}/>
-                <Route path='appointments' element={<Appointments />}/>
-                <Route path='queue' element={<Queue />}/>
-                <Route path='analytics' element={<Analytics />}/>
-                <Route path='records' element={<Records />}/>
-                <Route path='pharmacy' element={<Pharmacy />}/>
-                <Route path='blood_unit' element={<BloodUnit />}/>
-                <Route path='mapping' element={<Mapping />}/>
-                
-                <Route path='playground-jwt' element={<JsonWebToken />}/>
-                <Route path='playground-socket' element={<SocketIo />}/>
+          {isLoggedIn && (
+            <messaging.Provider value={[ currentChat, setCurrentChats ]}>
+              <TopNav />
+            </messaging.Provider>
+          )}
+          {!isLoggedIn ? (
+            <Routes>
+              <Route path="login" element={<Login />} />
+              <Route path="register" element={<Register />} />
+              <Route path="*" element={<Login />} />
+            </Routes>
+          ) : (
+            <div className="flex">
+              <div className={`w-auto h-full bg-${selectedTheme}-300`}>
+                <SideMenu />
+              </div>
+              <div className={`basis-11/12 h-auto bg-${selectedTheme}-100 overflow-y-hidden`}>
+                <Routes>
+                  <Route path='home' element={<Home />}/>
+                  <Route path='dashboard' element={<Dashboard />}/>
+                  <Route path='accounts' element={<Accounts />}/>
+                  <Route path='appointments' element={<Appointments />}/>
+                  <Route path='queue' element={<Queue />}/>
+                  <Route path='analytics' element={<Analytics />}/>
+                  <Route path='records' element={<Records />}/>
+                  <Route path='pharmacy' element={<Pharmacy />}/>
+                  <Route path='blood_unit' element={<BloodUnit />}/>
+                  <Route path='mapping' element={<Mapping />}/>
+                  
+                  {accessToken && jwtDecode(accessToken).role === 'developer' && (
+                    <>
+                      <Route path='playground-jwt' element={<JsonWebToken />}/>
+                      <Route path='playground-socket' element={<SocketIo />}/>
+                    </>
+                  )}
 
-                <Route path='*' element={<Notfound />}/>
-              </Routes>
+                  <Route path='*' element={<Notfound />}/>
+                </Routes>
+              </div>
             </div>
-          </div>
+          )}
         </BrowserRouter>
       </colorTheme.Provider>
     </div>

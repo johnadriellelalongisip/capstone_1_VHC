@@ -1,37 +1,37 @@
 const dbModel = require('../models/database_model');
-const crypto = require('crypto');
+// const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 // const nodemailer = require('nodemailer');
 const saltRounds = 10;
-const { google } = require('googleapis');
+// const { google } = require('googleapis');
 // const OAuth2 = google.auth.OAuth2;
 
-function hashData(...values) {
-  const combinedString = values.map(value => JSON.stringify(value)).join('');
-  const hash = crypto.createHash('sha256').update(combinedString).digest('hex');
-  return hash;
-}
+// function hashData(...values) {
+//   const combinedString = values.map(value => JSON.stringify(value)).join('');
+//   const hash = crypto.createHash('sha256').update(combinedString).digest('hex');
+//   return hash;
+// }
 
-function getDateTime(stateValue = 'fulldatetime') {
-  const date = new Date(); 
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  const hour = date.getHours().toString().padStart(2, '0');
-  const minute = date.getMinutes().toString().padStart(2, '0');
-  const seconds = date.getSeconds().toString().padStart(2, '0');
-  if (stateValue === 'fulldatetime') {
-    const data = `${year}-${month}-${day} ${hour}:${minute}:${seconds}`;
-    return data;
-  } else if (stateValue === 'date') {
-    const data = `${year}-${month}-${day}`;
-    return data;
-  } else if (stateValue === 'time') {
-    const data = `${hour}-${minute}-${seconds}`;
-    return data;
-  }
-}
+// function getDateTime(stateValue = 'fulldatetime') {
+//   const date = new Date(); 
+//   const year = date.getFullYear();
+//   const month = (date.getMonth() + 1).toString().padStart(2, '0');
+//   const day = date.getDate().toString().padStart(2, '0');
+//   const hour = date.getHours().toString().padStart(2, '0');
+//   const minute = date.getMinutes().toString().padStart(2, '0');
+//   const seconds = date.getSeconds().toString().padStart(2, '0');
+//   if (stateValue === 'fulldatetime') {
+//     const data = `${year}-${month}-${day} ${hour}:${minute}:${seconds}`;
+//     return data;
+//   } else if (stateValue === 'date') {
+//     const data = `${year}-${month}-${day}`;
+//     return data;
+//   } else if (stateValue === 'time') {
+//     const data = `${hour}-${minute}-${seconds}`;
+//     return data;
+//   }
+// }
 
 class StaffController {
 
@@ -236,60 +236,6 @@ class StaffController {
       });
     }
   };
-  
-  async authStaff(req, res) {
-    try {
-      const { username, password } = req.body;
-  
-      if (username !== 'ASDF' || password !== 'admin') {
-        return res.status(403).json({ status: 403 });
-      }
-  
-      const user = { staff_username: username };
-      const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10s' });
-      const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
-      const connection = await dbModel.getConnection();
-      await dbModel.query('UPDATE `medicalstaff` SET `refresh_token` = ? WHERE `staff_username` = ?', [refreshToken, username]);
-      dbModel.releaseConnection(connection);
-      return res.json({ accessToken, refreshToken });
-    } catch (error) {
-      return res.status(500).json({
-        status: 500,
-        message: error.message,
-        error: error
-      });
-    }
-  };
-
-  async authToken(req, res) {
-    try {
-      const { token, staff_username } = req.body;
-
-      const connection = await dbModel.getConnection();
-      const user = await dbModel.query('SELECT `staff_username`, `refresh_token` FROM `medicalstaff` WHERE `staff_username` = ?', [staff_username]);
-      const refresh_token = user[0]?.refresh_token;
-      dbModel.releaseConnection(connection);
-
-      if (refresh_token !== token) return res.sendStatus(403);
-      
-      if (token !== null || staff_username !== null) {
-        jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-
-          if (err) return res.status(403).json({status: 403, err: err });
-
-          const accessToken = jwt.sign({ staff_username: user.staff_username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10s' });
-
-          res.status(200).json({ accessToken });
-
-        });
-      } else {
-        return res.status(401);
-      }
-    } catch (error) {
-      return console.log(error);
-      // return res.status(500);
-    }
-  }
 
   async logoutUser(req, res) {
     try {
@@ -297,7 +243,6 @@ class StaffController {
       const staff_username = req.body.staff_username;
       const removeRefreshTokenQuery = 'UPDATE `medicalstaff` SET `refresh_token` = NULL WHERE `staff_username` = ?';
       const response = await dbModel.query(removeRefreshTokenQuery, staff_username);
-      console.log(response);
       dbModel.releaseConnection(connection);
       return res.status(200).json({
         status: 200,
@@ -311,42 +256,6 @@ class StaffController {
       });
     }
   }
-
-  // async authStaff(req, res) {
-  //   try {
-  //     const connection = await dbModel.getConnection();
-  //     const username = req.body.username;
-  //     const password = req.body.password;
-  //     const userData = await dbModel.query('SELECT staff_id, staff_password, staff_history FROM medicalstaff WHERE staff_username = ?', username);
-  //     if (userData.length === 0) {
-  //       return res.status(401).json({ status: 401, message: 'No user found.' });
-  //       return;
-  //     }
-  //     const storedHashedPassword = userData[0].staff_password;
-  //     const passwordMatch = await bcrypt.compare(password, storedHashedPassword);
-  //     if (passwordMatch) {
-  //       const currentLogs = JSON.parse(userData[0].staff_history);
-  //       const logToAdd = [req.body.logged_in];
-  //       const newData = {...currentLogs, [logToAdd]: 'Logged In'};
-  //       const updateHistoryResponse = await dbModel.query('UPDATE medicalstaff SET `staff_history` = ? WHERE staff_id = ?', [JSON.stringify(newData), userData[0].staff_id]);
-  //       dbModel.releaseConnection(connection);
-  //       return res.status(200).json({
-  //           status: 200,
-  //           message: 'Logged in successfully',
-  //           response: updateHistoryResponse,
-  //           logs: newData
-  //       });
-  //     } else {
-  //       return res.status(401).json({ status: 401, message: 'Wrong password, retry.' });
-  //     }
-  //   } catch (error) {
-  //     return res.status(500).json({
-  //       status: 500,
-  //       message: error.message,
-  //       error: error
-  //     });
-  //   }
-  // }
 
 }
 

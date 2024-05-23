@@ -18,8 +18,6 @@ router.post('/editUser', userController.editUser);
 // router.get('/sendEmail', staffController.sendEmail);
 router.get('/getStaff', staffController.getStaff);
 router.post('/addStaff', staffController.addStaff);
-router.post('/authStaff', staffController.authStaff);
-router.post('/authToken', staffController.authToken);
 router.post('/logoutUser', staffController.logoutUser);
 
 // RECORDS

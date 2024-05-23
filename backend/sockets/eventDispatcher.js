@@ -6,7 +6,7 @@ const queueSocket = require('./queueSocket');
 const staffSocket = require('./staffSocket');
 const pharmacySocket = require('./pharmacySocket');
 const authenticationSocket = require('./authenticationSocket');
-const { authenticationMiddleware } = require('../middlewares/authenticationMiddleware');
+const { socketAuth } = require('../middlewares/socketAuth');
 
 function initializeWebSocket(server) {
   const io = new Server(server, {
@@ -16,7 +16,7 @@ function initializeWebSocket(server) {
     },
   });
 
-  io.use(authenticationMiddleware);
+  io.use(socketAuth);
   
   recordSocket(io);
   appointmentSocket(io);

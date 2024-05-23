@@ -2,12 +2,14 @@ import { useState } from 'react';
 import api from '../axios';
 import { socket } from '../socket';
 import { jwtDecode } from 'jwt-decode';
+import useCrypto from './useCrypto';
 
 const useQuery = () => {
   const [response, setResponse] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchResults, setSearchResults] = useState(null);
+  const { encryptData, decryptData } = useCrypto();
 
   const fetchData = async (route) => {
     setIsLoading(true);
@@ -81,45 +83,61 @@ const useQuery = () => {
     }
   };
 
+  const updateTokenDynamic = (obj, updates) => {
+    for (let key in updates) {
+      obj[key] = updates[key];
+    }
+  };  
+
   const userAuth = async (payload) => {
     setIsLoading(true);
     try {
-      const response = await api.post(`/authStaff`, payload);
-      console.log(response);
-      if (response && response.data && response.data.accessToken) {
-        localStorage.setItem('accessToken', response.data.accessToken);
-        socket.auth.token = response.data.accessToken;
-        localStorage.setItem('isLoggedIn', JSON.stringify({ isLoggedIn: true }));
-      } 
-      if (response && response.data && response.data.refreshToken) {
-        localStorage.setItem('refreshToken', response.data.refreshToken);
+      const response = await api.post(`/authStaff`, payload);  
+      const data = {};
+      if (response?.data) {
+        if (response.data.accessToken) {
+          const accessTokenToAdd = { 
+            accessToken: response.data.accessToken,
+            isLoggedIn: true
+          };
+          updateTokenDynamic(data, accessTokenToAdd );
+          socket.auth.token = response.data.accessToken;
+        }
+        if (response.data.refreshToken) {
+          const refreshTokenToAdd = { refreshToken: response.data.refreshToken };
+          updateTokenDynamic(data, refreshTokenToAdd);
+        }
+        if (Object.keys(data).length > 0) {
+          localStorage.setItem('safeStorageData', encryptData(data));
+          window.location.reload();
+          setResponse(response.data);
+        }
+        setIsLoading(false);
       }
       setIsLoading(false);
+      return data;
     } catch (error) {
-      console.error(error);
+      handleError(error);
       setIsLoading(false);
     }
-  };
-
+  };  
+  
   const verifyToken = async () => {
     setIsLoading(true);
-    const refreshToken = localStorage.getItem('refreshToken');
-    const accessToken = localStorage.getItem("accessToken");
-    const decoded = jwtDecode(accessToken);
-    if (accessToken) {
-      if (refreshToken !== null || accessToken !== null) {
-        try {
-          const response = await api.post('/authToken', { token: refreshToken, staff_username: decoded.staff_username });
-          if (response && response.data && response.data.accessToken) {
-            localStorage.setItem('accessToken', response.data.accessToken);
-            socket.auth.token = response.data.accessToken;
-          }
-          setIsLoading(false);
-        } catch (error) {
-          handleError(error);
-          setIsLoading(false);
+    const decryptedData = decryptData(localStorage.getItem('safeStorageData'));
+    const { accessToken, refreshToken } = decryptedData;
+    if (refreshToken !== null || accessToken !== null) {
+      try {
+        const decoded = jwtDecode(accessToken);
+        const response = await api.post('/authToken', { token: refreshToken, staff_username: decoded.staff_username });
+        if (response && response.data && response.data.accessToken) {
+          socket.auth.token = response.data.accessToken;
+          updateTokenDynamic( decryptedData, { accessToken: response.data.accessToken });
+          localStorage.setItem('safeStorageData', encryptData(decryptedData));
         }
-      } else {
+        setIsLoading(false);
+      } catch (error) {
+        handleError(error);
         setIsLoading(false);
       }
     } else {
@@ -132,10 +150,9 @@ const useQuery = () => {
     try {
       const response = await api.post('/logoutUser', payload);
       if (response && response.data && response.data.status === 200) {
-        setResponse(response.data.message);
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.setItem('isLoggedIn', JSON.stringify({ isLoggedIn: false }));
+        setResponse(response.data);
+        localStorage.setItem('safeStorageData', encryptData({ isLoggedIn : false }));
+        window.location.reload();
       }
       setIsLoading(false);
     } catch (error) {

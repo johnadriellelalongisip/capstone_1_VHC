@@ -1,33 +1,31 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import useQuery from "../hooks/useQuery";
 import { Spinner } from "flowbite-react";
-import { useNavigate } from "react-router-dom";
+import useDeviceId from "../hooks/useDeviceId";
+import useCurrentTime from "../hooks/useCurrentTime";
 
-const Login = ({ setIsLoggedIn }) => {
+const Login = () => {
+  const { deviceId } = useDeviceId();
+  const { mysqlTime } = useCurrentTime();
   const [payload, setPayload] = useState({
     username: "",
-    password: ""
+    password: "",
+    deviceId: deviceId,
+    history: () => {
+      const history = {};
+      const Hkey = String(mysqlTime);
+      history[Hkey] = "Logged In";
+      return history;
+    },
+    dateTime: String(mysqlTime)
   });
   const [passwordVisibility, setPasswordVisibility] = useState(true);
-  const { response, isLoading, error, userAuth } = useQuery();
-  const navigate = useNavigate();
-
+  const { isLoading, userAuth } = useQuery();
   const handleSubmit = async (e) => {
     e.preventDefault();
-    userAuth(payload);
+    await userAuth(payload);
   };
-
-  useEffect(() => {
-    if (response && response.status === 200) {
-      localStorage.setItem('accessToken', response.accessToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
-      setIsLoggedIn(true);
-      localStorage.setItem('isLoggedIn', 'true');
-      navigate("/home");
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [response, error]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

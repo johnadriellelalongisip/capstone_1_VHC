@@ -6,15 +6,27 @@ import { useContext, useState } from "react";
 import { colorTheme } from "../../App";
 import useWindowSize from "../../hooks/useWindowSize";
 import OptionButton from "./OptionButton";
+import { decryptData } from "../../hooks/useCrypto";
+import { jwtDecode } from "jwt-decode";
+import useQuery from "../../hooks/useQuery";
+import useCurrentTime from "../../hooks/useCurrentTime";
 
 const Profile = ({ prof, toggle, toggleOptions, toggleHelp }) => {
   // eslint-disable-next-line no-unused-vars
   const [selectedTheme] = useContext(colorTheme);
   const [rotateSetting, setRotateSetting] = useState(false);
   const {avatarSize} = useWindowSize();
+  const { logoutUser } = useQuery();
+  const { mysqlTime } = useCurrentTime();
+  const { accessToken } = decryptData(localStorage.getItem('safeStorageData'));
+  const decoded = accessToken ? jwtDecode(accessToken) : {};
   
-  const Logout = () => {
-
+  const Logout = async () => {
+    console.log('want to logout');
+    const history = {};
+    const Hkey = String(mysqlTime);
+    history[Hkey] = "Logged Out";
+    await logoutUser({ staff_username: decoded.staff_username, history: history});
   };
 
   return (
@@ -23,7 +35,7 @@ const Profile = ({ prof, toggle, toggleOptions, toggleHelp }) => {
           <button onClick={() => toggle()} className={`hover:drop-shadow-lg flex justify-start items-center mb-2 text-${selectedTheme}-600 p-1 m-2 drop-shadow-lg rounded-lg bg-${selectedTheme}-100 transition-colors duration-200 hover:bg-${selectedTheme}-50`}>
             <div className="flex justify-between items-center m-2">
               <Avatar img="default_profile.svg" rounded status="online" size={avatarSize} statusPosition="bottom-right" />
-              <p className="font-semibold p-1 text-xs md:text-sm lg:text-base">User Name</p>
+              <p className="font-semibold p-1 text-xs md:text-sm lg:text-base capitalize">{decoded.staff_username}</p>
             </div>
           </button>
           <div className="w-60 md:w-70 lg:w-80 flex flex-col gap-2">

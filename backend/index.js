@@ -5,8 +5,11 @@ const path = require('path');
 const cors = require('cors');
 const routes = require('./routes/routes');
 const initializeWebSocket = require('./sockets/eventDispatcher');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 const bodyParser = require('body-parser');
+const routeAuth = require('./middlewares/routeAuth');
+const authController = require('./controllers/authController');
 
 const app = express();
 const port = 5000;
@@ -20,15 +23,18 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cookieParser());
 app.use(bodyParser.json());
 
 const serverOptions = {
   key: fs.readFileSync(path.join(__dirname, 'certificates', 'key.pem')),
   cert: fs.readFileSync(path.join(__dirname, 'certificates', 'cert.pem')),
 };
-  
 app.use(express.static('public'));
-app.use('/api', routes);
+
+app.use('/api/authStaff', authController.authStaff);
+app.use('/api/authToken', authController.authToken);
+app.use('/api', routeAuth, routes);
 
 const server = https.createServer(serverOptions, app);
 
