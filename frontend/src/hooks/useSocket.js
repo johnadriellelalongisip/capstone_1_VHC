@@ -60,9 +60,6 @@ const useSocket = ({ SSName, keyMap, fetchUrl, socketUrl, socketEmit, socketErro
       setData(convertData(response.data));
       sessionStorage.setItem(SSName,JSON.stringify(convertData(response.data)));
     }
-    if (error) {
-      console.log(error);
-    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [response,error]);
 

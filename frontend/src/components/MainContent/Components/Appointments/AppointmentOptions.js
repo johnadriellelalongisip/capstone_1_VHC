@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { colorTheme } from "../../../../App";
+import { colorTheme, notificationMessage } from "../../../../App";
 import { IoCalendarSharp } from "react-icons/io5";
-import { MdCheck, MdClose, MdDelete, MdEdit, MdKeyboardDoubleArrowDown } from "react-icons/md";
+import { MdCheck, MdClose } from "react-icons/md";
 import useQuery from "../../../../hooks/useQuery";
 import { Tooltip } from "flowbite-react";
 import ConfirmForm from "../../../../hooks/ConfirmForm";
@@ -10,7 +10,14 @@ import { socket } from "../../../../socket";
 const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
   const [selectedTheme] = useContext(colorTheme);
   const { searchResults, response, isLoading, error, searchItems, editData, deleteData } = useQuery();
-  const [selectedAppointment, setSelectedAppointment] = useState([{}]);
+  const [selectedAppointment, setSelectedAppointment] = useState({
+    fullname: "",
+    phoneNumber: "",
+    description: "",
+    appointed_datetime: "",
+    status: "",
+    citizen_id: ""
+  });
   const [editing, setEditing] = useState(false);
   const confirmationRef = useRef(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -19,7 +26,10 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
     phoneNumber: "",
     description: "",
     appointed_datetime: "",
+    status: ""
   });
+  // eslint-disable-next-line no-unused-vars
+  const [notifMessage, setNotifMessage] = useContext(notificationMessage);
 
   useEffect(() => {
     if (PK) {
@@ -37,18 +47,26 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
   function closeModal() {
     setEditing(false);
     toggle();
-    setSelectedAppointment([{}]);
+    setSelectedAppointment({
+      fullname: "",
+      phoneNumber: "",
+      description: "",
+      appointed_datetime: "",
+      status: "",
+      citizen_id: ""
+    });
     setPayload({
       fullname: "",
       phoneNumber: "",
       description: "",
       appointed_datetime: "",
+      status: ""
     });
   };
 
-  const handleUpdate = (data) => {
+  // const handleUpdate = (data) => {
     
-  };
+  // };
 
   const handleCancelAppointment = () => {
     deleteData("handleCancelAppointment", PK);
@@ -67,12 +85,13 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
   }
 
   useEffect(() => {
-    if (response && response.status === 204) {
-      console.log(response);
+    if (response && response.status === 200) {
+      setNotifMessage(response.message);
     }
     if (error) {
-      console.log(error);
+      setNotifMessage(error);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [response, error]);
 
   function toggleConfirmation() {
@@ -85,31 +104,32 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
     }
   };
 
-  const isFormFilled = () => {
-    if (editing && (payload.fullname !== selectedAppointment.fullname ||
-      payload.phoneNumber !== selectedAppointment.phoneNumber ||
-      payload.description !== selectedAppointment.description ||
-      payload.appointed_datetime !== selectedAppointment.appointed_datetime)) 
-    {
-      return true;
-    } else {
-      return false;
-    }
-  };
+  // const isFormFilled = () => {
+  //   if (editing && (payload.fullname !== selectedAppointment.fullname ||
+  //     payload.phoneNumber !== selectedAppointment.phoneNumber ||
+  //     payload.description !== selectedAppointment.description ||
+  //     payload.appointed_datetime !== selectedAppointment.appointed_datetime)) 
+  //   {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // };
 
-  const handleToggleEdit = () => {
-    setPayload(() => ({
-      fullname: selectedAppointment.fullname,
-      phoneNumber: selectedAppointment.phoneNumber,
-      description: selectedAppointment.description,
-      appointed_datetime: selectedAppointment.appointed_datetime
-    }));
-    if (isFormFilled()) {
-      toggleConfirmation();
-    } else {
-      setEditing((prev) => !prev);
-    }
-  };
+  // const handleToggleEdit = () => {
+  //   setPayload(() => ({
+  //     fullname: selectedAppointment.fullname || "",
+  //     phoneNumber: selectedAppointment.phoneNumber || "",
+  //     description: selectedAppointment.description || "",
+  //     appointed_datetime: selectedAppointment.appointed_datetime || "",
+  //     status: selectedAppointment.status || ""
+  //   }));
+  //   if (isFormFilled()) {
+  //     toggleConfirmation();
+  //   } else {
+  //     setEditing((prev) => !prev);
+  //   }
+  // };
 
   const proceedUpdate = () => {
     toggleConfirmation();
@@ -154,8 +174,8 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
                   </div>
                 ))}
                 <div className="flex justify-evenly items-center my-4">
-                  {Array.from({ length: 3 }).map((_, index) => (
-                    <div className={`rounded-full size-10 md:size-11 lg:size-12 bg-${selectedTheme}-400`}> </div>
+                  {Array.from({ length: 2 }).map((_, index) => (
+                    <div key={index} className={`rounded-full size-10 md:size-11 lg:size-12 bg-${selectedTheme}-400`}> </div>
                   ))}
                 </div>
               </div>
@@ -172,7 +192,7 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
                       id="fullname"
                       list="recordSuggestions"
                       required
-                      value={!editing ? selectedAppointment?.fullname : payload.fullname}
+                      value={!editing ? (selectedAppointment?.fullname || "") : payload.fullname}
                       onChange={handleChange}
                       className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] ${editing ? `border-${selectedTheme}-800` : `border-transparent`}`}
                     />
@@ -185,7 +205,7 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
                       name="phoneNumber" 
                       id="phoneNumber"
                       required
-                      value={!editing ? selectedAppointment?.phone_number : payload.phoneNumber}
+                      value={!editing ? (selectedAppointment?.phone_number || "") : payload.phoneNumber}
                       onChange={handleChange}
                       className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] ${editing ? `border-${selectedTheme}-800` : `border-transparent`}`}
                     />
@@ -197,7 +217,7 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
                       name="description"
                       id="description"
                       required
-                      value={!editing ? selectedAppointment?.description : payload.description}
+                      value={!editing ? (selectedAppointment?.description || "") : payload.description}
                       onChange={handleChange}
                       className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] ${editing ? `border-${selectedTheme}-800` : `border-transparent`}`}
                       rows={4}
@@ -211,7 +231,7 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
                       name="appointed_datetime"
                       id="appointed_datetime"
                       required
-                      value={!editing ? selectedAppointment?.appointed_datetime : payload.appointed_datetime}
+                      value={!editing ? (selectedAppointment?.appointed_datetime || "") : payload.appointed_datetime}
                       onChange={handleChange}
                       className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] ${editing ? `border-${selectedTheme}-800` : `border-transparent`}`}
                     />
@@ -225,17 +245,13 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
                       id="status"
                       list="recordSuggestions"
                       required
-                      value={!editing ? selectedAppointment?.status : payload.status}
+                      value={!editing ? (selectedAppointment?.status || "") : payload.status}
                       onChange={handleChange}
                       className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-transparent`}
                     />
                   </div>
                 </form>
                 <div className="flex justify-evenly items-center my-4">
-
-                  {/* <Tooltip content={editing ? 'Update?' : 'Edit?'} animation="duration-500">
-                    <button onClick={() => handleToggleEdit()} className={`drop-shadow-md p-3 text-center rounded-full font-semibold ${!editing ? `bg-${selectedTheme}-300 text-${selectedTheme}-600` : `bg-${selectedTheme}-600 text-${selectedTheme}-300`} hover:bg-${selectedTheme}-400 hover:text-${selectedTheme}-700 active:bg-${selectedTheme}-700 active:text-${selectedTheme}-400 transition-colors duration-300 ease-linear`}><MdEdit className="size-5 md:size-6 lg:size-7"/></button>
-                  </Tooltip> */}
 
                   <Tooltip content="Cancel Appointment?" animation="duration-500">
                     <button onClick={() => handleCancelAppointment()} className={`drop-shadow-md p-3 text-center rounded-full font-semibold bg-${selectedTheme}-300 text-${selectedTheme}-600 hover:bg-${selectedTheme}-400 hover:text-${selectedTheme}-700 active:bg-${selectedTheme}-700 active:text-${selectedTheme}-400 transition-colors duration-300 ease-linear`}><MdClose className="size-5 md:size-6 lg:size-7"/></button>
@@ -255,5 +271,5 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
     </>
   );
 }
- 
+
 export default AppointmentOptions;

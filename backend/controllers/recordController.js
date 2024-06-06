@@ -3,8 +3,9 @@ const dbModel = require('../models/database_model');
 class RecordController {
   
   async addRecord(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const query = 'INSERT INTO `municipal_citizens`(`citizen_firstname`, `citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_birthdate`, `citizen_barangay`, `citizen_family_id`, `date_added`,  `citizen_number`, `citizen_history`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
       const payload = req.body;
       const data = [
@@ -20,7 +21,6 @@ class RecordController {
         payload.history
       ];
       const response = await dbModel.query(query, data)
-      dbModel.releaseConnection(connection);
       return res.status(200).json({
         status: 200,
         message: 'Record added successfully',
@@ -33,14 +33,18 @@ class RecordController {
         message: error.message,
         error: error
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 
   async getRecords(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const response = await dbModel.query('SELECT `citizen_firstname`, `citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_birthdate`, `citizen_barangay`, `citizen_family_id`, `citizen_number` FROM `municipal_citizens`');
-      dbModel.releaseConnection(connection);
       const newResponse = response.map((res) => {
         const date = new Date(res.citizen_birthdate);
         const year = date.getFullYear();
@@ -65,16 +69,20 @@ class RecordController {
         message: error.message,
         error: error.message
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 
   async findRecord(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const query = "SELECT `citizen_history`, `citizen_firstname`,`citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_number`, `citizen_birthdate` FROM `municipal_citizens` WHERE `citizen_family_id` = ?";
       const family_id = req.params.id;
       const response = await dbModel.query(query, family_id);
-      dbModel.releaseConnection(connection);
       return res.status(200).json({
         status: 200,
         message: "Data retrieved successfully",
@@ -86,12 +94,17 @@ class RecordController {
         message: error.message,
         error: error.message
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 
   async addRecordHistory(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const payload = req.body;
       const family_id = req.params.id;
       const data = await dbModel.query('SELECT `citizen_history` FROM `municipal_citizens` WHERE `citizen_family_id` = ?', family_id);
@@ -99,7 +112,6 @@ class RecordController {
       const newHistory = {...oldHistory, ...payload};
       const query = 'UPDATE `municipal_citizens` SET `citizen_history` = ? WHERE `citizen_family_id` = ?';
       const response = await dbModel.query(query, [JSON.stringify(newHistory), family_id]);
-      dbModel.releaseConnection(connection);
       return res.status(200).json({
         status: 200,
         message: "Data updated successfully",
@@ -111,16 +123,20 @@ class RecordController {
         message: error.message,
         error: error.message
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 
   async findFirstName(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const query = "SELECT `citizen_family_id`, CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) AS citizen_full_name, `citizen_gender`, `citizen_barangay`, `citizen_number` FROM `municipal_citizens` WHERE CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) LIKE CONCAT('%', ?, '%')";
       const nameInput = req.params.id;
       const response = await dbModel.query(query, nameInput);
-      dbModel.releaseConnection(connection);
       if (response.length !== 0) {
         return res.status(200).json({
           status: 200,
@@ -140,6 +156,10 @@ class RecordController {
         message: error.message,
         error: error.message
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 

@@ -69,7 +69,7 @@ const NewAppointmentForm = ({ close, children }) => {
         addData("newAppointment", convertedPayload);
       }
       setTimeout(() => {
-        socket.emit('updateAppointment', convertedPayload);
+        socket.emit('updateAppointment');
       },[500]);
       cleanUp();
       close();
@@ -80,12 +80,6 @@ const NewAppointmentForm = ({ close, children }) => {
       }, 3000);
     }
   };
-
-  useEffect(() => {
-    if(error) {
-      console.log(error);
-    }
-  }, [error]);
 
   const handleNameChange = (e) => {
     const specialCharacterPattern = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>?0123456789]/g;
@@ -119,10 +113,10 @@ const NewAppointmentForm = ({ close, children }) => {
   }, [selectedOption]);
   
   const toggleInputState = () => {
-    if (appointmentID.length > 0) {
-      toggleConfirm();
-    } else {
+    if (appointmentID.length === 0) {
       setInputState(prev => !prev);
+    } else {
+      toggleConfirm();
     }
     if (fullname.length > 0) {
       toggleConfirm();

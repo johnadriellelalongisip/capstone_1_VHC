@@ -25,7 +25,6 @@ router.post('/addRecord', recordController.addRecord);
 router.get('/getRecords', recordController.getRecords);
 router.get('/findRecord/:id', recordController.findRecord);
 router.post('/addRecordHistory/:id', recordController.addRecordHistory);
-router.get('/findFirstName/:id', recordController.findFirstName);
 
 // PHARMACY
 router.post('/submitCSVMedicinesRecord', pharmacyController.handleFile);
@@ -35,13 +34,13 @@ router.get('/searchPharmacyInventory/:id', pharmacyController.searchPharmacyInve
 // QUEUE
 router.post('/addToQueue', queueController.addToQueue);
 router.get('/getQueue', queueController.getQueue);
+router.post('/nextQueue/', queueController.nextQueue)
 
 // APPOINTMENTS
 router.post('/newAppointment', appointmentController.newAppointment);
 router.post('/newAppointmentByFamID', appointmentController.newAppointmentByFamID);
 router.get('/getAppointments', appointmentController.getAppointments);
 router.get('/findAppointmentByNumber/:id', appointmentController.findAppointmentByNumber);
-router.get('/findAppointmentByName/:id', appointmentController.findAppointmentByName);
 router.post('/editAppointment', appointmentController.editAppointment);
 router.post('/handleCancelAppointment/:id', appointmentController.handleCancelAppointment);
 router.post('/handleApproveAppointment/:id', appointmentController.handleApproveAppointment);

@@ -5,7 +5,7 @@ import { TbFileExport } from "react-icons/tb";
 import FormModal from "./FormModal";
 import { colorTheme } from "../../../../App";
 
-const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = true, enExport = true, isLoading, toggleOption, optionPK, error }) => {
+const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = true, enExport = true, isLoading, enOptions = true, toggleOption, optionPK, error }) => {
   const [selectedTheme] = useContext(colorTheme);
   const [move, setMove] = useState(false);
   const [query, setQuery] = useState('');
@@ -156,7 +156,7 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
             </button>
           </th>
         ))}
-        {top && (
+        {top && enOptions && (
           <th className="w-full p-2 text-center flex justify-center items-center">{error ? error : 'Actions'}</th>
         )}
       </tr>
@@ -239,6 +239,7 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
                         {col}
                       </td>
                     ))}
+                    {enOptions && (
                     <td className="w-full p-2 flex items-center justify-center">
                       <button 
                         className={`font-semibold text-${selectedTheme}-500 hover:text-${selectedTheme}-600 hover:underline`}
@@ -247,6 +248,7 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
                         Options
                       </button>
                     </td>
+                    )}
                   </tr>
                 ))}
                 {Array.from({ length: Math.max(rowCount - displayedData.length, 0) }).map((_, rowIndex) => (
@@ -288,7 +290,7 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
           </tfoot>
         </table>
       </div>
-      <div className="flex flex-row justify-between items-center">
+      <div className="flex flex-row justify-between items-center mt-1">
         <div className="flex justify-evenly items-center">
           {enExport && (
             <button className={`flex gap-2 p-1 px-3 items-center justify-center bg-${selectedTheme}-200 text-${selectedTheme}-600 font-semibold rounded-lg text-xs md:text-sm lg:text-base hover:text-${selectedTheme}-700 hover:transition-transform ease-in-out`}>Export to file<TbFileExport className="size-3 md:size-3 lg:size-4"/></button>

@@ -1,27 +1,28 @@
 import { useLocation } from "react-router-dom";
+import { FaStethoscope } from "react-icons/fa";
 import Header from "../../Header";
-import { MdOutlineSmartToy } from "react-icons/md";
 
-const SocketIo = () => {
+const Equipments = () => {
   const location = useLocation();
   const pathname = location.pathname.slice(1);
   const title = pathname.charAt(0).toUpperCase() + pathname.slice(1);
-  
 
   return (
     <div className="w-full h-screen flex flex-col">
       <div className="flex flex-col p-2 mb-4 mx-2 md:mx-3 lg:mx-4 mt-4">
         <div>
-          <Header title={ title } icon={<MdOutlineSmartToy />}/>
+          <Header title={ title } icon={<FaStethoscope />}/>
         </div>
         <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2">
-          <div className="flex flex-col justify-start items-center gap-3">
-          
-          </div>  
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-60 md:mb-72 lg:mb-80">
+            <div className="w-34 h-36 bg-sky-50 rounded-xl">
+              
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
- 
-export default SocketIo;
+
+export default Equipments;

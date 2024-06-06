@@ -2,7 +2,6 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://127.0.0.1:5000/api/",
   "dependencies": {
     "@fingerprintjs/fingerprintjs": "^4.3.0",
     "@fontsource/roboto": "^5.0.8",

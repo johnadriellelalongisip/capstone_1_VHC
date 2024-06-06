@@ -10,6 +10,9 @@ import AddToQueue from "./AddToQueue";
 import Attended from "./Attended";
 import { socket } from "../../../../socket";
 import useSocket from "../../../../hooks/useSocket";
+import { decryptData } from "../../../../hooks/useCrypto";
+import { jwtDecode } from "jwt-decode";
+import useCurrentTime from "../../../../hooks/useCurrentTime";
 
 const Queue = () => {
   const [selectedTheme] = useContext(colorTheme);
@@ -17,13 +20,14 @@ const Queue = () => {
   const attendedRef = useRef(null);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [isAttendedOpen, setIsAttendedOpen] = useState(false);
-  const { isLoading } = useQuery();
+  const { isLoading, error, editData } = useQuery();
   const [waiting, setWaiting] = useState([{}]);
   const displayedData = ['priority', 'emergency', 'serving'];
   const [viewStateIndex, setViewStateIndex] = useState(displayedData.indexOf('serving'));
   const location = useLocation();
   const pathname = location.pathname.slice(1);
   const title = pathname.charAt(0).toUpperCase() + pathname.slice(1);
+  const { mysqlTime } = useCurrentTime();
   const keyMap = {
     "queue_number": "queue_number",
     "patient_name": "patient_name",
@@ -33,6 +37,9 @@ const Queue = () => {
     "patient_status" : "patient_status" ,
   }
   const { data: queue } = useSocket({ SSName: "sessionQueue", keyMap: keyMap, fetchUrl: "getQueue", socketUrl: "newQueue", socketEmit: "updateQueue", socketError: "newQueueError" });
+
+  const { accessToken } = decryptData(localStorage.getItem('safeStorageData'));
+  const role = accessToken ? jwtDecode(accessToken).role : "";
 
   useEffect(() => {
     setWaiting(queue.reduce((acc, curr) => {
@@ -63,8 +70,8 @@ const Queue = () => {
     }
   }
 
-  const handleNext = () => {
-
+  const handleNext = async() => {
+    await editData('/nextQueue', "1", {dateTime: String(mysqlTime)});
   };
 
   const handleDismiss = (i) => {
@@ -115,15 +122,19 @@ const Queue = () => {
         ):(
         <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2">
           <div className="flex items-center justify-end gap-3 m-1 my-2">
-            <button onClick={toggleAttended} className={`p-2 rounded-lg bg-${selectedTheme}-600 text-${selectedTheme}-200 transition-colors text-xs md:text-sm lg:text-base font-semibold px-4 hover:text-${selectedTheme}-300 hover:bg-${selectedTheme}-700 focus:bg-${selectedTheme}-800 focus:text-${selectedTheme}-400 active:bg-${selectedTheme}-300 active:text-${selectedTheme}-600 border-[1px] border-${selectedTheme}-600`}>
-              Attended
-            </button>
+            {role && (role !== 'user') && (
+              <button onClick={toggleAttended} className={`p-2 rounded-lg bg-${selectedTheme}-600 text-${selectedTheme}-200 transition-colors text-xs md:text-sm lg:text-base font-semibold px-4 hover:text-${selectedTheme}-300 hover:bg-${selectedTheme}-700 focus:bg-${selectedTheme}-800 focus:text-${selectedTheme}-400 active:bg-${selectedTheme}-300 active:text-${selectedTheme}-600 border-[1px] border-${selectedTheme}-600`}>
+                Attended
+              </button>
+            )}
             <button onClick={toggleForm} className={`p-2 rounded-lg bg-${selectedTheme}-200 text-${selectedTheme}-600 transition-colors text-xs md:text-sm lg:text-base font-semibold px-4 hover:text-${selectedTheme}-700 hover:bg-${selectedTheme}-300 focus:bg-${selectedTheme}-400 focus:text-${selectedTheme}-800 active:bg-${selectedTheme}-600 active:text-${selectedTheme}-300 border-[1px] border-${selectedTheme}-600`}>
               Add
             </button>
-            <button onClick={handleNext} className={`p-2 rounded-lg bg-${selectedTheme}-600 text-${selectedTheme}-200 transition-colors text-xs md:text-sm lg:text-base font-semibold px-4 hover:text-${selectedTheme}-300 hover:bg-${selectedTheme}-700 focus:bg-${selectedTheme}-800 focus:text-${selectedTheme}-400 active:bg-${selectedTheme}-300 active:text-${selectedTheme}-600 border-[1px] border-${selectedTheme}-600`}>
-              Next
-            </button>
+            {role && (role !== 'user') && (
+              <button onClick={handleNext} className={`p-2 rounded-lg bg-${selectedTheme}-600 text-${selectedTheme}-200 transition-colors text-xs md:text-sm lg:text-base font-semibold px-4 hover:text-${selectedTheme}-300 hover:bg-${selectedTheme}-700 focus:bg-${selectedTheme}-800 focus:text-${selectedTheme}-400 active:bg-${selectedTheme}-300 active:text-${selectedTheme}-600 border-[1px] border-${selectedTheme}-600`}>
+                Next
+              </button>
+            )}
           </div>
           <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 place-items-center gap-4 mb-60 md:mb-72 lg:mb-80`}>
           

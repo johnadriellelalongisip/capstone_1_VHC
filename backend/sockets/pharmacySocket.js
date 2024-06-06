@@ -3,10 +3,10 @@ const dbModel = require('../models/database_model');
 module.exports = function(io) {
   io.on('connection', (socket) => {
     socket.on('updatePharmacy', async () => {
+      let connection;
       try {
-        const connection = await dbModel.getConnection();
+        connection = await dbModel.getConnection();
         const response = await dbModel.query('SELECT `item_id`, `item_name`, `unit_size`, `lot_no`, `exp_date`, `quantity_stockroom` FROM `pharmacy_inventory`');
-        dbModel.releaseConnection(connection);
         const newResponse = response.map((res) => {
           const date = new Date(res.exp_date);
           const year = date.getFullYear();
@@ -26,6 +26,8 @@ module.exports = function(io) {
       } catch (error) {
         socket.emit('newPharmacyError', error.message);
         socket.broadcast.emit('newPharmacyError', error.message);
+      } finally {
+        dbModel.releaseConnection(connection);
       }
     });
   });

@@ -36,6 +36,7 @@ const saltRounds = 10;
 class StaffController {
 
   // async sendEmail(req, res) {
+  // let connection;
   //   try {
   //     const oauth2Client = new OAuth2(
   //       process.env.CLIENT_ID,
@@ -91,11 +92,11 @@ class StaffController {
   // }
   
   async getStaff(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const query = "SELECT `staff_id`, `staff_username`, `staff_email`, `isVerified`, `staff_role`, `account_created_at`, `account_last_updated_at`, `staff_last_activity` FROM `medicalstaff`";
       const response = await dbModel.query(query);
-      dbModel.releaseConnection(connection);
       return res.status(200).json({
         status: 200,
         message: 'Data retrieved successfully',
@@ -108,12 +109,17 @@ class StaffController {
         message: error.message,
         error: error
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
   
   async addStaff(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const payload = req.body;
       const retrieveQuery = "SELECT `staff_username` FROM `medicalstaff` WHERE `staff_username` = ?";
       const emailRetrieveQuery = "SELECT `staff_username` FROM `medicalstaff` WHERE `staff_email`= ?"
@@ -137,67 +143,72 @@ class StaffController {
         } else {
           try {
             const accessibility = {
-              "accessibility": {
-                "dashboard": {
-                  "view": true,
-                  "edit": false
-                },
-                "users": {
-                  "view": true,
-                  "edit": false,
-                  "create": false,
-                  "delete": false
-                },
-                "accounts": {
-                  "view": true,
-                  "edit": false,
-                  "create": false,
-                  "delete": false
-                },
-                "appointments": {
-                  "view": true,
-                  "edit": false,
-                  "create": false,
-                  "delete": false
-                },
-                "home": {
-                  "view": true,
-                  "edit": false
-                },
-                "queue": {
-                  "view": true,
-                  "edit": false
-                },
-                "analytics": {
-                  "view": true,
-                  "edit": false
-                },
-                "records": {
-                  "view": true,
-                  "edit": false,
-                  "create": false,
-                  "delete": false
-                },
-                "pharmacy": {
-                  "view": true,
-                  "edit": false,
-                  "create": false,
-                  "delete": false
-                },
-                "blood_unit": {
-                  "view": true,
-                  "edit": false,
-                  "create": false,
-                  "delete": false
-                },
-                "mapping": {
-                  "view": true,
-                  "edit": false
-                },
-                "notfound": {
-                  "view": true
-                }
-              }
+              "dashboard": {
+                "create": false,
+                "retrieve": true,
+                "update": false,
+                "delete": false
+              },
+              "analytics": {
+                "create": false,
+                "retrieve": true,
+                "update": false,
+                "delete": false
+              },
+              "mapping": {
+                "create": false,
+                "retrieve": true,
+                "update": false,
+                "delete": false
+              },
+              "appointments": {
+                "create": false,
+                "retrieve": true,
+                "update": false,
+                "delete": false
+              },
+              "queue": {
+                "create": false,
+                "retrieve": true,
+                "update": false,
+                "delete": false
+              },
+              "records": {
+                "create": false,
+                "retrieve": true,
+                "update": false,
+                "delete": false
+              },
+              "pharmacy": {
+                "create": false,
+                "retrieve": true,
+                "update": false,
+                "delete": false
+              },
+              "blood": {
+                "create": false,
+                "retrieve": true,
+                "update": false,
+                "delete": false
+              },
+              "equipment": {
+                "create": false,
+                "retrieve": true,
+                "update": false,
+                "delete": false
+              },
+              "accounts": {
+                "create": false,
+                "retrieve": true,
+                "update": false,
+                "delete": false
+              },
+              "blood_unit": {
+                "create": false,
+                "retrieve": true,
+                "update": false,
+                "delete": false
+              },
             };
             const query = 'INSERT INTO medicalstaff (staff_username, staff_password, staff_email, isVerified, staff_role, account_created_at, account_last_updated_at, staff_last_activity, staff_accessibility, staff_history) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
             const data = [
@@ -227,23 +238,43 @@ class StaffController {
           }
         }
       });
-      dbModel.releaseConnection(connection);
     } catch (error) {
       return res.status(500).json({
         status: 500,
         message: error.message,
         error: error
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   };
 
   async logoutUser(req, res) {
+    let connection;
+    if (req.body.staff_username && req.body.staff_username === process.env.DEVELOPER_USERNAME) {
+      return res.status(200).json({
+        status: 200,
+        message: "Logout Successfully"
+      });
+    }
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
+      const userQuery = 'SELECT `staff_history`, `refresh_token` FROM `medicalstaff` WHERE `staff_username` = ?';
       const staff_username = req.body.staff_username;
-      const removeRefreshTokenQuery = 'UPDATE `medicalstaff` SET `refresh_token` = NULL WHERE `staff_username` = ?';
-      const response = await dbModel.query(removeRefreshTokenQuery, staff_username);
-      dbModel.releaseConnection(connection);
+      const [user] = await dbModel.query(userQuery, [staff_username]);
+      const newHistory = {
+        ...JSON.parse(user.staff_history),
+        ...req.body.history
+      };
+      const refreshTokens = JSON.parse(user.refresh_token);
+      if (refreshTokens.hasOwnProperty(req.body.ipAddress)) {
+        delete refreshTokens[req.body.ipAddress];
+      };
+      console.log(refreshTokens);
+      const removeRefreshTokenQuery = 'UPDATE `medicalstaff` SET `refresh_token` = ?, `staff_history` = ? WHERE `staff_username` = ?';
+      await dbModel.query(removeRefreshTokenQuery, [JSON.stringify(refreshTokens), JSON.stringify(newHistory), staff_username]);
       return res.status(200).json({
         status: 200,
         message: "Logout Successfully"
@@ -254,6 +285,10 @@ class StaffController {
         message: error.message,
         error: error
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 

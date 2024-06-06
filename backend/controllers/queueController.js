@@ -2,8 +2,9 @@ const dbModel = require('../models/database_model');
 
 class QueueController {
   async addToQueue(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const query = 'INSERT INTO `patient_queue`(`patient_name`,`patient_gender`,`barangay_from`,`time_arrived`,`patient_status`) VALUES (?, ?, ?, ?, ?)';
       const payload = req.body;
       const data = [
@@ -14,7 +15,6 @@ class QueueController {
         payload.status, 
       ];
       const response = await dbModel.query(query, data)
-      dbModel.releaseConnection(connection);
       return res.status(200).json({
         status: 200,
         message: 'Queue added successfully',
@@ -26,15 +26,19 @@ class QueueController {
         message: error.message,
         error: error
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 
   async getQueue(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const query = 'SELECT * FROM `patient_queue`';
       const response = await dbModel.query(query)
-      dbModel.releaseConnection(connection);
       const newResponse = response.map((res) => {
         const date = new Date(res.time_arrived);
         const year = date.getFullYear();
@@ -60,6 +64,30 @@ class QueueController {
         message: error.message,
         error: error
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
+    }
+  }
+
+  async nextQueue(req, res) {
+    let connection;
+    try {
+      connection = await dbModel.getConnection();
+      // const query = 'UPDATE `patient_queue` SET `patient_status` = "waiting", `time_attended` = ? WHERE `queue_number` = ?';
+      // const response = await dbModel.query(query, [req.body.dateTime, id]);
+      res.status(200).json({ status: 200, message: `Now Serving: ${id}` });
+    } catch (error) {
+      return res.status(500).json({
+        status: 500,
+        message: error.message,
+        error: error
+      });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 }

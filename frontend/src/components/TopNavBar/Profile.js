@@ -22,20 +22,21 @@ const Profile = ({ prof, toggle, toggleOptions, toggleHelp }) => {
   const decoded = accessToken ? jwtDecode(accessToken) : {};
   
   const Logout = async () => {
-    console.log('want to logout');
     const history = {};
     const Hkey = String(mysqlTime);
-    history[Hkey] = "Logged Out";
-    await logoutUser({ staff_username: decoded.staff_username, history: history});
+    history[Hkey] = "Logged Out";dd
+    if (ipAddress) {
+      await logoutUser({ staff_username: decoded.staff_username, history: history, ipAddress: ipAddress });
+    }
   };
-
+  
   return (
     <dialog ref={prof} className={`rounded-lg mr-0 fixed right-4 md:right-10 lg:right-14 top-20 bg-${selectedTheme}-100 drop-shadow-lg`}>
         <div className="flex flex-col m-2">
           <button onClick={() => toggle()} className={`hover:drop-shadow-lg flex justify-start items-center mb-2 text-${selectedTheme}-600 p-1 m-2 drop-shadow-lg rounded-lg bg-${selectedTheme}-100 transition-colors duration-200 hover:bg-${selectedTheme}-50`}>
             <div className="flex justify-between items-center m-2">
               <Avatar img="default_profile.svg" rounded status="online" size={avatarSize} statusPosition="bottom-right" />
-              <p className="font-semibold p-1 text-xs md:text-sm lg:text-base capitalize">{decoded.staff_username}</p>
+              <p className="font-semibold p-1 text-xs md:text-sm lg:text-base capitalize">{decoded.staff_username}<span className="font-thin">({decoded.role})</span></p>
             </div>
           </button>
           <div className="w-60 md:w-70 lg:w-80 flex flex-col gap-2">

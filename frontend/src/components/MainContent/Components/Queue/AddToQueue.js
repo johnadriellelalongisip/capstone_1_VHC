@@ -8,15 +8,13 @@ import { socket } from "../../../../socket";
 
 const AddToQueue = ({ ATref, ATonClick }) => {
   const [selectedTheme] = useContext(colorTheme);
-  const { response, searchResults, isLoading, error, addData, searchItems } = useQuery();
+  const { isLoading, error, addData } = useQuery();
   const { mysqlTime } = useCurrentTime();
   const [suggestions, setSuggestions] = useState([]);
   const [payload, setPayload] = useState({
     name: "",
     barangay: "",
   });
-  const [isNameFocused, setIsNameFocused] = useState(false);
-  const [isNameSelected, setIsNameSelected] = useState(false);
   const [isBarangayValid, setIsBarangayValid] = useState(false);
   const [gender, setGender] = useState('male');
   const [status, setStatus] = useState('waiting');
@@ -64,17 +62,13 @@ const AddToQueue = ({ ATref, ATonClick }) => {
   };
 
   function toggleClose() {
-    if (payload.name || payload.barangay) {
-      cleanUp();
-    } else {
-      ATonClick();
-      cleanUp();
-    }
+    cleanUp();
+    ATonClick();
   }
 
   function setNewSuggestions(newData) {
     setSuggestions((prevSuggestions) => {
-      const newSuggestions = newData.map((data) => String(data.citizen_full_name));
+      const newSuggestions = newData.map((data) => `${String(data.Firstname)} ${String(data.Lastname)}`);
       if (newSuggestions !== null || newSuggestions !== undefined) {
         return [...prevSuggestions, ...newSuggestions];
       } else {
@@ -84,15 +78,10 @@ const AddToQueue = ({ ATref, ATonClick }) => {
   }
   
   useEffect(() => {
-    setIsBarangayValid(barangays.includes(payload.barangay.charAt(0).toUpperCase() + payload.barangay.slice(1)));
+    // setIsBarangayValid(barangays.includes(payload.barangay.charAt(0).toUpperCase() + payload.barangay.slice(1)));
+    setIsBarangayValid(true)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payload.barangay]);
-  
-  useEffect(() => {
-    if (searchResults?.data) {
-      setNewSuggestions(searchResults.data);
-    }
-  }, [searchResults?.data]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -108,16 +97,20 @@ const AddToQueue = ({ ATref, ATonClick }) => {
       socket.emit("updateQueue");
     },500);
   };
+
   const handleEnter = (event) => {
-    if (event.key === 'Enter' && isNameFocused && payload.name) {
-      searchItems('findFirstName', String(payload.name));
-      setNewSuggestions([]);
+    const records = JSON.parse(sessionStorage.getItem('sessionRecords'));
+    if (event.key === 'Enter' && payload.name && records) {
+      const foundRecords = records.filter(prev => {
+        return prev.Firstname.toLowerCase().includes(payload.name.toLowerCase()) || prev.Lastname.toLowerCase().includes(payload.name.toLowerCase());
+      });
+      setNewSuggestions(foundRecords);
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const specialCharacterPattern = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g;
+    const specialCharacterPattern = /[!@#$%^&*()_+\-=\]{};':"\\|,.<>?]/g;
     if (!specialCharacterPattern.test(value)) {
       setPayload((prevFormData) => ({
           ...prevFormData,
@@ -130,21 +123,6 @@ const AddToQueue = ({ ATref, ATonClick }) => {
       e.preventDefault();
     }
   };
-
-  const handleSelectName = (value, i) => {
-    console.log(searchResults)
-    setPayload((prevFormData) => ({
-      ...prevFormData,
-      name: value,
-    }));
-    setIsNameSelected(true);
-  };
-  const handleSelectBarangay = (value) => {
-    setPayload((prevFormData) => ({
-      ...prevFormData,
-      barangay: value
-    }));
-  };
   
   return (
     <dialog ref={ATref} className={`rounded-lg bg-gray-100 drop-shadow-lg w-80 md:w-[500px] lg:w-[600px]`}>
@@ -153,7 +131,9 @@ const AddToQueue = ({ ATref, ATonClick }) => {
         <div className={`flex justify-between items-center p-2 text-${selectedTheme}-600 border-b-[1px] border-solid border-${selectedTheme}-500 shadow-md shadow-${selectedTheme}-600 mb-2`}>
           <div className="flex items-center p-1 gap-1">
             <MdPeople className='w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8' />
-            <strong className="font-semibold drop-shadow-md text-sm md:text-base lg:text-lg">Add to query<span className={`ml-2 text-${selectedTheme}-500 font-bold`}>Patient's Number: 55</span></strong>
+            <strong className="font-semibold drop-shadow-md text-sm md:text-base lg:text-lg">Add to query
+            {/* <span className={`ml-2 text-${selectedTheme}-500 font-bold`}>Patient's Number: 55</span> */}
+            </strong>
           </div>
           <button onClick={() => toggleClose()} className={`transition-colors duration-200 rounded-3xl p-1 bg-${selectedTheme}-300 hover:bg-${selectedTheme}-400 active:bg-${selectedTheme}-200`}>
             <MdClose className='w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7' />
@@ -173,15 +153,14 @@ const AddToQueue = ({ ATref, ATonClick }) => {
               onChange={handleChange} 
               className={`text-xs md:text-sm lg:text-base grow p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent`}
               autoComplete="off"
-              onFocus={(e) => {setIsNameFocused(true); payload.name.length && isNameSelected && searchItems('findFirstName', e.target.value);} }
-              onBlur={() => {setIsNameFocused(false); setSuggestions([]);}}
+              onBlur={() => setSuggestions([])}
               onKeyDown={handleEnter}
               list="nameResults"
               placeholder="Type then press ENTER to search the records"
             />
             <datalist id="nameResults">
               {suggestions && suggestions.slice(0, 5).map((name, index) => (
-                <option key={index} value={name} onClick={() => handleSelectName(name, index)} />
+                <option key={index} value={name} />
               ))}
             </datalist>
           </div>
@@ -201,7 +180,7 @@ const AddToQueue = ({ ATref, ATonClick }) => {
             />
             <datalist id="barangaySuggestions">
               {payload.barangay.length >= 2 && barangays.map((barangay, index) => (
-                <option key={index} value={barangay} onClick={() => handleSelectBarangay(barangay)} />
+                <option key={index} value={barangay} />
               ))}
             </datalist>
           </div>

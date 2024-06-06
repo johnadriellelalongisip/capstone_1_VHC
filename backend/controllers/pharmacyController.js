@@ -3,8 +3,9 @@ const dbModel = require('../models/database_model');
 class PharmacyController {
   
   async handleFile(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const payload = req.body.data;
       const log = req.body.logs;
       for (const item of payload) {
@@ -23,8 +24,7 @@ class PharmacyController {
           'INSERT INTO `pharmacy_inventory` (`item_name`, `unit_size`, `lot_no`, `exp_date`, `quantity_stockroom`, `item_logs`) VALUES (?, ?, ?, ?, ?, ?)',
           [data.item_name, data.unit_size, data.lot_no, data.exp_date, data.quantity_stockroom, JSON.stringify(data.item_logs)]
         );
-      }  
-      dbModel.releaseConnection(connection);
+      }
       return res.status(200).json({
         status: 200,
         message: "Data inserted successfully",
@@ -36,15 +36,19 @@ class PharmacyController {
         message: error.message,
         error: error,
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
   
   async getPharmacyInventory(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const query = 'SELECT `item_id`, `item_name`, `unit_size`, `lot_no`, `exp_date`, `quantity_stockroom` FROM `pharmacy_inventory`';
       const response = await dbModel.query(query);
-      dbModel.releaseConnection(connection);
       const formattedResponse = response.map((row) => {
         const expDate = row.exp_date ? new Date(row.exp_date) : null;
         const formattedExpDate = expDate ? expDate.toLocaleDateString() : null;
@@ -64,15 +68,19 @@ class PharmacyController {
         message: error.message,
         error: error
       })
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 
   async searchPharmacyInventory(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const query = 'SELECT `item_name`, `unit_size`, `lot_no`, `exp_date`, `quantity_stockroom`, `item_logs` FROM `pharmacy_inventory` WHERE `item_id` = ?';
       const response = await dbModel.query(query, req.params.id);
-      dbModel.releaseConnection(connection);
       const formattedResponse = response.map((row) => {
         const expDate = row.exp_date ? new Date(row.exp_date) : null;
         const formattedExpDate = expDate ? 
@@ -94,6 +102,10 @@ class PharmacyController {
         message: error.message,
         error: error
       })
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 

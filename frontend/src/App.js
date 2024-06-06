@@ -18,24 +18,46 @@ import Mapping from "./components/MainContent/Components/Mapping/Mapping.js";
 
 import { socket } from "./socket.js";
 import JsonWebToken from "./components/MainContent/Components/Playground/JsonWebToken.js";
-import SocketIo from "./components/MainContent/Components/Playground/SocketIo.js";
+import Problems from "./components/MainContent/Components/Playground/Problems.js";
 import Login from "./components/Login.js";
 import Register from "./components/Register.js";
 import { decryptData } from "./hooks/useCrypto.js";
 import { jwtDecode } from "jwt-decode";
+import Equipments from "./components/MainContent/Components/Equipments/Equipments.js";
+import axios from "axios";
 
 export const colorTheme = createContext();
 export const messaging = createContext();
+export const notificationMessage = createContext();
 export const isLoggedInContext = createContext();
+
+// JWT & TOKENS NEEDS TO BE DONE IN THE BACKEND SERVER, THIS INCLUDES ROLES, USERNAMES, ETC. 
+// ALL REQUESTS OF THE CLIENT ARE PARSED ON THE BACKEDN SERVER
+// FOR NOW STAY MUNA AKO SA LOCALSTORAGE T-T
 
 const App = () => {
   const [selectedTheme, setSelectedTheme] = useState(localStorage.getItem('theme'));
   const [currentChat, setCurrentChats] = useState(null);
+  const [notifMessage, setNotifMessage] = useState(null);
   const safeStorageData = localStorage.getItem('safeStorageData');
   const [isLoggedIn, setIsLoggedIn] = useState(safeStorageData ? decryptData(safeStorageData) : false);
-  const { accessToken, isLoggedIn : loggedIn } = decryptData(localStorage.getItem('safeStorageData'));
+  const { accessToken, isLoggedIn : loggedIn } = safeStorageData ? decryptData(safeStorageData) : {};
+  const role = accessToken ? jwtDecode(accessToken).role : "";
 
+  const fetchIpAddress = async () => {
+    try {
+      const response = await axios.get('https://api.ipify.org/?format=json');
+      sessionStorage.setItem("myIpAddress",response.data.ip);
+    } catch (error) {
+      throw error;
+    }
+  };
+  
+  
   useEffect(() => {
+    if (sessionStorage.getItem("myIpAddress") === null || sessionStorage.getItem("myIpAddress") === undefined) {
+      fetchIpAddress();
+    }
     if (safeStorageData) {
       setIsLoggedIn(loggedIn || false);
     }
@@ -63,6 +85,7 @@ const App = () => {
   return (
     <>
     <div className="flex flex-col h-screen">
+      <notificationMessage.Provider value={[notifMessage, setNotifMessage]}>
       <colorTheme.Provider value={[selectedTheme, setSelectedTheme, colors]}>
         <BrowserRouter basename='/'>
           {isLoggedIn && (
@@ -85,19 +108,23 @@ const App = () => {
                 <Routes>
                   <Route path='home' element={<Home />}/>
                   <Route path='dashboard' element={<Dashboard />}/>
-                  <Route path='accounts' element={<Accounts />}/>
+                  <Route path='analytics' element={<Analytics />}/>
+                  <Route path='mapping' element={<Mapping />}/>
                   <Route path='appointments' element={<Appointments />}/>
                   <Route path='queue' element={<Queue />}/>
-                  <Route path='analytics' element={<Analytics />}/>
                   <Route path='records' element={<Records />}/>
                   <Route path='pharmacy' element={<Pharmacy />}/>
+                  <Route path='equipments' element={<Equipments />}/>
                   <Route path='blood_unit' element={<BloodUnit />}/>
-                  <Route path='mapping' element={<Mapping />}/>
+
+                  {role && (role === 'developer' || role === 'admin') && (
+                    <Route path='accounts' element={<Accounts />}/>
+                  )}
                   
-                  {accessToken && jwtDecode(accessToken).role === 'developer' && (
+                  {role && role === 'developer' && (
                     <>
+                      <Route path='problems' element={<Problems />}/>
                       <Route path='playground-jwt' element={<JsonWebToken />}/>
-                      <Route path='playground-socket' element={<SocketIo />}/>
                     </>
                   )}
 
@@ -108,6 +135,7 @@ const App = () => {
           )}
         </BrowserRouter>
       </colorTheme.Provider>
+      </notificationMessage.Provider>
     </div>
     </>
   );

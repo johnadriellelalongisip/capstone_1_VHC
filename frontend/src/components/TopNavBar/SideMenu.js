@@ -1,12 +1,13 @@
 import { useContext, useState } from "react";
 import { MdHome, MdSpaceDashboard, MdFolder, MdAnalytics, MdLocalPharmacy, MdPeople, MdOutlineSmartToy, MdKeyboardArrowDown } from "react-icons/md";
-import { FaCode, FaMapMarkedAlt, FaUsers } from "react-icons/fa";
+import { FaCode, FaMapMarkedAlt, FaStethoscope, FaUsers } from "react-icons/fa";
 import { BiSolidDonateBlood } from "react-icons/bi";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { colorTheme } from "../../App";
 import { IoCalendar } from "react-icons/io5";
 import { decryptData } from "../../hooks/useCrypto";
 import { jwtDecode } from "jwt-decode";
+import { GoReport } from "react-icons/go";
 
 const Menu = ({ path, Icon, label }) => {
   const [selectedTheme] = useContext(colorTheme);
@@ -58,6 +59,7 @@ const SideMenu = () => {
   const location = useLocation();
   const loc = location.pathname;
   const { accessToken } = decryptData(localStorage.getItem('safeStorageData'));
+  const role = accessToken ? jwtDecode(accessToken).role : "";
 
   const [selectedTheme] = useContext(colorTheme);
   return (
@@ -70,10 +72,13 @@ const SideMenu = () => {
       <Menu path="queue" Icon={MdPeople} label="Queues" />
       <Menu path="records" Icon={MdFolder} label="Records" />
       <Menu path="pharmacy" Icon={MdLocalPharmacy} label="Pharmacy" />
+      <Menu path="equipments" Icon={FaStethoscope} label="Equipments" />
       <Menu path="blood_unit" Icon={BiSolidDonateBlood} label="Blood Unit" />
-      <Menu path="accounts" Icon={FaUsers} label="Accounts" />
+      {role && (role !== 'user') && (
+        <Menu path="accounts" Icon={FaUsers} label="Accounts" />
+      )}
 
-      {accessToken && jwtDecode(accessToken).role === 'developer' && (
+      {role && role === 'developer' && (
         <>
           <button onClick={() => setIsDevMenuOpen(prev => !prev)} className={`m-2 px-2 md:px-8 lg:px-14 gap-2 rounded-lg transition-colors bg-${selectedTheme}-300 hover:text-${selectedTheme}-600 hover:bg-${selectedTheme}-50 hover:drop-shadow-md p-2 first-line duration-300 ease-linear ${
             isDevMenuOpen || loc === '/playground-jwt' || loc === '/playground-socket' ? `bg-${selectedTheme}-50 drop-shadow-xl` : `bg-transparent`
@@ -89,7 +94,7 @@ const SideMenu = () => {
           {isDevMenuOpen && (
             <>
               <Menu path="playground-jwt" Icon={MdOutlineSmartToy} label="JWT" />
-              <Menu path="playground-socket" Icon={MdOutlineSmartToy} label="SOCKET" />
+              <Menu path="problems" Icon={GoReport} label="Problems" />
             </>
           )}
         </>

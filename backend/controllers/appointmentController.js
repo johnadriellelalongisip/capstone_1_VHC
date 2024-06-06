@@ -26,8 +26,9 @@ function convertDate(datetime) {
 class AppointmentController {
 
   async newAppointment(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const query = "INSERT INTO `appointments`(`citizen_id`, `fullname`, `phone_number`, `appointed_datetime`, `description`, `status`, `created_at`, `appointment_logs`) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ";
       const payload = req.body;
       const data = [
@@ -41,7 +42,6 @@ class AppointmentController {
         payload.logs,
       ];
       const response = await dbModel.query(query, data);
-      dbModel.releaseConnection(connection);
       return res.status(200).json({
         status: 200,
         message: "Data added successfully",
@@ -53,13 +53,19 @@ class AppointmentController {
         message: error.message,
         error: error,
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 
   async newAppointmentByFamID(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const findRecord = "SELECT `citizen_history`, `citizen_firstname`,`citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_number`, `citizen_birthdate` FROM `municipal_citizens` WHERE `citizen_family_id` = ?";
+      if (!findRecord) return res.status(404).json({ status: 404, message: "User not found!"});
       const retrieveResponse = await dbModel.query(findRecord, req.body.appointmentID);
       const payload = req.body;
       const curRecord = retrieveResponse[0];
@@ -89,10 +95,9 @@ class AppointmentController {
       ];
       const query = "INSERT INTO `appointments`(`citizen_id`, `fullname`, `phone_number`, `appointed_datetime`, `description`, `status`, `created_at`, `appointment_logs`) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ";
       const createResponse = await dbModel.query(query, data);
-      dbModel.releaseConnection(connection);
       return res.status(200).json({
         status: 200,
-        message: "Data added successfully",
+        message: "Appointment created successfully",
         createResponse: createResponse,
         retrieveResponse: retrieveResponse, 
         updateResponse: updateResponse
@@ -100,17 +105,22 @@ class AppointmentController {
     } catch (error) {
       return res.status(500).json({
         status: 500,
-        message: error.message,
+        message: "Record not found!",
+        error_message: error.message,
         error: error,
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 
   async getAppointments(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const response = await dbModel.query("SELECT a.appointment_id, CASE WHEN a.citizen_id IS NULL OR a.fullname IS NOT NULL THEN a.fullname ELSE CONCAT(mc.citizen_firstname, ' ', mc.citizen_lastname) END AS citizen_fullname, CASE WHEN a.citizen_id IS NULL THEN a.phone_number ELSE mc.citizen_number END AS phone_number, a.appointed_datetime AS appointed_datetime,a.description AS description, a.status AS status, a.created_at AS created_at FROM appointments a LEFT JOIN municipal_citizens mc ON a.citizen_id = mc.citizen_family_id");
-      dbModel.releaseConnection(connection);
       const newResponse = response.map((res) => {
         return {
           ...res,
@@ -129,14 +139,18 @@ class AppointmentController {
         message: error.message,
         error: error
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
   
   async editAppointment(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const query = "";
-      dbModel.releaseConnection(connection);
       const newResponse = response.map((res) => {
         return {
           ...res,
@@ -155,12 +169,17 @@ class AppointmentController {
         message: error.message,
         error: error
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 
   async handleCancelAppointment(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const retrieveQuery = "SELECT `status`, `appointment_logs` FROM `appointments` WHERE `appointment_id` = ?";
       const retrieveResponse = await dbModel.query(retrieveQuery, req.params.id);
       const oldLogs = JSON.parse(retrieveResponse[0].appointment_logs);
@@ -176,7 +195,6 @@ class AppointmentController {
         JSON.stringify(newAppointmentLog),
         req.params.id
       ];
-      console.log(retrieveResponse);
       if (retrieveResponse[0].status === "appointment cancelled") {
         return res.status(200).json({
           status:200,
@@ -190,7 +208,6 @@ class AppointmentController {
       } else {
         const updateQuery = "UPDATE `appointments` SET `status` = ?, `appointment_logs` = ? WHERE `appointment_id` = ?";
         const updateResponse = await dbModel.query(updateQuery, updatePayload);
-        dbModel.releaseConnection(connection);
         return res.status(200).json({
           status: 200,
           message: "Appointment successfully cancelled!",
@@ -203,12 +220,17 @@ class AppointmentController {
         message: error.message,
         error: error
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 
   async handleApproveAppointment(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const retrieveQuery = "SELECT `status`, `appointment_logs` FROM `appointments` WHERE `appointment_id` = ?";
       const retrieveResponse = await dbModel.query(retrieveQuery, req.params.id);
       const oldLogs = JSON.parse(retrieveResponse[0].appointment_logs);
@@ -224,7 +246,6 @@ class AppointmentController {
         JSON.stringify(newAppointmentLog),
         req.params.id
       ];
-      console.log(retrieveResponse);
       if (retrieveResponse[0].status === "scheduled") {
         return res.status(200).json({
           status:200,
@@ -238,7 +259,6 @@ class AppointmentController {
       } else {
         const updateQuery = "UPDATE `appointments` SET `status` = ?, `appointment_logs` = ? WHERE `appointment_id` = ?";
         const updateResponse = await dbModel.query(updateQuery, updatePayload);
-        dbModel.releaseConnection(connection);
         return res.status(200).json({
           status: 200,
           message: "Appointment successfully approved!",
@@ -251,16 +271,20 @@ class AppointmentController {
         message: error.message,
         error: error
       });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
 
   async findAppointmentByNumber(req, res) {
+    let connection;
     try {
-      const connection = await dbModel.getConnection();
+      connection = await dbModel.getConnection();
       const PK = req.params.id;
       const query = "SELECT `appointment_id`, `citizen_id`, `fullname`, `phone_number`, `appointed_datetime`, `description`, `status`, `created_at`, `appointment_logs` FROM `appointments` WHERE `appointment_id` = ?";
       const response = await dbModel.query(query, PK);
-      dbModel.releaseConnection(connection);
       const newResponse = response.map((res) => {
         return {
           ...res,
@@ -278,23 +302,10 @@ class AppointmentController {
         message: error.message,
         error: error
       });
-    }
-  }
-
-  async findAppointmentByName(req, res) {
-    try {
-      const connection = await dbModel.getConnection();
-      const PK = req.params.id;
-      const query = "SELECT a.appointment_id, CASE WHEN a.citizen_id IS NULL OR a.fullname IS NOT NULL THEN a.fullname ELSE CONCAT(mc.citizen_firstname, ' ', mc.citizen_lastname) END AS citizen_fullname, CASE WHEN a.citizen_id IS NULL THEN a.phone_number ELSE mc.citizen_number END AS phone_number,a.appointed_datetime AS appointed_datetime,a.description AS description,a.status AS status,a.created_at AS created_at FROM appointments a LEFT JOIN municipal_citizens mc ON a.citizen_id = mc.citizen_family_id WHERE a.appointment_id = ?";
-      const response = await dbModel.query(query, PK);
-
-      dbModel.releaseConnection(connection);
-    } catch (error) {
-      return res.status(500).json({
-        status: 500,
-        message: error.message,
-        error: error
-      });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
     }
   }
   

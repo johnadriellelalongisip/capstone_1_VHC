@@ -4,11 +4,11 @@ module.exports = function(io) {
   io.on('connection', (socket) => {
 
     socket.on('updateStaff', async () => {
+      let connection;
       try {
-        const connection = await dbModel.getConnection();
+        connection = await dbModel.getConnection();
         const query = "SELECT `staff_id`, `staff_username`, `staff_email`, `isVerified`, `staff_role`, `account_created_at`, `account_last_updated_at`, `staff_last_activity` FROM `medicalstaff`";
         const response = await dbModel.query(query);
-        dbModel.releaseConnection(connection);
         const convertDateTime = (Ddate) => {
           const date = new Date(Ddate);
           const year = date.getFullYear();
@@ -34,6 +34,8 @@ module.exports = function(io) {
       } catch (error) {
         socket.emit('newStaffError', error.message);
         socket.broadcast.emit('newStaffError', error.message);
+      } finally {
+        dbModel.releaseConnection(connection);
       }
     });
 

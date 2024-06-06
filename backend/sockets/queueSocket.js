@@ -3,10 +3,10 @@ const dbModel = require('../models/database_model');
 module.exports = function(io) {
   io.on('connection', (socket) => {
     socket.on('updateQueue', async () => {
+      let connection;
       try {
-        const connection = await dbModel.getConnection();
+        connection = await dbModel.getConnection();
         const response = await dbModel.query('SELECT * FROM `patient_queue`');
-        dbModel.releaseConnection(connection);
         const newResponse = response.map((res) => {
           const date = new Date(res.time_arrived);
           const year = date.getFullYear();
@@ -26,6 +26,8 @@ module.exports = function(io) {
       } catch (error) {
         socket.emit('newQueueError', error.message);
         socket.broadcast.emit('newQueueError', error.message);
+      } finally {
+        dbModel.releaseConnection(connection);
       }
     });
   });

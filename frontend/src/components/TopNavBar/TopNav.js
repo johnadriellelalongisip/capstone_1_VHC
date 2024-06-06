@@ -2,7 +2,7 @@
 import { Avatar, Tooltip } from "flowbite-react";
 import { BsBellFill } from "react-icons/bs";
 import { AiFillMessage } from "react-icons/ai";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import useNavigationState from "../../hooks/useToggles";
 import Messages from "./Messaging/Messages";
 import Notifs from "./Notifications/Notifications";
@@ -10,7 +10,7 @@ import Profile from "./Profile";
 import Settings from "./Settings/Settings";
 import Help from "./Help/Help";
 import Themes from "./Settings/Themes";
-import { colorTheme } from "../../App";
+import { colorTheme, notificationMessage } from "../../App";
 import Chatbox from "./Messaging/Chatbox";
 import useWindowSize from "../../hooks/useWindowSize";
 import ReportForm from "./Help/ReportForm";
@@ -53,6 +53,17 @@ const TopNav = () => {
     toggleReportForm,
     toggleFeedback,
   } = useNavigationState();
+  const [notifMessage, setNotifMessage] = useContext(notificationMessage);
+
+  useEffect(() => {
+    if (notifMessage) {
+      popupNotif.current.show();
+      setTimeout(() => {
+        popupNotif.current.close();
+        setNotifMessage(null);
+      }, 5000);
+    }
+  }, [notifMessage]);
 
   return (
     <div className={`top-0 left-0 right-0 flex justify-between items-center p-5 bg-${selectedTheme}-200 z-50`}>
@@ -113,7 +124,7 @@ const TopNav = () => {
       <Chatbox chatbox={chatbox} toggle={() => closeChatbox()} />
       <Newchat newchat={newChat} closeNewChat={() => closeNewChat()} />
 
-      <Notifs notifs={notification} toggle={() => toggleNotif()} togglePopupNotif={() => togglePopupNotif()} />
+      <Notifs notifs={notification} toggle={() => toggleNotif()} />
       <PopupNotification popupNotifRef={popupNotif} toggle={() => togglePopupNotif()} />
 
       <Profile prof={profile} toggle={() => toggleProfile()} toggleOptions={() => toggleSettings()} toggleHelp={() => toggleHelp()} />

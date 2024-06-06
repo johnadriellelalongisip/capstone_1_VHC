@@ -106,7 +106,7 @@ const useNavigationState = () => {
       popupNotif.current.close();
       setIsPopupNotifOpen(false);
     }
-  }
+  };
 
   const toggleProfile = () => {
     setIsProfOpen(true);

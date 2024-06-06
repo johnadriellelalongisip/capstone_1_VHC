@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import api from '../axios';
-import { socket } from '../socket';
 import { jwtDecode } from 'jwt-decode';
 import useCrypto from './useCrypto';
+import { notificationMessage } from '../App';
 
 const useQuery = () => {
   const [response, setResponse] = useState(null);
@@ -10,6 +10,8 @@ const useQuery = () => {
   const [error, setError] = useState(null);
   const [searchResults, setSearchResults] = useState(null);
   const { encryptData, decryptData } = useCrypto();
+  // eslint-disable-next-line no-unused-vars
+  const [notifMessage, setNotifMessage] = useContext(notificationMessage);
 
   const fetchData = async (route) => {
     setIsLoading(true);
@@ -18,7 +20,10 @@ const useQuery = () => {
       setResponse(response.data);
       setIsLoading(false);
     } catch (error) {
-      handleError(error);
+      if (error.response) {
+        handleError(error);
+        setIsLoading(false);
+      }
       setIsLoading(false);
     }
   };
@@ -28,6 +33,7 @@ const useQuery = () => {
     try {
       const response = await api.post(`/${route}`, payload);
       setResponse(response.data);
+      setNotifMessage(response.data.message);
       setIsLoading(false);
     } catch (error) {
       handleError(error);
@@ -92,27 +98,23 @@ const useQuery = () => {
   const userAuth = async (payload) => {
     setIsLoading(true);
     try {
-      const response = await api.post(`/authStaff`, payload);  
+      const response = await api.post(`/authStaff`, payload);
+      console.log(response);
       const data = {};
-      if (response?.data) {
-        if (response.data.accessToken) {
-          const accessTokenToAdd = { 
-            accessToken: response.data.accessToken,
-            isLoggedIn: true
-          };
-          updateTokenDynamic(data, accessTokenToAdd );
-          socket.auth.token = response.data.accessToken;
-        }
-        if (response.data.refreshToken) {
-          const refreshTokenToAdd = { refreshToken: response.data.refreshToken };
-          updateTokenDynamic(data, refreshTokenToAdd);
-        }
-        if (Object.keys(data).length > 0) {
-          localStorage.setItem('safeStorageData', encryptData(data));
-          window.location.reload();
-          setResponse(response.data);
-        }
-        setIsLoading(false);
+      if (response.data.accessToken) {
+        const accessTokenToAdd = { 
+          accessToken: response.data.accessToken,
+          isLoggedIn: true
+        };
+        updateTokenDynamic(data, accessTokenToAdd );
+      }
+      if (response.data.refreshToken) {
+        const refreshTokenToAdd = { refreshToken: response.data.refreshToken };
+        updateTokenDynamic(data, refreshTokenToAdd);
+      }
+      if (Object.keys(data).length > 0) {
+        localStorage.setItem('safeStorageData', encryptData(data));
+        window.location.reload();
       }
       setIsLoading(false);
       return data;
@@ -120,7 +122,7 @@ const useQuery = () => {
       handleError(error);
       setIsLoading(false);
     }
-  };  
+  };
   
   const verifyToken = async () => {
     setIsLoading(true);
@@ -131,7 +133,6 @@ const useQuery = () => {
         const decoded = jwtDecode(accessToken);
         const response = await api.post('/authToken', { token: refreshToken, staff_username: decoded.staff_username });
         if (response && response.data && response.data.accessToken) {
-          socket.auth.token = response.data.accessToken;
           updateTokenDynamic( decryptedData, { accessToken: response.data.accessToken });
           localStorage.setItem('safeStorageData', encryptData(decryptedData));
         }
@@ -150,9 +151,14 @@ const useQuery = () => {
     try {
       const response = await api.post('/logoutUser', payload);
       if (response && response.data && response.data.status === 200) {
-        setResponse(response.data);
+      setNotifMessage(response.data.message);
+      setResponse(response.data);
         localStorage.setItem('safeStorageData', encryptData({ isLoggedIn : false }));
-        window.location.reload();
+        sessionStorage.clear();
+        setIsLoading(false);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       }
       setIsLoading(false);
     } catch (error) {
@@ -164,7 +170,9 @@ const useQuery = () => {
   const handleError = (error) => {
     if (!error.response) {
       setError('No internet connection');
+      setNotifMessage('No internet connection');
     } else {
+      setNotifMessage(error.response.data.message);
       setError(`Error: ${error.message}`);
     }
     setIsLoading(false);

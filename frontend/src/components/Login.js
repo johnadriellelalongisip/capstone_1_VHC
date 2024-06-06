@@ -8,23 +8,30 @@ import useCurrentTime from "../hooks/useCurrentTime";
 const Login = () => {
   const { deviceId } = useDeviceId();
   const { mysqlTime } = useCurrentTime();
+  const [passwordVisibility, setPasswordVisibility] = useState(true);
+  const { isLoading, userAuth } = useQuery();
+  const myDevice = String(deviceId);
   const [payload, setPayload] = useState({
     username: "",
     password: "",
-    deviceId: deviceId,
-    history: () => {
-      const history = {};
-      const Hkey = String(mysqlTime);
-      history[Hkey] = "Logged In";
-      return history;
-    },
     dateTime: String(mysqlTime)
   });
-  const [passwordVisibility, setPasswordVisibility] = useState(true);
-  const { isLoading, userAuth } = useQuery();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await userAuth(payload);
+    const history = {};
+    const Hkey = String(mysqlTime);
+    history[Hkey] = "Logged In";
+    const ipAddress = sessionStorage.getItem("myIpAddress");
+    if (ipAddress) {
+      const newPayload = {
+        ...payload,
+        deviceId: myDevice,
+        history: history,
+        ipAddress: ipAddress
+      };
+      await userAuth(newPayload);
+    }
   };
 
   const handleChange = (e) => {
