@@ -20,7 +20,7 @@ const Queue = () => {
   const attendedRef = useRef(null);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [isAttendedOpen, setIsAttendedOpen] = useState(false);
-  const { isLoading, error, editData } = useQuery();
+  const { isLoading, error, addData, editData } = useQuery();
   const [waiting, setWaiting] = useState([{}]);
   const displayedData = ['priority', 'emergency', 'serving'];
   const [viewStateIndex, setViewStateIndex] = useState(displayedData.indexOf('serving'));
@@ -70,12 +70,18 @@ const Queue = () => {
     }
   }
 
-  const handleNext = async() => {
-    await editData('/nextQueue', "1", {dateTime: String(mysqlTime)});
+  const handleNext = () => {
+    addData('nextQueue', {dateTime: String(mysqlTime)});
+    setTimeout(() => {
+      socket.emit('updateQueue');
+    },[500])
   };
 
   const handleDismiss = (i) => {
-
+    editData('dismissQueue', [{dateTime: String(mysqlTime)}], i);
+    setTimeout(() => {
+      socket.emit('updateQueue');
+    },[500])
   }
 
   const toggleViewState = (direction) => {
@@ -154,7 +160,7 @@ const Queue = () => {
                       <div className={`flex justify-between items-center px-10 bg-${selectedTheme}-100 rounded-lg font-semibold p-2 drop-shadow-md`}>
                         <p>{q.queue_number}</p>
                         <p>{q.patient_name}</p>
-                        <button onClick={handleDismiss(i)} className={`p-1 rounded-lg bg-${selectedTheme}-600 text-${selectedTheme}-200 font-semibold text-xs md:text-sm lg:text-base`}>Dismiss</button>
+                        <button onClick={() => handleDismiss(q.queue_number)} className={`p-1 rounded-lg bg-${selectedTheme}-600 text-${selectedTheme}-200 font-semibold text-xs md:text-sm lg:text-base`}>Dismiss</button>
                       </div>
                     </div>
                   )

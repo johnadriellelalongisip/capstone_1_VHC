@@ -75,9 +75,13 @@ class QueueController {
     let connection;
     try {
       connection = await dbModel.getConnection();
-      // const query = 'UPDATE `patient_queue` SET `patient_status` = "waiting", `time_attended` = ? WHERE `queue_number` = ?';
-      // const response = await dbModel.query(query, [req.body.dateTime, id]);
-      res.status(200).json({ status: 200, message: `Now Serving: ${id}` });
+      const getEmergency = await dbModel.query('SELECT `queue_number` FROM `patient_queue` WHERE `patient_status` = "emergency" ORDER BY `queue_number` ASC LIMIT 1');
+      console.log(getEmergency);
+      const getFIFO = await dbModel.query('SELECT `queue_number` FROM `patient_queue` WHERE `patient_status` = "waiting" ORDER BY `queue_number` ASC LIMIT 1');
+      const query = 'UPDATE `patient_queue` SET `patient_status` = "serving", `time_attended` = ? WHERE `queue_number` = ?';
+      const response = await dbModel.query(query, [req.body.dateTime, getFIFO[0].queue_number]);
+      console.log(response);
+      res.status(200).json({ status: 200, message: `Now Serving: ${getFIFO[0].queue_number}` });
     } catch (error) {
       return res.status(500).json({
         status: 500,
@@ -90,6 +94,49 @@ class QueueController {
       }
     }
   }
+
+  async dismissQueue(req, res) {
+    let connection;
+    try {
+      connection = await dbModel.getConnection();
+      const selectQuery = 'SELECT `patient_status` FROM `patient_queue` WHERE `queue_number` = ?';
+      const [currentStatus] = await dbModel.query(selectQuery, [req.params.id]);
+      if (!currentStatus) {
+        return res.status(404).json({
+          status: 404,
+          message: `Queue number ${req.params.id} not found`
+        });
+      }
+      console.log(`Current status of queue number ${req.params.id}:`, currentStatus.patient_status);
+      if (currentStatus.patient_status === "served") {
+        return res.status(200).json({
+          status: 200,
+          message: `Queue number ${req.params.id} is already served`
+        });
+      }
+      const updateQuery = 'UPDATE `patient_queue` SET `patient_status` = "served" WHERE `queue_number` = ?';
+      const response = await dbModel.query(updateQuery, [req.params.id]);
+      console.log(response, req.params.id);
+      if (response.affectedRows === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: `Queue number ${req.params.id} not found`
+        });
+      }
+      res.status(200).json({ status: 200, message: `Successfully Dismissed Number: ${req.params.id}` });
+    } catch (error) {
+      return res.status(500).json({
+        status: 500,
+        message: error.message,
+        error: error
+      });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
+    }
+  }
+  
 }
 
 module.exports = new QueueController();

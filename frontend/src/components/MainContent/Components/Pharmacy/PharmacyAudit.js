@@ -10,7 +10,7 @@ const PharmacyAudit = ({ recordAudit, toggle, itemId }) => {
   const [toEdit, setToEdit] = useState(true);
   const [isDirty, setIsDirty] = useState(false);
   const [initialFormData, setInitialFormData] = useState({});
-  const { searchResults, setSearchResults, isLoading, error, searchData, editData } = useQuery();
+  const { searchResults, setSearchResults, isLoading, error, searchData } = useQuery();
   const [formData, setFormData] = useState({
     item_name: "",
     unit_size: "",

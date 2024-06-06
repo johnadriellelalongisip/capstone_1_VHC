@@ -28,6 +28,18 @@ const useQuery = () => {
     }
   };
 
+  const postData = async (route) => {
+    setIsLoading(true);
+    try {
+      const response = await api.post(`/${route}`);
+      setResponse(response.data);
+      setIsLoading(false);
+    } catch (error) {
+      handleError(error);
+      setIsLoading(false);
+    }
+  };
+
   const addData = async (route, payload) => {
     setIsLoading(true);
     try {
@@ -185,6 +197,7 @@ const useQuery = () => {
     searchResults,
     setSearchResults,
     fetchData,
+    postData,
     addData,
     editData,
     deleteData,
