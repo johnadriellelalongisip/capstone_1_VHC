@@ -24,7 +24,8 @@ const Profile = ({ prof, toggle, toggleOptions, toggleHelp }) => {
   const Logout = async () => {
     const history = {};
     const Hkey = String(mysqlTime);
-    history[Hkey] = "Logged Out";dd
+    history[Hkey] = "Logged Out";
+    const ipAddress = sessionStorage.getItem("myIpAddress");
     if (ipAddress) {
       await logoutUser({ staff_username: decoded.staff_username, history: history, ipAddress: ipAddress });
     }
