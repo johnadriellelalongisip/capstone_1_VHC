@@ -2,15 +2,12 @@ import { useState } from "react";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import useQuery from "../hooks/useQuery";
 import { Spinner } from "flowbite-react";
-import useDeviceId from "../hooks/useDeviceId";
 import useCurrentTime from "../hooks/useCurrentTime";
 
 const Login = () => {
-  const { deviceId } = useDeviceId();
   const { mysqlTime } = useCurrentTime();
   const [passwordVisibility, setPasswordVisibility] = useState(true);
   const { isLoading, userAuth } = useQuery();
-  const myDevice = String(deviceId);
   const [payload, setPayload] = useState({
     username: "",
     password: "",
@@ -23,10 +20,11 @@ const Login = () => {
     const Hkey = String(mysqlTime);
     history[Hkey] = "Logged In";
     const ipAddress = sessionStorage.getItem("myIpAddress");
+    const deviceId = sessionStorage.getItem("myDeviceId");
     if (ipAddress) {
       const newPayload = {
         ...payload,
-        deviceId: myDevice,
+        deviceId: deviceId,
         history: history,
         ipAddress: ipAddress
       };

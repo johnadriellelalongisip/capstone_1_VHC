@@ -25,6 +25,7 @@ import { decryptData } from "./hooks/useCrypto.js";
 import { jwtDecode } from "jwt-decode";
 import Equipments from "./components/MainContent/Components/Equipments/Equipments.js";
 import axios from "axios";
+import useDeviceId from "./hooks/useDeviceId.js";
 
 export const colorTheme = createContext();
 export const messaging = createContext();
@@ -42,7 +43,10 @@ const App = () => {
   const safeStorageData = localStorage.getItem('safeStorageData');
   const [isLoggedIn, setIsLoggedIn] = useState(safeStorageData ? decryptData(safeStorageData) : false);
   const { accessToken, isLoggedIn : loggedIn } = safeStorageData ? decryptData(safeStorageData) : {};
-  const role = accessToken ? jwtDecode(accessToken).role : "";
+  const decodedToken = accessToken ? jwtDecode(accessToken) : {};
+  const role = accessToken ? decodedToken.role : "";
+  // eslint-disable-next-line no-unused-vars
+  const { loading: deviceIdLoading } = useDeviceId();
 
   const fetchIpAddress = async () => {
     try {
@@ -51,8 +55,7 @@ const App = () => {
     } catch (error) {
       throw error;
     }
-  };
-  
+  };  
   
   useEffect(() => {
     if (sessionStorage.getItem("myIpAddress") === null || sessionStorage.getItem("myIpAddress") === undefined) {
@@ -82,6 +85,14 @@ const App = () => {
     'gray', 'red', 'orange', 'lime', 'green', 'teal', 'cyan', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink'
   ];
 
+  if (deviceIdLoading) {
+    return (
+      <>
+        
+      </>
+    )
+  }
+  
   return (
     <>
     <div className="flex flex-col h-screen">

@@ -29,17 +29,7 @@ const Appointments = () => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [filteredAppointments, setFilteredAppointments] = useState([{}]);
   const { isLoading, error } = useQuery();
-  
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1;
-  const currentDay = currentDate.getDate();
-  const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
-  const formatDateString = (value) => {
-    return value < 10 ? '0' + value : '' + value;
-  };
-  const newStartDate = `${currentYear}-${formatDateString(currentMonth)}-${currentDay.length === 1 ? `0${currentDay}` : currentDay}`;
-  const newEndDate = `${currentYear}-${formatDateString(currentMonth)}-${daysInMonth}`;
+  const { startDate:newStartDate, endDate:newEndDate } = useCurrentTime();
   const [startDate, setStartDate] = useState(newStartDate);
   const [endDate, setEndDate] = useState(newEndDate);
   const { weeks } = useCurrentTime();
@@ -218,11 +208,13 @@ const Appointments = () => {
                           {index + 1}
                       </p>
                       <div className={`hidden md:hidden lg:block min-h-16 max-h-16 overflow-y-auto m-2 p-1 overflow-x-hidden`}>
-                        {scheduledAppointments.map((app, i) => {
-                          const appTime = app["Appointed Time"].split(" ");
-                          const d = new Date(appTime[0]);
-                          const time = appTime[1] + "" + appTime[2];
-                          const date = `${formatDatePart(d.getMonth() + 1)}-${formatDatePart(d.getDate())}-${d.getFullYear()}`;
+                        {scheduledAppointments.map((app, i) => {  
+                          const dateTime = new Date(app["Appointed Time"]);
+                          let hour = dateTime.getHours().toString() % 12 || 12;
+                          const minute = dateTime.getMinutes().toString().padStart(2, '0');
+                          const meridian = hour % 2 ? 'pm' : 'am';
+                          const time = `${String(hour).padStart(2, '0')}:${minute} ${meridian}`;
+                          const date = `${formatDatePart(dateTime.getMonth() + 1)}-${formatDatePart(dateTime.getDate())}-${dateTime.getFullYear()}`;
                           const currentDate = `${formatDatePart(selectedDate.getMonth() + 1)}-${formatDatePart(index + 1)}-${selectedDate.getFullYear()}`;
                           return (
                             <p key={i} className={`px-1 bg-${selectedTheme}-800 text-${selectedTheme}-200 rounded-md text-xxs md:text-sm lg:text-base font-thin text-nowrap mb-1`}>

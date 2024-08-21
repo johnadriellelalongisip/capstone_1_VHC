@@ -3,6 +3,7 @@ import api from '../axios';
 import { jwtDecode } from 'jwt-decode';
 import useCrypto from './useCrypto';
 import { notificationMessage } from '../App';
+import useCurrentTime from './useCurrentTime';
 
 const useQuery = () => {
   const [response, setResponse] = useState(null);
@@ -10,13 +11,14 @@ const useQuery = () => {
   const [error, setError] = useState(null);
   const [searchResults, setSearchResults] = useState(null);
   const { encryptData, decryptData } = useCrypto();
+  const { mysqlTime } = useCurrentTime();
   // eslint-disable-next-line no-unused-vars
   const [notifMessage, setNotifMessage] = useContext(notificationMessage);
 
   const fetchData = async (route) => {
     setIsLoading(true);
     try {
-      const response = await api.get(`/${route}`);
+      const response = await api.get(`/${route}`, {dateTime: String(mysqlTime)});
       setResponse(response.data);
       setIsLoading(false);
     } catch (error) {
@@ -28,14 +30,15 @@ const useQuery = () => {
     }
   };
 
-  const postData = async (route) => {
+  const postData = async (route, payload) => {
     setIsLoading(true);
     try {
-      const response = await api.post(`/${route}`);
+      const newPayload = {dateTime: String(mysqlTime), ...payload};
+      const response = await api.post(`/${route}`, newPayload);
       setResponse(response.data);
       setIsLoading(false);
     } catch (error) {
-      handleError(error);
+      console.error(error);
       setIsLoading(false);
     }
   };
@@ -58,6 +61,7 @@ const useQuery = () => {
     try {
       const response = await api.post(`/${route}/${id}`, payload);
       setResponse(response.data);
+      setNotifMessage(response.data.message);
       setIsLoading(false);
     } catch (error) {
       handleError(error);
@@ -70,6 +74,7 @@ const useQuery = () => {
     try {
       const response = await api.post(`/${route}/${id}`);
       setResponse(response.data);
+      setNotifMessage(response.data.message);
       setIsLoading(false);
     } catch (error) {
       handleError(error);
@@ -188,6 +193,9 @@ const useQuery = () => {
       setError(`Error: ${error.message}`);
     }
     setIsLoading(false);
+    setTimeout(() => {
+      setError(null);
+    },5000);
   };
 
   return {

@@ -34,6 +34,7 @@ router.get('/searchPharmacyInventory/:id', pharmacyController.searchPharmacyInve
 // QUEUE
 router.post('/addToQueue', queueController.addToQueue);
 router.get('/getQueue', queueController.getQueue);
+router.get('/getAttended', queueController.getAttended);
 router.post('/nextQueue', queueController.nextQueue);
 router.post('/dismissQueue/:id', queueController.dismissQueue);
 

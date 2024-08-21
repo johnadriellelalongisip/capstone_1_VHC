@@ -5,7 +5,7 @@ import { TbFileExport } from "react-icons/tb";
 import FormModal from "./FormModal";
 import { colorTheme } from "../../../../App";
 
-const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = true, enExport = true, isLoading, enOptions = true, toggleOption, optionPK, error }) => {
+const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = true, enExport = true, isLoading = true, enOptions = true, toggleOption, optionPK, error }) => {
   const [selectedTheme] = useContext(colorTheme);
   const [move, setMove] = useState(false);
   const [query, setQuery] = useState('');

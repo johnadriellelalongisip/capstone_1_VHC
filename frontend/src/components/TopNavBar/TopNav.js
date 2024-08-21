@@ -49,7 +49,7 @@ const TopNav = () => {
     toggleProfile,
     toggleSettings,
     toggleTheme,
-    toggleHelp,
+    toggleHelp, 
     toggleReportForm,
     toggleFeedback,
   } = useNavigationState();

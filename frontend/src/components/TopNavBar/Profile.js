@@ -18,16 +18,17 @@ const Profile = ({ prof, toggle, toggleOptions, toggleHelp }) => {
   const {avatarSize} = useWindowSize();
   const { logoutUser } = useQuery();
   const { mysqlTime } = useCurrentTime();
-  const { accessToken } = decryptData(localStorage.getItem('safeStorageData'));
+  const safeStorage = localStorage.getItem('safeStorageData');
+  const { accessToken } = safeStorage ? decryptData(safeStorage) : {};
   const decoded = accessToken ? jwtDecode(accessToken) : {};
   
   const Logout = async () => {
     const history = {};
     const Hkey = String(mysqlTime);
     history[Hkey] = "Logged Out";
-    const ipAddress = sessionStorage.getItem("myIpAddress");
-    if (ipAddress) {
-      await logoutUser({ staff_username: decoded.staff_username, history: history, ipAddress: ipAddress });
+    const deviceId = sessionStorage.getItem("myDeviceId");
+    if (deviceId) {
+      await logoutUser({ staff_username: decoded.staff_username, history: history, ipAddress: deviceId });
     }
   };
   

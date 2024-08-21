@@ -22,8 +22,8 @@ const refreshAccessToken = async (refreshToken) => {
     const storedData = localStorage.getItem('safeStorageData');
     const { accessToken } = decryptData(storedData);
     const decodedToken = jwtDecode(accessToken);
-    const ipAddress = sessionStorage.getItem("myIpAddress");
-    const response = await axios.post(`https://localhost:5000/api/authToken`, { token: refreshToken, staff_username: decodedToken.staff_username, ipAddress: ipAddress });
+    const deviceId = sessionStorage.getItem("myDeviceId");
+    const response = await axios.post(`https://localhost:5000/api/authToken`, { token: refreshToken, staff_username: decodedToken.staff_username, deviceId: deviceId });
     const newAccessToken = response.data.accessToken;
     const safeStorageData = decryptData(localStorage.getItem('safeStorageData'));
     safeStorageData.accessToken = newAccessToken;
@@ -37,7 +37,7 @@ const refreshAccessToken = async (refreshToken) => {
 api.interceptors.response.use(
   response => response,
   async error => {
-    if (error.response.status === 401) {
+    if (error.response?.status === 401) {
       const originalRequest = error.config;
       try {
         const { data } = await axios.post('https://localhost:5000/api/authToken', {}, { withCredentials: true });

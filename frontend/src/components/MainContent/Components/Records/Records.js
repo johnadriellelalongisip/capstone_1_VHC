@@ -3,11 +3,10 @@ import Header from "../../Header";
 import DataTable from "../Elements/DataTable";
 import { MdFolder } from "react-icons/md";
 import useQuery from "../../../../hooks/useQuery";
-import { useContext, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import RecordAudit from "./RecordAudit";
 import useSocket from "../../../../hooks/useSocket";
 import { socket } from "../../../../socket";
-import { colorTheme } from "../../../../App";
 
 const Records = () => {
   const location = useLocation();
@@ -18,7 +17,6 @@ const Records = () => {
   const [famID, setFamID] = useState(null);
   
   const { isLoading, error } = useQuery();
-  const [selectedTheme] = useContext(colorTheme);
   const keyMap = {
     "citizen_family_id": "Family-ID",
     "citizen_firstname": "Firstname",

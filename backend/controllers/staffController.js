@@ -269,8 +269,8 @@ class StaffController {
         ...req.body.history
       };
       const refreshTokens = JSON.parse(user.refresh_token);
-      if (refreshTokens.hasOwnProperty(req.body.ipAddress)) {
-        delete refreshTokens[req.body.ipAddress];
+      if (refreshTokens.hasOwnProperty(req.body.deviceId)) {
+        delete refreshTokens[req.body.deviceId];
       };
       console.log(refreshTokens);
       const removeRefreshTokenQuery = 'UPDATE `medicalstaff` SET `refresh_token` = ?, `staff_history` = ? WHERE `staff_username` = ?';

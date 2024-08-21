@@ -94,7 +94,7 @@ const AddToQueue = ({ ATref, ATonClick }) => {
       ATonClick();
     }
     setTimeout(() => {
-      socket.emit("updateQueue");
+      socket.emit("updateQueue", {dateTime: String(mysqlTime)});
     },500);
   };
 
