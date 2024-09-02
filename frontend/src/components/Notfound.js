@@ -9,7 +9,7 @@ const Notfound = () => {
         </div>
         <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2 mb-60 md:mb-72 lg:mb-80">
           <div className="text-center mt-10">
-            <p className="text-4xl font-bold text-red-600 mb-4">
+            <p className="text-3xl font-bold text-red-600 mb-4">
               Oops! Error 404
             </p>
             <p className="text-lg">

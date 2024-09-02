@@ -26,7 +26,7 @@ const Records = () => {
     "citizen_birthdate": "Birthdate",
     "citizen_barangay": "Barangay",
     "citizen_number": "Number"
-  };
+  };  
 
   const { data: records } = useSocket({ SSName: "sessionRecords", keyMap: keyMap, fetchUrl: "getRecords", socketEmit: "updateRecords", socketUrl: "newRecords", socketError: "newRecordsError" })
 

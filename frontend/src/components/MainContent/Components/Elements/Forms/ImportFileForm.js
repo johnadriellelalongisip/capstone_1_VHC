@@ -1,11 +1,11 @@
-import { Spinner } from 'flowbite-react';
+import { Checkbox, Spinner } from 'flowbite-react';
 import { useContext, useRef, useState } from 'react';
 import { colorTheme } from '../../../../../App';
 import useQuery from '../../../../../hooks/useQuery';
 import * as XLSX from 'xlsx';
 import useCurrentTime from '../../../../../hooks/useCurrentTime';
 
-const PharmacyForm = ({ close, children }) => {
+const ImportFileForm = ({ close, children, url }) => {
   const [selectedTheme] = useContext(colorTheme);
   const { isLoading, error, addData } = useQuery();
   const [data, setData] = useState(null);
@@ -30,7 +30,6 @@ const PharmacyForm = ({ close, children }) => {
         setData(jsonData);
       });
     };
-
     reader.readAsBinaryString(file);
   };
 
@@ -45,7 +44,7 @@ const PharmacyForm = ({ close, children }) => {
       logs : date_added
     };
     console.log(payload);
-    addData('submitCSVMedicinesRecord', payload);
+    addData(url, payload);
     setData(null);
     close();
     fileRef.current.value = "";
@@ -57,9 +56,9 @@ const PharmacyForm = ({ close, children }) => {
       <form className="flex flex-col gap-4 m-5 mt-20 md:mt-24 lg:mt-24" onSubmit={handleSubmit}>
         <div>
           <div className="mb-2 block">
-            <label htmlFor="firstname" className='text-xs md:text-sm lg:text-base font-semibold'>First Name</label>
+            <label htmlFor="firstname" className='text-xs md:text-sm lg:text-base font-semibold'>Excel File:</label>
           </div>
-          <input
+          <input 
             ref={fileRef}
             type="file" 
             required 
@@ -71,9 +70,19 @@ const PharmacyForm = ({ close, children }) => {
           />
         </div>
         <button disabled={isLoading} type="submit" className={`font-semibold p-2 rounded-md w-full transition-colors duration-200 ${!isLoading ? `text-${selectedTheme}-100 bg-${selectedTheme}-700 hover:drop-shadow-md hover:bg-${selectedTheme}-800 focus:bg-${selectedTheme}-600 active:bg-${selectedTheme}-300 active:text-${selectedTheme}-600 active:shadow-inner active:ring-2 active:ring-${selectedTheme}-600` : `text-${selectedTheme}-700 bg-${selectedTheme}-100 shadow-inner` }`}><p className="drop-shadow-lg">{!isLoading ? 'Add New Record' : <Spinner/>}</p></button>
+        <div className="flex items-center justify-end gap-2">
+          <Checkbox
+            id="accept"
+            // checked={dontCloseUponSubmission}
+            // onChange={() => setDontCloseUponSubmission((prev) => !prev)}
+          />
+          <label htmlFor="accept" className="flex text-xs md:text-sm lg:text-base font-semibold">
+            Don't Close Upon Submition
+          </label>
+        </div>
       </form>
     </>
   );
 }
 
-export default PharmacyForm;
+export default ImportFileForm;

@@ -1,20 +1,23 @@
-import { useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import useQuery from "../hooks/useQuery";
 import { Spinner } from "flowbite-react";
 import useCurrentTime from "../hooks/useCurrentTime";
+import { notificationMessage } from "../App";
 
 const Login = () => {
   const { mysqlTime } = useCurrentTime();
   const [passwordVisibility, setPasswordVisibility] = useState(true);
   const { isLoading, userAuth } = useQuery();
+  const [notifMessage] = useContext(notificationMessage);
+  const promptRef = useRef(null);
   const [payload, setPayload] = useState({
     username: "",
     password: "",
     dateTime: String(mysqlTime)
   });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const history = {};
     const Hkey = String(mysqlTime);
@@ -28,7 +31,7 @@ const Login = () => {
         history: history,
         ipAddress: ipAddress
       };
-      await userAuth(newPayload);
+      userAuth(newPayload);
     }
   };
 
@@ -40,6 +43,14 @@ const Login = () => {
     }));
   };
 
+  useEffect(() => {
+    if(notifMessage) {
+      promptRef.current.show();
+    } else {
+      promptRef.current.close();
+    }
+  }, [notifMessage]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-no-repeat bg-cover bg-center text-sm md:text-base lg:text-md">
       <div className="flex flex-col md:flex-row lg:flex-row w-auto h-auto bg-sky-200/80 rounded-lg shadow-sky-950 shadow-2xl border-[1px] border-sky-900/40 border-solid">
@@ -47,7 +58,7 @@ const Login = () => {
           <img src="MHO_logo.png" alt="..." className="w-14 h-14 md:w-20 md:h-20 lg:w-28 lg:h-28"/>
           <p className="text-center font-semibold block md:hidden lg:hidden text-sky-900 drop-shadow-sm">Login Here</p>
         </div>
-        <div className="flex flex-col m-2">
+        <div className="relative flex flex-col m-2">
           <p className="text-center font-semibold p-5 hidden md:block lg:block text-sky-700 drop-shadow-sm">Login Here</p>
           <form onSubmit={handleSubmit} className="w-full flex flex-col justify-start items-start gap-5 p-2 md:p-3 lg:p-4">
             <div className="flex justify-between w-full items-center gap-4">
@@ -87,8 +98,15 @@ const Login = () => {
                 }
               </button>
             </div>
-            <button disabled={isLoading} type="submit" className={`font-semibold p-2 rounded-md w-full transition-colors duration-200 ${!isLoading ? 'text-sky-100 bg-sky-700 hover:drop-shadow-md hover:bg-sky-800 focus:bg-sky-600 active:bg-sky-300 active:text-sky-600 active:shadow-inner active:ring-2 active:ring-sky-600' : 'text-sky-700 bg-sky-100 shadow-inner' }`}><p className="drop-shadow-lg">{!isLoading ? 'Login' : <Spinner/>}</p></button>
+            <button disabled={isLoading} type="submit" className={`font-semibold p-2 rounded-md w-full transition-colors duration-200 ${!isLoading ? 'text-sky-100 bg-sky-700 hover:drop-shadow-md hover:bg-sky-800 focus:bg-sky-600 active:bg-sky-300 active:text-sky-600 active:shadow-inner active:ring-2 active:ring-sky-600' : 'text-sky-700 bg-sky-100 shadow-inner'}`}>
+              <p className="drop-shadow-lg">{!isLoading ? 'Login' : <Spinner />}</p>
+            </button>
           </form>
+          <dialog ref={promptRef} className="absolute bottom-[-30px] right-0 left-0 bg-transparent">
+            <div className="bg-red-200 p-1 text-red-600 font-medium text-center rounded-md drop-shadow-md">
+              {notifMessage}
+            </div>
+          </dialog>
         </div>
       </div>
     </div>

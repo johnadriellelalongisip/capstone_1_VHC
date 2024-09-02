@@ -2,9 +2,9 @@ import axios from 'axios';
 import { decryptData, encryptData } from './hooks/useCrypto';
 import { jwtDecode } from 'jwt-decode';
 
-const baseUrl = process.env.REACT_APP_PROJECT_STATE;
+const baseUrl = process.env.REACT_APP_PROJECT_STATE === 'production' ? undefined : 'https://localhost:5000/api';
 const api = axios.create({
-  baseURL: baseUrl === 'production' ? undefined : 'https://localhost:5000/api',
+  baseURL: baseUrl,
   withCredentials: true,
 });
 
@@ -23,7 +23,7 @@ const refreshAccessToken = async (refreshToken) => {
     const { accessToken } = decryptData(storedData);
     const decodedToken = jwtDecode(accessToken);
     const deviceId = sessionStorage.getItem("myDeviceId");
-    const response = await axios.post(`https://localhost:5000/api/authToken`, { token: refreshToken, staff_username: decodedToken.staff_username, deviceId: deviceId });
+    const response = await axios.post(`${baseUrl}/authToken`, { token: refreshToken, staff_username: decodedToken.staff_username, deviceId: deviceId });
     const newAccessToken = response.data.accessToken;
     const safeStorageData = decryptData(localStorage.getItem('safeStorageData'));
     safeStorageData.accessToken = newAccessToken;
@@ -37,11 +37,13 @@ const refreshAccessToken = async (refreshToken) => {
 api.interceptors.response.use(
   response => response,
   async error => {
-    if (error.response?.status === 401) {
+    if (error.response?.status !== 401) {
       const originalRequest = error.config;
+      console.log("error response: ", error.response.data);
       try {
-        const { data } = await axios.post('https://localhost:5000/api/authToken', {}, { withCredentials: true });
+        const { data } = await axios.post(`${baseUrl}/authToken`, {}, { withCredentials: true });
         originalRequest.headers['Authorization'] = `Bearer ${data.accessToken}`;
+        console.log("return");
         return axios(originalRequest);
       } catch (err) {
         return Promise.reject(err);

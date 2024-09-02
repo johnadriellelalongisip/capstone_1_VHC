@@ -5,7 +5,7 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { colorTheme } from "../../../../App";
 import Header from "../../Header";
 import DataTable from "../Elements/DataTable";
-// import DatePicker from "./DatePicker";
+import DatePicker from "./DatePicker";
 import useQuery from "../../../../hooks/useQuery";
 import AppointmentOptions from "./AppointmentOptions";
 import useSocket from "../../../../hooks/useSocket";
@@ -15,7 +15,7 @@ import { decryptData } from "../../../../hooks/useCrypto";
 import { jwtDecode } from "jwt-decode";
 import { Tooltip } from "flowbite-react";
 
-// export const appointmentDate = createContext();
+export const appointmentDate = createContext();
 
 const Appointments = () => {
   const [selectedTheme] = useContext(colorTheme);
@@ -155,13 +155,13 @@ const Appointments = () => {
   };
 
   const openAppointedDayRef = () => {
-    // if (!isAppDayOpen) {
-    //   setIsAppDayOpen(true);
-    //   appointedDayRef.current.show();
-    // } else {
-    //   setIsAppDayOpen(false);
-    //   appointedDayRef.current.close();
-    // }
+    if (!isAppDayOpen) {
+      setIsAppDayOpen(true);
+      appointedDayRef.current.show();
+    } else {
+      setIsAppDayOpen(false);
+      appointedDayRef.current.close();
+    }
   };
 
   return (
@@ -248,9 +248,9 @@ const Appointments = () => {
                 <MdArrowDropDown className={`size-2 md:size-3 lg:size-4 ${isDatePickerOpen && `rotate-180`}`}/>
               </button>
               <div className="absolute top-full left-0 z-50 mt-2">
-                {/* <appointmentDate.Provider value={[ startDate, endDate, setStartDate, setEndDate ]}>
+                <appointmentDate.Provider value={[ startDate, endDate, setStartDate, setEndDate ]}>
                   <DatePicker dateRef={datepickerRef} toggleDatePicker={toggleDate}/>
-                </appointmentDate.Provider> */}
+                </appointmentDate.Provider>
               </div>
             </div>
           

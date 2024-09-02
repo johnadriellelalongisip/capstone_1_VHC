@@ -116,9 +116,8 @@ const useQuery = () => {
     setIsLoading(true);
     try {
       const response = await api.post(`/authStaff`, payload);
-      console.log(response);
       const data = {};
-      if (response.data.accessToken) {
+      if (response && response.status === 200 && response.data.accessToken) {
         const accessTokenToAdd = { 
           accessToken: response.data.accessToken,
           isLoggedIn: true
@@ -133,10 +132,9 @@ const useQuery = () => {
         localStorage.setItem('safeStorageData', encryptData(data));
         window.location.reload();
       }
-      setIsLoading(false);
-      return data;
     } catch (error) {
       handleError(error);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -195,7 +193,8 @@ const useQuery = () => {
     setIsLoading(false);
     setTimeout(() => {
       setError(null);
-    },5000);
+      setNotifMessage(null);
+    },3000);
   };
 
   return {

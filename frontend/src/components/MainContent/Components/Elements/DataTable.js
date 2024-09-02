@@ -1,11 +1,11 @@
 import { TextInput } from "flowbite-react";
 import { useContext, useEffect, useRef, useState } from "react";
-import { MdSearch, MdOutlineChevronLeft, MdOutlineChevronRight, MdOutlineKeyboardDoubleArrowLeft, MdOutlineKeyboardDoubleArrowRight, MdArrowDropUp, MdArrowDropDown, MdInfo } from "react-icons/md";
+import { MdSearch, MdOutlineChevronLeft, MdOutlineChevronRight, MdOutlineKeyboardDoubleArrowLeft, MdOutlineKeyboardDoubleArrowRight, MdArrowDropUp, MdInfo, MdKeyboardArrowUp } from "react-icons/md";
 import { TbFileExport } from "react-icons/tb";
 import FormModal from "./FormModal";
 import { colorTheme } from "../../../../App";
 
-const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = true, enExport = true, isLoading = true, enOptions = true, toggleOption, optionPK, error }) => {
+const DataTable = ({ data, modalForm, enAdd = true, enImport = false, importName, importUrlDestination, enSearch = true, enExport = true, isLoading = true, enOptions = true, toggleOption, optionPK, error }) => {
   const [selectedTheme] = useContext(colorTheme);
   const [move, setMove] = useState(false);
   const [query, setQuery] = useState('');
@@ -83,12 +83,7 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
     });
     const order = sortState[field] ? 'desc' : 'asc';
     setSortedData(sortedRecord(field, order));
-  };  
-
-  // const handleOptionClick = (option) => {
-  //   setRowCount(option);
-    // setShowEntries(false);
-  // };
+  }; 
 
   const filteredData = sortedData.filter((row) =>
     Object.values(row).some((col) =>
@@ -173,7 +168,7 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
               onClick={() => toggleForm()}
               disabled={error}
             >
-              Import File
+              <p className={`font-bold text-${selectedTheme}-100`}>Import File</p>
             </button>
           )}
           {enAdd && (
@@ -182,9 +177,19 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
               onClick={() => toggleForm()}
               disabled={error}
             >
-              Add New Data
+              <p className={`font-bold text-${selectedTheme}-100`}>Add</p>
             </button>
           )}
+          <div className="flex gap-1">
+            <p className={`text-xs md:text-sm lg:text-sm p-1 text-${selectedTheme}-800 font-bold`}>Entries per page:</p>
+            <button onClick={() => setRowCount(prev => prev > 3 && ++prev)} className={`rounded-sm bg-${selectedTheme}-500 border-0 p-1`}>
+              <MdKeyboardArrowUp />
+            </button>
+            <p className={`text-xs md:text-sm lg:text-sm p-1 text-${selectedTheme}-800 font-bold`}>{rowCount}</p>
+            <button onClick={() => setRowCount(prev => prev > 3 && --prev)} className={`rounded-sm bg-${selectedTheme}-500 border-0 p-1`}>
+              <MdKeyboardArrowUp className="rotate-180" />
+            </button>
+          </div>
         </div>
         <div 
           className={`flex`}
@@ -285,9 +290,6 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = true, enSearch = 
               </>
             )}
           </tbody>
-          <tfoot>
-            <Header top={false} />
-          </tfoot>
         </table>
       </div>
       <div className="flex flex-row justify-between items-center mt-1">

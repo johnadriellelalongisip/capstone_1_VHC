@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 class AuthController {
+
   async authStaff(req, res) {
     let connection;
     connection = await dbModel.getConnection();
@@ -20,18 +21,20 @@ class AuthController {
         const user = { staff_username: developer.username, role: "developer", accessibility: "full" };
         const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10s' });
         const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
-        // res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, sameSite: 'None' });
-        // res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'None' });
         return res.status(200).json({ accessToken, refreshToken });
       }
       const [staff] = await dbModel.query('SELECT `staff_username`, `staff_password`, `refresh_token`, `staff_role`, `staff_accessibility`, `staff_history`, `staff_devices` FROM `medicalstaff` WHERE `staff_username` = ?', [username]);
 
       if (!staff) {
-        return res.status(401).json({ status: 401, message: 'No user found.' });
+        res.status(401).json({ status: 401, message: 'No user found.' });
+        return;
       }
 
       const passwordMatch = await bcrypt.compare(password, staff.staff_password);
-      if (!passwordMatch) return res.status(401).json({ status: 401, message: "Wrong password" });
+      if (!passwordMatch) {
+        res.status(401).json({ status: 401, message: "Wrong password" });
+        return;
+      }
 
       const user = { staff_username: username, role: staff.staff_role };
       const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30s' });
@@ -43,10 +46,10 @@ class AuthController {
       const newHistory = { ...JSON.parse(staff.staff_history), ...history };
       const devices = { ...JSON.parse(staff.staff_devices), [String(deviceId) + "," + String(ipAddress)]: String(dateTime) };
       const dataToQuery = [(JSON.stringify(devicesRT)), String(dateTime), JSON.stringify(newHistory), JSON.stringify(devices), username];
+
       await dbModel.query('UPDATE `medicalstaff` SET `refresh_token` = ?, `staff_last_activity` = ?, `staff_history` = ?, `staff_devices` = ? WHERE `staff_username` = ?', dataToQuery);
-      // res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, sameSite: 'None' });
-      // res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'None' });
       return res.status(200).json({ accessToken, refreshToken, message: "Login successful", accessibilities: staff.staff_accessibility });
+
     } catch (error) {
       return res.status(500).json({ status: 500, message: 'Internal server error', error: error.message });
     } finally {

@@ -47,7 +47,7 @@ const Pharmacy = () => {
         <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-60 md:mb-72 lg:mb-80">
             <div className="col-span-2 w-34 h-36 bg-gray-50 rounded-xl">
-              <DataTable data={medicines} modalForm={pathname} isLoading={isLoading} toggleOption={toggleOptions} error={error} />
+              <DataTable data={medicines} modalForm={pathname} isLoading={isLoading} toggleOption={toggleOptions} error={error} enImport={true} importName="pharmacyImport" importUrlDestination={"submitCSVMedicinesRecord"} />
             </div>
           </div>
         </div>

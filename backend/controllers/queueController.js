@@ -5,8 +5,8 @@ class QueueController {
     let connection;
     try {
       connection = await dbModel.getConnection();
-      const payload = req.body;
-      const query = 'INSERT INTO `patient_queue`(`patient_name`,`patient_gender`,`barangay_from`,`time_arrived`,`current_status`,`patient_status_history`) VALUES (?, ?, ?, ?, ?, ?)';
+      const payload = req.body;744444444444444
+          const query = 'INSERT INTO `patient_queue`(`patient_name`,`patient_gender`,`barangay_from`,`time_arrived`,`current_status`,`patient_status_history`) VALUES (?, ?, ?, ?, ?, ?)';
       const status = {}
       const SKey = String(payload.time_added);
       status[SKey] = payload.status;

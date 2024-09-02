@@ -7,10 +7,10 @@ import { colorTheme } from '../../../../App';
 import NewAppointmentForm from './Forms/NewAppointmentForm';
 import ConfirmForm from '../../../../hooks/ConfirmForm';
 import NewAccountForm from './Forms/NewAccountForm';
+import ImportFileForm from './Forms/ImportFileForm';
 
-const SelectedForm = ({ formType, toggle }) => {
+const SelectedForm = ({ formType, toggle, importUrl }) => {
   const [selectedTheme] = useContext(colorTheme);
-
   const renderFormContent = () => {
     switch (formType) {
       case 'records':
@@ -39,6 +39,7 @@ const SelectedForm = ({ formType, toggle }) => {
             {formType === 'blood_unit' && 'Add new donatee'}
             {formType === 'appointments' && 'Create new appointment'}
             {formType === 'accounts' && 'Add new user'}
+            {formType === 'import' && 'Import File'}
           </p>
         </div>
         <button onClick={toggle} className={`transition-colors duration-300 p-2 rounded-3xl bg-${selectedTheme}-400 hover:bg-${selectedTheme}-500 active:bg-${selectedTheme}-200`}>

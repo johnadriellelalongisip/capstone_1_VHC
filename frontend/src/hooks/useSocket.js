@@ -3,12 +3,15 @@ import { useEffect, useState } from "react";
 import useQuery from "./useQuery";
 import { socket } from "../socket";
 import useCurrentTime from "./useCurrentTime";
+// import useIndexedDB from "./useIndexedDb";
 
 const useSocket = ({ SSName, keyMap, fetchUrl, socketUrl, socketEmit, socketError }) => {
   const [data, setData] = useState([{}]);
   const [SockError, setSockError] = useState(null);
   const { response, error, fetchData } = useQuery();
-  const storedRecords = JSON.parse(sessionStorage.getItem(SSName));
+  // const { updateStore, getAllItems } = useIndexedDB("TheDatabase", SSName);
+  const [storedRecords, setStoredRecords] = useState([]);
+  // const storedRecords = JSON.parse(sessionStorage.getItem(SSName));
   const { mysqlTime } = useCurrentTime();
 
   function convertData(data) {
@@ -26,14 +29,16 @@ const useSocket = ({ SSName, keyMap, fetchUrl, socketUrl, socketEmit, socketErro
     return newData;
   };
 
-  function tryThisShet(data) {
-    if(JSON.stringify(convertData(data)) !== JSON.stringify(storedRecords)) {
-      sessionStorage.setItem(SSName,JSON.stringify(convertData(data)));
+  async function tryThisShet(data) {
+    if(convertData(data) !== storedRecords) {
+      setStoredRecords(convertData(data));
+      // updateStore(SSName, convertData(data));
       setData(convertData(data));
     } else {
       setData(storedRecords);
     }
   };
+
   useEffect(() => {
     if(storedRecords === undefined || storedRecords === null) {
       fetchData(fetchUrl);
@@ -61,7 +66,8 @@ const useSocket = ({ SSName, keyMap, fetchUrl, socketUrl, socketEmit, socketErro
   useEffect(() => {
     if (response && response.status === 200 && response.data) {
       setData(convertData(response.data));
-      sessionStorage.setItem(SSName,JSON.stringify(convertData(response.data)));
+      setStoredRecords(response.data);
+      // sessionStorage.setItem(SSName,JSON.stringify(convertData(response.data)));
     }
   }, [response,error]);
 

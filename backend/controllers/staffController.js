@@ -272,7 +272,6 @@ class StaffController {
       if (refreshTokens.hasOwnProperty(req.body.deviceId)) {
         delete refreshTokens[req.body.deviceId];
       };
-      console.log(refreshTokens);
       const removeRefreshTokenQuery = 'UPDATE `medicalstaff` SET `refresh_token` = ?, `staff_history` = ? WHERE `staff_username` = ?';
       await dbModel.query(removeRefreshTokenQuery, [JSON.stringify(refreshTokens), JSON.stringify(newHistory), staff_username]);
       return res.status(200).json({
