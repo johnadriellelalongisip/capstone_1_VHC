@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import useQuery from "../hooks/useQuery";
 import { Spinner } from "flowbite-react";
 import useCurrentTime from "../hooks/useCurrentTime";
+import { notificationMessage } from "../App";
 
 function Register() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
+  const [notifMessage] = useContext(notificationMessage);
+  const promptRef = useRef(null);
   const navigate = useNavigate();
   const { mysqlTime } = useCurrentTime();
 
@@ -23,16 +26,13 @@ function Register() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newStaffHistory = {"account_created_at": mysqlTime};
     const payload = {
       username: username,
       password: password,
       email: email,
       current_datetime: mysqlTime,
-      history: JSON.stringify(newStaffHistory)
     };
     addData('addStaff',payload);
-    console.log(mysqlTime);
   };
 
   useEffect(() => {
@@ -50,16 +50,13 @@ function Register() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [response, error]);
 
-  // const goToLogin = () => {
-  //   if (username === '' && email === '' && password === '') {
-  //     navigate('/login');
-  //   } else {
-  //     var answer = window.confirm("Are you sure you want to go back?");
-  //     if(answer) {
-  //       navigate('/login');
-  //     }
-  //   }
-  // };
+  useEffect(() => {
+    if(notifMessage) {
+      promptRef.current.show();
+    } else {
+      promptRef.current.close();
+    }
+  }, [notifMessage]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-no-repeat bg-cover bg-center text-sm md:text-base lg:text-md">
@@ -68,7 +65,7 @@ function Register() {
           <img src="MHO_logo.png" alt="..." className="w-14 h-14 md:w-20 md:h-20 lg:w-28 lg:h-28"/>
           <p className="text-center font-semibold block md:hidden lg:hidden text-sky-900 drop-shadow-sm">Register Here</p>
         </div>
-        <div className="flex flex-col p-2">
+        <div className="relative flex flex-col p-2">
           <p className="text-center font-semibold p-5 hidden md:block lg:block text-sky-700 drop-shadow-sm">Register Here</p>
           <form onSubmit={handleSubmit} className="w-full flex flex-col justify-start items-start gap-5 p-2 md:p-3 lg:p-4">
             <div className="flex justify-between w-full items-center gap-4">
@@ -118,13 +115,20 @@ function Register() {
                 name="email" 
                 id="email" 
                 value={email}
+                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+                maxLength={100}
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-sky-700/90 text-sky-50 rounded-xl p-2 font-semibold drop-shadow-sm"
-                autoComplete={false}
+                autoComplete="off"
               />
             </div>
             <button disabled={isLoading} type="submit" className={`font-semibold p-2 rounded-md w-full transition-colors duration-200 ${!isLoading ? 'text-sky-100 bg-sky-700 hover:drop-shadow-md hover:bg-sky-800 focus:bg-sky-600 active:bg-sky-300 active:text-sky-600 active:shadow-inner active:ring-2 active:ring-sky-600' : 'text-sky-700 bg-sky-100 shadow-inner' }`}><p className="drop-shadow-lg">{!isLoading ? 'Create' : <Spinner/>}</p></button>
           </form>
+          <dialog ref={promptRef} className="absolute bottom-[-30px] right-0 left-0 bg-transparent">
+            <div className="bg-red-200 p-1 text-red-600 font-medium text-center rounded-md drop-shadow-md">
+              {notifMessage}
+            </div>
+          </dialog>
           {/* <div className="text-center font-normal text-xs">
             <p>Already have an account? <button onClick={goToLogin} className="font-semibold hover:underline hover:text-sky-800">Login here</button></p>
           </div> */}

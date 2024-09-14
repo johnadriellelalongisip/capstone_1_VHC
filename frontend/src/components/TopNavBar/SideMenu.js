@@ -1,13 +1,13 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { MdHome, MdSpaceDashboard, MdFolder, MdAnalytics, MdLocalPharmacy, MdPeople, MdOutlineSmartToy, MdKeyboardArrowDown } from "react-icons/md";
 import { FaCode, FaMapMarkedAlt, FaStethoscope, FaUsers } from "react-icons/fa";
 import { BiSolidDonateBlood } from "react-icons/bi";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { colorTheme } from "../../App";
 import { IoCalendar } from "react-icons/io5";
-import { decryptData } from "../../hooks/useCrypto";
 import { jwtDecode } from "jwt-decode";
 import { GoReport } from "react-icons/go";
+import useIndexedDB from "../../hooks/useIndexedDb";
 
 const Menu = ({ path, Icon, label }) => {
   const [selectedTheme] = useContext(colorTheme);
@@ -58,8 +58,17 @@ const SideMenu = () => {
   const [isDevMenuOpen, setIsDevMenuOpen] = useState(false);
   const location = useLocation();
   const loc = location.pathname;
-  const { accessToken } = decryptData(localStorage.getItem('safeStorageData'));
-  const role = accessToken ? jwtDecode(accessToken).role : "";
+  const { getAllItems } = useIndexedDB();
+  const [idbAccessToken, setIdbAccessToken] = useState(null);
+  async function getTokens() {
+    const tokens = await getAllItems('tokens');
+    setIdbAccessToken(tokens.accessToken);
+  }
+  useEffect(() => {
+    getTokens();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const role = idbAccessToken ? jwtDecode(idbAccessToken).role : "";
 
   const [selectedTheme] = useContext(colorTheme);
   return (

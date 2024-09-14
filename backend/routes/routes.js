@@ -15,10 +15,11 @@ router.post('/deleteUser', userController.deleteUser);
 router.post('/editUser', userController.editUser);
 
 // USER AUTHENTICATION/REGISTRATION
-// router.get('/sendEmail', staffController.sendEmail);
+router.post('/verifyEmail', staffController.verifyEmail);
 router.get('/getStaff', staffController.getStaff);
 router.post('/addStaff', staffController.addStaff);
 router.post('/logoutUser', staffController.logoutUser);
+router.get('/verifyToken', staffController.verifyToken);
 
 // RECORDS
 router.post('/addRecord', recordController.addRecord);

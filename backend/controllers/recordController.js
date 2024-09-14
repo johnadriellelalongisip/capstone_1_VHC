@@ -6,7 +6,7 @@ class RecordController {
     let connection;
     try {
       connection = await dbModel.getConnection();
-      const query = 'INSERT INTO `municipal_citizens`(`citizen_firstname`, `citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_birthdate`, `citizen_barangay`, `citizen_family_id`, `date_added`,  `citizen_number`, `citizen_history`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+      const query = 'INSERT INTO `citizen`(`citizen_firstname`, `citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_birthdate`, `citizen_barangay`, `citizen_family_id`, `date_added`,  `citizen_number`, `citizen_history`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
       const payload = req.body;
       const data = [
         payload.firstName,
@@ -44,7 +44,7 @@ class RecordController {
     let connection;
     try {
       connection = await dbModel.getConnection();
-      const response = await dbModel.query('SELECT `citizen_firstname`, `citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_birthdate`, `citizen_barangay`, `citizen_family_id`, `citizen_number` FROM `municipal_citizens`');
+      const response = await dbModel.query('SELECT `citizen_firstname`, `citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_birthdate`, `citizen_barangay`, `citizen_family_id`, `citizen_number` FROM `citizen`');
       const newResponse = response.map((res) => {
         const date = new Date(res.citizen_birthdate);
         const year = date.getFullYear();
@@ -80,7 +80,7 @@ class RecordController {
     let connection;
     try {
       connection = await dbModel.getConnection();
-      const query = "SELECT `citizen_history`, `citizen_firstname`,`citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_number`, `citizen_birthdate` FROM `municipal_citizens` WHERE `citizen_family_id` = ?";
+      const query = "SELECT `citizen_history`, `citizen_firstname`,`citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_number`, `citizen_birthdate` FROM `citizen` WHERE `citizen_family_id` = ?";
       const family_id = req.params.id;
       const response = await dbModel.query(query, family_id);
       return res.status(200).json({
@@ -107,10 +107,10 @@ class RecordController {
       connection = await dbModel.getConnection();
       const payload = req.body;
       const family_id = req.params.id;
-      const data = await dbModel.query('SELECT `citizen_history` FROM `municipal_citizens` WHERE `citizen_family_id` = ?', family_id);
+      const data = await dbModel.query('SELECT `citizen_history` FROM `citizen` WHERE `citizen_family_id` = ?', family_id);
       const oldHistory = JSON.parse(data[0].citizen_history);
       const newHistory = {...oldHistory, ...payload};
-      const query = 'UPDATE `municipal_citizens` SET `citizen_history` = ? WHERE `citizen_family_id` = ?';
+      const query = 'UPDATE `citizen` SET `citizen_history` = ? WHERE `citizen_family_id` = ?';
       const response = await dbModel.query(query, [JSON.stringify(newHistory), family_id]);
       return res.status(200).json({
         status: 200,
@@ -134,7 +134,7 @@ class RecordController {
     let connection;
     try {
       connection = await dbModel.getConnection();
-      const query = "SELECT `citizen_family_id`, CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) AS citizen_full_name, `citizen_gender`, `citizen_barangay`, `citizen_number` FROM `municipal_citizens` WHERE CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) LIKE CONCAT('%', ?, '%')";
+      const query = "SELECT `citizen_family_id`, CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) AS citizen_full_name, `citizen_gender`, `citizen_barangay`, `citizen_number` FROM `citizen` WHERE CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) LIKE CONCAT('%', ?, '%')";
       const nameInput = req.params.id;
       const response = await dbModel.query(query, nameInput);
       if (response.length !== 0) {

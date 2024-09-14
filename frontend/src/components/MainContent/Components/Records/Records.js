@@ -26,9 +26,9 @@ const Records = () => {
     "citizen_birthdate": "Birthdate",
     "citizen_barangay": "Barangay",
     "citizen_number": "Number"
-  };  
+  };
 
-  const { data: records } = useSocket({ SSName: "sessionRecords", keyMap: keyMap, fetchUrl: "getRecords", socketEmit: "updateRecords", socketUrl: "newRecords", socketError: "newRecordsError" })
+  const { data: records, loading } = useSocket({ SSName: "sessionRecords", keyMap: keyMap, fetchUrl: "getRecords", socketEmit: "updateRecords", socketUrl: "newRecords", socketError: "newRecordsError" })
 
   const toggleOptions = (familyId) => {
     setFamID(familyId);
@@ -48,7 +48,7 @@ const Records = () => {
           <Header title={ title } icon={ <MdFolder /> }/>
         </div>
         <div className="min-h-screen h-screen overflow-y-auto scroll-smooth p-2 mt-2 mb-52">
-          <DataTable data={records} modalForm={pathname} isLoading={isLoading} toggleOption={toggleOptions} optionPK={"Family-ID"} error={error} enImport={false} />
+          <DataTable data={records} modalForm={pathname} isLoading={loading || isLoading} toggleOption={toggleOptions} optionPK={"Family-ID"} error={error} enImport={false} />
         </div>
       </div>
       <RecordAudit recordAudit={recordAuditRef} toggle={toggleOptions} family_id={famID} />

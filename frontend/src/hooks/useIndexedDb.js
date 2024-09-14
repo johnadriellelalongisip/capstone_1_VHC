@@ -1,79 +1,102 @@
 import { openDB } from 'idb';
 
-const useIndexedDB = (dbName, storeNames) => {
-  // Ensure storeNames is always an array
+const useIndexedDB = () => {
+  const dbName = "Database";
+  let storeNames = ["tokens"];
   if (!Array.isArray(storeNames)) {
     storeNames = [storeNames];
   }
 
-  // Open the database and ensure all specified stores are created
   const dbPromise = openDB(dbName, undefined, {
     upgrade(db) {
       storeNames.forEach(storeName => {
         if (!db.objectStoreNames.contains(storeName)) {
-          db.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
+          db.createObjectStore(storeName);
         }
       });
     },
   });
 
-  // Add a new record to a specific store
-  const addItem = async (storeName, item) => {
-    const db = await dbPromise;
-    const tx = db.transaction(storeName, 'readwrite');
-    const store = tx.objectStore(storeName);
-    await store.add(item);
-    await tx.done;
-  };
-
-  // Get a record by ID from a specific store
-  const getItem = async (storeName, id) => {
-    const db = await dbPromise;
-    const tx = db.transaction(storeName, 'readonly');
-    const store = tx.objectStore(storeName);
-    const item = await store.get(id);
-    await tx.done;
-    return item;
-  };
-
-  // Get all records from a specific store
-  const getAllItems = async (storeName) => {
-    const db = await dbPromise;
-    const tx = db.transaction(storeName, 'readonly');
-    const store = tx.objectStore(storeName);
-    const allItems = await store.getAll();
-    await tx.done;
-    return allItems;
-  };
-
-  // Update a record by ID in a specific store
-  const updateItem = async (storeName, id, newData) => {
-    const db = await dbPromise;
-    const tx = db.transaction(storeName, 'readwrite');
-    const store = tx.objectStore(storeName);
-    const item = await store.get(id);
-    if (item) {
-      const updatedItem = { ...item, ...newData };
-      await store.put(updatedItem);
+  const addItem = async (storeName, value, key) => {
+    try {
+      const db = await dbPromise;
+      const tx = db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      await store.put(value, key);
+      await tx.done;
+    } catch (error) {
+      console.error('Failed to add item:', error);
     }
-    await tx.done;
   };
 
-  // Update a store
-  const updateStore = async (storeName, newData) => {
-     const db = await dbPromise;
-     const tx = db.transaction(storeName, 'readwrite');
-     const store = tx.objectStore(storeName);
-     await store.put(newData);
-  }
+  const clearStore = async (storeName) => {
+    try {
+      const db = await dbPromise;
+      const tx = db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      await store.clear();
+      await tx.done;
+    } catch (error) {
+      console.error('Failed to clear store:', error);
+    }
+  };
 
-  // Delete a record by ID from a specific store
+  const getItem = async (storeName, id) => {
+    try {
+      const db = await dbPromise;
+      const tx = db.transaction(storeName, 'readonly');
+      const store = tx.objectStore(storeName);
+      const item = await store.get(id);
+      await tx.done;
+      return item;
+    } catch (error) {
+      console.error('Failed to get item:', error);
+    }
+  };
+
+  const getAllItems = async (storeName) => {
+    try {
+      const db = await dbPromise;
+      const tx = db.transaction(storeName, 'readonly');
+      const store = tx.objectStore(storeName);
+      const keys = await store.getAllKeys();
+      const values = await store.getAll();
+      await tx.done;
+      const result = {};
+      keys.forEach((key, index) => {
+        result[key] = values[index];
+      });
+      return result;
+    } catch (error) {
+      console.error('Failed to get all items:', error);
+    }
+  };
+
+  const updateItem = async (storeName, key, newData) => {
+    try {
+      const db = await dbPromise;
+      const tx = db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      const item = await store.get(key);
+      if (item) {
+        await store.put(newData, key);
+      }
+      await tx.done;
+    } catch (error) {
+      console.error('Failed to update item:', error);
+    }
+  };
+
   const deleteItem = async (storeName, id) => {
-    const db = await dbPromise;
-    const tx = db.transaction(storeName, 'readwrite');
-    const store = tx.objectStore(storeName);
-    await store.delete(id);
-    await tx.done;
+    try {
+      const db = await dbPromise;
+      const tx = db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      await store.delete(id);
+      await tx.done;
+    } catch (error) {
+      console.error('Failed to delete item:', error);
+    }
   };
 
   return {
@@ -81,8 +104,8 @@ const useIndexedDB = (dbName, storeNames) => {
     getItem,
     getAllItems,
     updateItem,
-    updateStore,
     deleteItem,
+    clearStore
   };
 };
 

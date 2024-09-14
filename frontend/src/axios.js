@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { decryptData, encryptData } from './hooks/useCrypto';
 import { jwtDecode } from 'jwt-decode';
+import useIndexedDB from './hooks/useIndexedDb';
 
 const baseUrl = process.env.REACT_APP_PROJECT_STATE === 'production' ? undefined : 'https://localhost:5000/api';
 const api = axios.create({
@@ -17,17 +17,17 @@ const createCancelToken = () => {
   cancelTokenSource = axios.CancelToken.source();
 };
 
-const refreshAccessToken = async (refreshToken) => {
+const RefreshAccessToken = async (refreshToken) => {
+  const { getAllItems, updateItem } = useIndexedDB();
   try {
-    const storedData = localStorage.getItem('safeStorageData');
-    const { accessToken } = decryptData(storedData);
+    const { accessToken } = await getAllItems('tokens');
     const decodedToken = jwtDecode(accessToken);
-    const deviceId = sessionStorage.getItem("myDeviceId");
-    const response = await axios.post(`${baseUrl}/authToken`, { token: refreshToken, staff_username: decodedToken.staff_username, deviceId: deviceId });
+    const response = await axios.post(`${baseUrl}/authToken`, { username: decodedToken.username }, {
+      headers: { Authorization: `Bearer ${accessToken}`},
+      withCredentials: true
+    })
     const newAccessToken = response.data.accessToken;
-    const safeStorageData = decryptData(localStorage.getItem('safeStorageData'));
-    safeStorageData.accessToken = newAccessToken;
-    localStorage.setItem('safeStorageData', encryptData(safeStorageData));
+    await updateItem('tokens', 'accessToken', newAccessToken);
     return newAccessToken;
   } catch (error) {
     return console.error('Unable to refresh token', error);
@@ -37,13 +37,16 @@ const refreshAccessToken = async (refreshToken) => {
 api.interceptors.response.use(
   response => response,
   async error => {
+    const { getAllItems } = useIndexedDB();
     if (error.response?.status !== 401) {
       const originalRequest = error.config;
-      console.log("error response: ", error.response.data);
       try {
-        const { data } = await axios.post(`${baseUrl}/authToken`, {}, { withCredentials: true });
+        const { accessToken } = await getAllItems('tokens');
+        const { data } = await axios.post(`${baseUrl}/authToken`, { username: jwtDecode(accessToken).username }, { 
+          headers: { Authorization: `Bearer ${accessToken}`},
+          withCredentials: true
+        });
         originalRequest.headers['Authorization'] = `Bearer ${data.accessToken}`;
-        console.log("return");
         return axios(originalRequest);
       } catch (err) {
         return Promise.reject(err);
@@ -54,20 +57,22 @@ api.interceptors.response.use(
 );
 
 api.interceptors.request.use(async (config) => {
+  const { getAllItems } = useIndexedDB();
   createCancelToken();
   config.cancelToken = cancelTokenSource.token;
-  const safeStorageData = localStorage.getItem('safeStorageData');
-  if (safeStorageData) {
-    const { accessToken, refreshToken, isLoggedIn } = decryptData(safeStorageData);
-    if (isLoggedIn) {
-      const decodedToken = jwtDecode(accessToken);
-      if (decodedToken.exp * 1000 < Date.now()) {
-        const newToken = await refreshAccessToken(refreshToken);
-        config.headers['Authorization'] = `Bearer ${newToken}`;
-      } else {
-        config.headers['Authorization'] = `Bearer ${accessToken}`;
-      }
+  const { accessToken } = await getAllItems('tokens');
+
+  if (accessToken) {
+
+    const decodedToken = jwtDecode(accessToken);
+
+    if (decodedToken.exp * 1000 < Date.now()) {
+      const newToken = await RefreshAccessToken(accessToken);
+      config.headers['Authorization'] = `Bearer ${newToken}`;
+    } else {
+      config.headers['Authorization'] = `Bearer ${accessToken}`;
     }
+
   }
   return config;
 });

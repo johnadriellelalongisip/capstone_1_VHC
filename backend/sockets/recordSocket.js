@@ -6,7 +6,7 @@ module.exports = function(io) {
       let connection;
       try {
         connection = await dbModel.getConnection();
-        const response = await dbModel.query('SELECT `citizen_firstname`, `citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_birthdate`, `citizen_barangay`, `citizen_family_id`, `citizen_number` FROM `municipal_citizens`');
+        const response = await dbModel.query('SELECT `citizen_firstname`, `citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_birthdate`, `citizen_barangay`, `citizen_family_id`, `citizen_number` FROM `citizen`');
         const newResponse = response.map((res) => {
           const date = new Date(res.citizen_birthdate);
           const year = date.getFullYear();

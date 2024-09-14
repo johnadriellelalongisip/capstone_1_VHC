@@ -16,8 +16,7 @@ const NewAccountForm = ({ close, children }) => {
     username: "",
     password: "",
     email: "",
-    role: "user",
-    accessibility: ""
+    role: "staff",
   });
 
   const handleChange = (e) => {
@@ -29,18 +28,14 @@ const NewAccountForm = ({ close, children }) => {
       ...prevFormData,
       [name]: value,
     }));
-    const history = {};
-    const JKey = String(mysqlTime);
-    history[JKey] = "Account Added";    
     setPayload((prev) => ({
       ...prev,
-      history,
       current_datetime: String(mysqlTime)
     }));
   }
 
   useEffect(() => {
-    if ((payload.password !== repassword) && (repassword.length >= 8 && payload.password.length >= 8)) {
+    if (payload.password !== repassword) {
       setIsWarningShown(true);
       setWarning("Password does not match!");
     } else {
@@ -53,8 +48,7 @@ const NewAccountForm = ({ close, children }) => {
       username: "",
       password: "",
       email: "",
-      role: "user",
-      accessibility: ""
+      role: "staff",
     });
     setRepassword("");
     setIsWarningShown(false);
@@ -63,17 +57,15 @@ const NewAccountForm = ({ close, children }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if ((repassword.length > 0 && repassword.length < 8) || (payload.password.length > 0 && payload.password.length < 8)) {
-      setIsWarningShown(true);
-      setWarning("Password must be greater than 8 characters!");
-    } else {
-      addData('addStaff',payload);
-      setIsWarningShown(false);
-      cleanUp();
-    }
-    setTimeout(() => {
+    addData('addStaff',payload);
+    setIsWarningShown(false);
+    cleanUp();
+    const time = setTimeout(() => {
       socket.emit("updateStaff");
     }, 500)
+    return () => {
+      clearTimeout(time);
+    };
   }
   
   return (
@@ -147,10 +139,10 @@ const NewAccountForm = ({ close, children }) => {
               name="role"
               value="user"
               className='text-xs md:text-sm lg:text-base'
-              checked={payload.role === 'user'}
+              checked={payload.role === 'staff'}
               onChange={handleChange}
             />
-            <Label htmlFor="user">User</Label>
+            <Label htmlFor="user">Staff</Label>
           </div>
           <div className="flex items-center gap-2">
             <Radio

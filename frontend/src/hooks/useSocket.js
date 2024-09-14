@@ -3,15 +3,13 @@ import { useEffect, useState } from "react";
 import useQuery from "./useQuery";
 import { socket } from "../socket";
 import useCurrentTime from "./useCurrentTime";
-// import useIndexedDB from "./useIndexedDb";
 
-const useSocket = ({ SSName, keyMap, fetchUrl, socketUrl, socketEmit, socketError }) => {
-  const [data, setData] = useState([{}]);
+const useSocket = ({ keyMap, fetchUrl, socketUrl, socketEmit, socketError }) => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [SockError, setSockError] = useState(null);
   const { response, error, fetchData } = useQuery();
-  // const { updateStore, getAllItems } = useIndexedDB("TheDatabase", SSName);
   const [storedRecords, setStoredRecords] = useState([]);
-  // const storedRecords = JSON.parse(sessionStorage.getItem(SSName));
   const { mysqlTime } = useCurrentTime();
 
   function convertData(data) {
@@ -32,8 +30,8 @@ const useSocket = ({ SSName, keyMap, fetchUrl, socketUrl, socketEmit, socketErro
   async function tryThisShet(data) {
     if(convertData(data) !== storedRecords) {
       setStoredRecords(convertData(data));
-      // updateStore(SSName, convertData(data));
       setData(convertData(data));
+      setLoading(false);
     } else {
       setData(storedRecords);
     }
@@ -41,6 +39,7 @@ const useSocket = ({ SSName, keyMap, fetchUrl, socketUrl, socketEmit, socketErro
 
   useEffect(() => {
     if(storedRecords === undefined || storedRecords === null) {
+      setLoading(true);
       fetchData(fetchUrl);
     } else {
       setData(storedRecords);
@@ -67,11 +66,10 @@ const useSocket = ({ SSName, keyMap, fetchUrl, socketUrl, socketEmit, socketErro
     if (response && response.status === 200 && response.data) {
       setData(convertData(response.data));
       setStoredRecords(response.data);
-      // sessionStorage.setItem(SSName,JSON.stringify(convertData(response.data)));
     }
   }, [response,error]);
 
-  return { data, SockError }
+  return { data, SockError, loading }
   
 }
  

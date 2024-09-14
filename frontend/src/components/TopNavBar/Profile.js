@@ -2,34 +2,38 @@ import { Avatar } from "flowbite-react";
 import { IoMdSettings } from "react-icons/io";
 import { MdHelp, MdKeyboardArrowRight } from "react-icons/md";
 import { ImExit } from "react-icons/im";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { colorTheme } from "../../App";
 import useWindowSize from "../../hooks/useWindowSize";
 import OptionButton from "./OptionButton";
-import { decryptData } from "../../hooks/useCrypto";
-import { jwtDecode } from "jwt-decode";
 import useQuery from "../../hooks/useQuery";
 import useCurrentTime from "../../hooks/useCurrentTime";
+import useIndexedDB from "../../hooks/useIndexedDb";
+import { jwtDecode } from "jwt-decode";
 
 const Profile = ({ prof, toggle, toggleOptions, toggleHelp }) => {
   // eslint-disable-next-line no-unused-vars
   const [selectedTheme] = useContext(colorTheme);
   const [rotateSetting, setRotateSetting] = useState(false);
+  const [username, setUsername] = useState(null);
+  const [role, setRole] = useState(null);
   const {avatarSize} = useWindowSize();
   const { logoutUser } = useQuery();
   const { mysqlTime } = useCurrentTime();
-  const safeStorage = localStorage.getItem('safeStorageData');
-  const { accessToken } = safeStorage ? decryptData(safeStorage) : {};
-  const decoded = accessToken ? jwtDecode(accessToken) : {};
+  const { getAllItems } = useIndexedDB();
+
+  useEffect(() => {
+    const getToken = async () => {
+      const token  = await getAllItems('tokens');
+      setUsername(jwtDecode(token.accessToken).username);
+      setRole(jwtDecode(token.accessToken).role);
+    }
+    getToken();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const Logout = async () => {
-    const history = {};
-    const Hkey = String(mysqlTime);
-    history[Hkey] = "Logged Out";
-    const deviceId = sessionStorage.getItem("myDeviceId");
-    if (deviceId) {
-      await logoutUser({ staff_username: decoded.staff_username, history: history, ipAddress: deviceId });
-    }
+    await logoutUser({ username: username, dateTime: mysqlTime });
   };
   
   return (
@@ -38,7 +42,7 @@ const Profile = ({ prof, toggle, toggleOptions, toggleHelp }) => {
           <button onClick={() => toggle()} className={`hover:drop-shadow-lg flex justify-start items-center mb-2 text-${selectedTheme}-600 p-1 m-2 drop-shadow-lg rounded-lg bg-${selectedTheme}-100 transition-colors duration-200 hover:bg-${selectedTheme}-50`}>
             <div className="flex justify-between items-center m-2">
               <Avatar img="default_profile.svg" rounded status="online" size={avatarSize} statusPosition="bottom-right" />
-              <p className="font-semibold p-1 text-xs md:text-sm lg:text-base capitalize">{decoded.staff_username}<span className="font-thin">({decoded.role})</span></p>
+              <p className="font-semibold p-1 text-xs md:text-sm lg:text-base capitalize">{username}<span className="font-thin">({role})</span></p>
             </div>
           </button>
           <div className="w-60 md:w-70 lg:w-80 flex flex-col gap-2">

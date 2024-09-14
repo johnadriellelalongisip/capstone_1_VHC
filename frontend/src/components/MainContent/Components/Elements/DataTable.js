@@ -60,7 +60,7 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = false, importName
   }, []);
 
   const sortedRecord = (column, order) => {
-    return data.slice().sort((a, b) => {
+    return data?.slice().sort((a, b) => {
       const valA = (a[column] ? a[column].toString().toLowerCase() : '');
       const valB = (b[column] ? b[column].toString().toLowerCase() : '');
   
@@ -97,7 +97,7 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = false, importName
   useEffect(() => {
     const NumOfPages = Math.ceil(filteredData.length / rowCount);
     setPages(NumOfPages);
-  }, [query,filteredData, rowCount]);
+  }, [query, filteredData, rowCount]);
 
   const toggleForm = () => {
     if (!isFormOpen) {
@@ -110,24 +110,6 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = false, importName
   }
 
   const displayedData = filteredData.slice((CurrentPage - 1) * rowCount, CurrentPage * rowCount);
-
-  if (isLoading) {
-    return (
-      <div className={`flex flex-col gap-3 w-full animate-pulse ease-linear drop-shadow-md`}>
-        <div className="flex justify-between m-2 md:m-3 lg:m-4">
-          <div className="flex justify-between items-center gap-3">
-            <div className={`bg-${selectedTheme}-400 rounded-lg h-6 md:h-8 lg:h-10 w-24 md:w-26 lg:w-28`}></div>
-          </div>
-          <div className={`bg-${selectedTheme}-400 rounded-lg h-6 md:h-8 lg:h-10 w-24 md:w-26 lg:w-28`}></div>
-        </div>
-        <div className={`bg-${selectedTheme}-400 rounded-lg h-96`}></div>
-        <div className="flex justify-between items-center">
-          <div className={`bg-${selectedTheme}-400 rounded-lg w-16 md:w-18 lg:w-20 h-6 md:h-8 lg:h-10`}></div>
-          <div className={`bg-${selectedTheme}-400 rounded-lg w-26 md:w-28 lg:w-32 h-6 md:h-8 lg:h-10`}></div>
-        </div>
-      </div>
-    )
-  }
 
   const Header = ({ top }) => (
     !(data && data.length > 0) ? (
@@ -180,13 +162,13 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = false, importName
               <p className={`font-bold text-${selectedTheme}-100`}>Add</p>
             </button>
           )}
-          <div className="flex gap-1">
+          <div className="flex items-center gap-1">
             <p className={`text-xs md:text-sm lg:text-sm p-1 text-${selectedTheme}-800 font-bold`}>Entries per page:</p>
-            <button onClick={() => setRowCount(prev => prev > 3 && ++prev)} className={`rounded-sm bg-${selectedTheme}-500 border-0 p-1`}>
+            <button disabled={data?.length === 0} onClick={() => setRowCount(prev => prev > 3 && ++prev)} className={`flex items-center rounded-sm bg-${selectedTheme}-500 border-0 p-1`}>
               <MdKeyboardArrowUp />
             </button>
             <p className={`text-xs md:text-sm lg:text-sm p-1 text-${selectedTheme}-800 font-bold`}>{rowCount}</p>
-            <button onClick={() => setRowCount(prev => prev > 3 && --prev)} className={`rounded-sm bg-${selectedTheme}-500 border-0 p-1`}>
+            <button disabled={data?.length === 0} onClick={() => setRowCount(prev => prev > 3 && --prev)} className={`flex items-center rounded-sm bg-${selectedTheme}-500 border-0 p-1`}>
               <MdKeyboardArrowUp className="rotate-180" />
             </button>
           </div>
@@ -229,10 +211,27 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = false, importName
           className="font-table table-auto w-full rounded-lg text-sm text-slate-700" 
         >
           <thead className="text-sm font-bold">
+          {data && (
             <Header top={true} />
+          )}
           </thead>
           <tbody className={`divide-y-2 divide-transparent text-xs md:text-sm lg:text-md`}>
-            {data && data.length > 0 ? (
+            {isLoading && data?.length > 0 &&(
+              <div className={`flex flex-col gap-3 w-full animate-pulse ease-linear drop-shadow-md`}>
+                <div className="flex justify-between m-2 md:m-3 lg:m-4">
+                  <div className="flex justify-between items-center gap-3">
+                    <div className={`bg-${selectedTheme}-400 rounded-lg h-6 md:h-8 lg:h-10 w-24 md:w-26 lg:w-28`}></div>
+                  </div>
+                  <div className={`bg-${selectedTheme}-400 rounded-lg h-6 md:h-8 lg:h-10 w-24 md:w-26 lg:w-28`}></div>
+                </div>
+                <div className={`bg-${selectedTheme}-400 rounded-lg h-96`}></div>
+                <div className="flex justify-between items-center">
+                  <div className={`bg-${selectedTheme}-400 rounded-lg w-16 md:w-18 lg:w-20 h-6 md:h-8 lg:h-10`}></div>
+                  <div className={`bg-${selectedTheme}-400 rounded-lg w-26 md:w-28 lg:w-32 h-6 md:h-8 lg:h-10`}></div>
+                </div>
+              </div>
+            )}
+            {data && data.length > 0 && (
               <>
                 {displayedData.map((row, rowi) => (
                   <tr
@@ -267,13 +266,14 @@ const DataTable = ({ data, modalForm, enAdd = true, enImport = false, importName
                   </tr>
                 ))}
               </>
-            ) : (
-              <tr>
-                <td className={`flex justify-center items-center text-center bg-blue-300 rounded-md h-96 p-2 font-bold`}>
-                  <MdInfo className="size-6 md:size-7 lg:size-8"/>
-                  <p>Table is empty. Add new data.</p>
-                </td>
-              </tr>
+            )}
+            {data && data.length === 0 && (
+             <tr>
+               <td className={`flex justify-center items-center text-center bg-blue-300 rounded-md h-96 p-2 font-bold`}>
+                 <MdInfo className="size-6 md:size-7 lg:size-8"/>
+                 <p>Table is empty. Add new data.</p>
+               </td>
+             </tr>
             )}
             {error && (
               <>

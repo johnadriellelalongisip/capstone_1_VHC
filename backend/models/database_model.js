@@ -6,7 +6,7 @@ class Database {
       host: 'localhost',
       user: 'root',
       password: '',
-      database: 'capstone',
+      database: 'capstone'
     });
   }
 

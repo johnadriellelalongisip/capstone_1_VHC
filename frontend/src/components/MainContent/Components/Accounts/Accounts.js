@@ -17,13 +17,10 @@ const Accounts = () => {
   const { isLoading, error } = useQuery();
   const keyMap = {
     "staff_id" : "Staff-ID",
-    "staff_username" : "Username",
-    "staff_email" : "Email",
+    "username" : "Username",
+    "email" : "Email",
     "isVerified" : "Verified?",
-    "staff_role" : "Role",
-    "account_created_at" : "Created At",
-    "account_last_updated_at" : "Last Updated",
-    "staff_last_activity" : "Last Activity"
+    "staff_role" : "Role"
   };
   const { data: records } = useSocket({ SSName: "sessionStaff", keyMap: keyMap, fetchUrl: "getStaff", socketEmit: "updateStaff", socketUrl: "newStaff", socketError: "newStaffError" })
 
