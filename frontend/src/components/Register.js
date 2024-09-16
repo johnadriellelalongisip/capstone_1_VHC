@@ -38,14 +38,11 @@ function Register() {
   useEffect(() => {
     if (response) {
       if (response.status === 200) {
-        console.log("Registration successful:", response.message);
         navigate('/login');
         cleanUp();
       }
     } else if (error) {
-      if (error) {
-        console.log("An error occured on the server:", error);
-      }
+      console.log("An error occured on the server:", error);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [response, error]);

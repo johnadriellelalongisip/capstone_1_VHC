@@ -16,6 +16,35 @@ class StaffController {
       }
     }
   }
+
+  async getStaffId(req, res) {
+    let connection;
+    try {
+      
+      const authHeader = req.headers['authorization'];
+      const accessToken = authHeader.split(' ')[1]; 
+      jwt.verify( accessToken , process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
+
+        connection = await dbModel.getConnection();
+        const getStaffIdQuery = 'SELECT `staff_id` FROM `medicalstaff` WHERE `username` = ?';
+        const [staff] = await dbModel.query(getStaffIdQuery, decoded.username);
+        if (!staff) return res.status(404).json({ message: 'Staff not found' });
+        return res.status(200).json({ staff_id: staff.staff_id });
+
+      })
+      
+    } catch (error) {
+      return res.status(500).json({
+        status: 500,
+        message: error.message,
+        error: error
+      });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection);
+      }
+    }
+  }
   
   async getStaff(req, res) {
     let connection;
@@ -78,7 +107,6 @@ class StaffController {
         }
         
         try {
-
           const insertQuery = 'INSERT INTO `medicalstaff` (`username`, `password`, `refresh_token`, `email`, `role`) VALUES (?, ?, ?, ?, ?)';
           const insertPayload = [
             payload.username, 
@@ -119,7 +147,7 @@ class StaffController {
             return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
           };
           const expDate = addHoursToDate(2);
-          const token = jwt.sign({ userId: insertResponse.insertId }, access_token, "2h");
+          const token = jwt.sign({ userId: insertResponse.insertId }, access_token, { expiresIn: '1m' });
           const emailVerificationPayload = [
             token,
             insertResponse.insertId,
@@ -128,13 +156,9 @@ class StaffController {
           const emailVerificationResponse = await dbModel.query(createEmailVerificationQuery, emailVerificationPayload);
 
           if(historyResponse?.affectedRows > 0 && emailVerificationResponse?.affectedRows > 0) {
-            const accessToken = jwt.sign({ userId: insertResponse.insertId }, access_token);
-            const refreshToken = jwt.sign({ userId: insertResponse.insertId }, refresh_token);
             return res.status(200).json({
               status: 200,
-              message: 'User added successfully',
-              accessToken: accessToken,
-              refreshToken: refreshToken
+              message: 'User added successfully'
             });
           } else {
             throw new Error("Something have gone wrong while logging history.");
@@ -164,14 +188,14 @@ class StaffController {
 
   async logoutUser(req, res) {
     let connection;
-    const {username, dateTime} = req.body;
-    if (username && username === process.env.DEVELOPER_USERNAME) {
-      return res.status(200).json({
-        status: 200,
-        message: "Logout Successfully"
-      });
-    }
     try {
+      const {username, dateTime} = req.body;
+      if (username && username === process.env.DEVELOPER_USERNAME) {
+        return res.status(200).json({
+          status: 200,
+          message: "Logout Successfully"
+        });
+      }
       connection = await dbModel.getConnection();
       const userQuery = 'SELECT `staff_id`, `refresh_token` FROM `medicalstaff` WHERE `username` = ?';
       const [user] = await dbModel.query(userQuery, [username]);
@@ -180,10 +204,10 @@ class StaffController {
       const insertHistoryQuery = 'INSERT INTO `medicalstaff_history` (`staff_id`, `action`, `action_details`, `citizen_family_id`, `action_datetime`) VALUES (?, ?, ?, ?, ?)';
       const historyPayload = [
         user.staff_id,
-        'logout',
+        'logged out',
         'logged out of account',
         null,
-        req.body.dateTime
+        dateTime
       ];
       const historyResponse = await dbModel.query(insertHistoryQuery, historyPayload);
       
@@ -209,26 +233,32 @@ class StaffController {
     }
   }
 
-  async verifyToken(req, res) {
+  async verifyAccessToken(req, res) {
     let connection;
     try {
       const refreshToken = req.cookies.refreshToken;
-      const authHeader = req.headers['authorization'];
-      const accessToken = authHeader && authHeader.split(' ')[1];
-      if (!accessToken) {
-        return res.status(401).json({ message: "Access token is missing" });
+      if (!refreshToken) {
+        return res.status(401).json({ message: "No refresh token provided" });
       }
-      jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+  
+      jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
         if (err) {
           if (err.name === 'TokenExpiredError') {
-            return res.status(401).json({ message: "Access token expired" });
-          } else {
-            return res.status(403).json({ message: "Invalid access token" });
+            res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'Strict', secure: true });
+            return res.status(401).json({ message: "Your session has expired!" });
           }
+          res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'Strict', secure: true });
+          return res.status(403).json({ message: "Invalid refresh token!" });
         }
-        return res.status(200).json({ status: 200, message: "Token is valid" });
+
+        const user = {
+          username: decoded.username,
+          role: decoded.role
+        };
+        const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '5m' });
+        return res.status(200).json({ status: 200, accessToken: accessToken, message: "Session is still valid" });
       });
-  
+    
     } catch (error) {
       console.error("Error verifying token:", error);
       return res.status(500).json({ message: "Internal server error" });

@@ -21,11 +21,10 @@ import Login from "./components/Login.js";
 import Register from "./components/Register.js";
 
 import { socket } from "./socket.js";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import useIndexedDB from "./hooks/useIndexedDb.js";
 import api from "./axios.js";
 import { Spinner } from "flowbite-react";
-import { jwtDecode } from "jwt-decode";
 
 export const colorTheme = createContext();
 export const messaging = createContext();
@@ -43,42 +42,13 @@ const App = () => {
   const colors = [
     'gray', 'red', 'orange', 'lime', 'green', 'teal', 'cyan', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink'
   ];
-  
-  const verifyToken = async () => {
-    if (tokens) {
-      console.log('verifying tokens')
-      try {
-        console.log('trying to verifying tokens')
-        const response = await api.get('/verifyToken', {
-          headers: { Authorization: `Bearer ${tokens}` },
-          withCredentials: true
-        });
-        console.log(`verifytoken response: ${response}`)
-        if (response.status === 200) {
-          setIsLoggedIn(true);
-        } else if (response.status === 401) {
-          const { username } = jwtDecode(tokens);
-          const res = await api.post('/authToken', { username: username }, {
-            headers: { Authorization: `Bearer ${tokens}` },
-            withCredentials: true
-          });
-          if (res.status === 200) {
-            await updateItem('tokens', 'accessToken', res.data.accessToken);
-            console.log(`New accessToken: ${res.data.accessToken}`)
-            setIsLoggedIn(true);
-          }
-        }
-      } catch (error) {
-        console.error("Token verification failed:", error);
-        await clearStore('tokens');
-      }
-    }
-  };
+  const navigate = useNavigate();
+  const location = useLocation();
+
   async function getIdbTokens() {
     const idb = await getAllItems('tokens');
-      setTokens(idb.accessToken);
+    setTokens(idb?.accessToken);
   }
-
   useEffect(() => {
     getIdbTokens();
     const time = setTimeout(() => {
@@ -96,10 +66,53 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    verifyToken();
+    const verifyAccessToken = async () => {
+      try {
+        const res = await api.get('/verifyToken', {
+          headers: { Authorization: `Bearer ${tokens}` },
+          withCredentials: true
+        });  
+        if (res?.status === 401) {
+          setNotifMessage(res.data.message);
+          await clearStore('tokens');
+        } else if (res?.status === 200) {
+          await updateItem('tokens', 'accessToken', res.data.accessToken);
+          setIsLoggedIn(true);
+          if (location.pathname !== '/home') {
+            navigate('/home');
+          }
+        } else {
+          setNotifMessage('Something went wrong checking your session');
+          const time = setTimeout(async () => {
+            setNotifMessage(null);
+            await clearStore('tokens');
+            if (location.pathname !== '/login') {
+              navigate('/login');
+            }
+          }, 3000);
+          return () => clearTimeout(time);
+        }
+      } catch (error) {
+        if (error.response.data.status === 401) {
+          await clearStore('tokens');
+        }
+        console.error('Verification error:', error);
+        if (location.pathname !== '/login') {
+          navigate('/login');
+        }
+        setNotifMessage('Something went wrong');
+        const time = setTimeout(() => {
+          setNotifMessage(null);
+        }, 8000);
+        return () => clearTimeout(time);
+      }
+    };
+    if (tokens) {
+      verifyAccessToken();
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokens]);
-
+  
   if (isLoading) {
     return (
       <div className="font-bold text-center flex justify-center items-center bg-white h-screen w-screen">
@@ -113,45 +126,43 @@ const App = () => {
     <div className="flex flex-col h-screen">
       <notificationMessage.Provider value={[notifMessage, setNotifMessage]}>
         <colorTheme.Provider value={[selectedTheme, setSelectedTheme, colors]}>
-          <BrowserRouter basename='/'>
-            <>
-              {isLoggedIn ? (
-                <>
-                <messaging.Provider value={[ currentChat, setCurrentChats ]}>
-                  <TopNav />
-                </messaging.Provider>
-                <div className="flex">
-                  <div className={`w-auto h-full bg-${selectedTheme}-300`}>
-                    <SideMenu />
-                  </div>
-                  <div className={`basis-11/12 h-auto bg-${selectedTheme}-100 overflow-y-hidden`}>
-                    <Routes>
-                      <Route path='home' element={<Home />}/>
-                      <Route path='dashboard' element={<Dashboard />}/>
-                      <Route path='analytics' element={<Analytics />}/>
-                      <Route path='mapping' element={<Mapping />}/>
-                      <Route path='appointments' element={<Appointments />}/>
-                      <Route path='queue' element={<Queue />}/>
-                      <Route path='records' element={<Records />}/>
-                      <Route path='pharmacy' element={<Pharmacy />}/>
-                      <Route path='equipments' element={<Equipments />}/>
-                      <Route path='blood_unit' element={<BloodUnit />}/>
-                      <Route path='accounts' element={<Accounts />}/>
-                      <Route path='playground-jwt' element={<JsonWebToken />}/>
-                      <Route path='problems' element={<Problems />}/>
-                      <Route path='*' element={<Notfound />}/>
-                    </Routes>
-                  </div>
+          <>
+            {isLoggedIn ? (
+              <>
+              <messaging.Provider value={[ currentChat, setCurrentChats ]}>
+                <TopNav />
+              </messaging.Provider>
+              <div className="flex">
+                <div className={`w-auto h-full bg-${selectedTheme}-300`}>
+                  <SideMenu />
                 </div>
-                </>
-              ) : (
-                <Routes>
-                  <Route path="*" element={<Login />}/>
-                  <Route path="register" element={<Register />} />
-                </Routes>
-              )}
-            </>
-          </BrowserRouter>
+                <div className={`basis-11/12 h-auto bg-${selectedTheme}-100 overflow-y-hidden`}>
+                  <Routes>
+                    <Route path='home' element={<Home />}/>
+                    <Route path='dashboard' element={<Dashboard />}/>
+                    <Route path='analytics' element={<Analytics />}/>
+                    <Route path='mapping' element={<Mapping />}/>
+                    <Route path='appointments' element={<Appointments />}/>
+                    <Route path='queue' element={<Queue />}/>
+                    <Route path='records' element={<Records />}/>
+                    <Route path='pharmacy' element={<Pharmacy />}/>
+                    <Route path='equipments' element={<Equipments />}/>
+                    <Route path='blood_unit' element={<BloodUnit />}/>
+                    <Route path='accounts' element={<Accounts />}/>
+                    <Route path='playground-jwt' element={<JsonWebToken />}/>
+                    <Route path='problems' element={<Problems />}/>
+                    <Route path='*' element={<Notfound />}/>
+                  </Routes>
+                </div>
+              </div>
+              </>
+            ) : (
+              <Routes>
+                <Route path="*" element={<Login />}/>
+                <Route path="register" element={<Register />} />
+              </Routes>
+            )}
+          </>
         </colorTheme.Provider>
       </notificationMessage.Provider>
     </div>

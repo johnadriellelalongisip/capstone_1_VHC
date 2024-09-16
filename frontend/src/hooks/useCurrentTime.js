@@ -16,10 +16,10 @@ const useCurrentTime = () => {
   const endDate = `${currentYear}-${formatDateString(currentMonth)}-${daysInMonth}`;
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
+    const intervalId = setTimeout(() => {
       setCurrentTime(new Date());
     }, 1000);
-    return () => clearInterval(intervalId);
+    return () => clearTimeout(intervalId);
   }, []);
 
   const formattedTime = currentTime.toLocaleTimeString();

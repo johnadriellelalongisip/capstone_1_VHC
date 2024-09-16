@@ -5,124 +5,54 @@ import { Checkbox, Label, Radio, Spinner } from "flowbite-react";
 import useQuery from "../../../../hooks/useQuery";
 import useCurrentTime from "../../../../hooks/useCurrentTime";
 import { socket } from "../../../../socket";
+import api from "../../../../axios";
 
 const AddToQueue = ({ ATref, ATonClick }) => {
   const [selectedTheme] = useContext(colorTheme);
-  const { isLoading, error, addData } = useQuery();
+  const { response, isLoading, error, addData, postData } = useQuery();
   const { mysqlTime } = useCurrentTime();
   const [suggestions, setSuggestions] = useState([]);
-  const [payload, setPayload] = useState({
-    name: "",
-    barangay: "",
-  });
-  const [isBarangayValid, setIsBarangayValid] = useState(false);
-  const [gender, setGender] = useState('male');
+  const [name, setName] = useState('');
+  const [barangay, setBarangay] = useState('');
+  const [gender, setGender] = useState('');
   const [status, setStatus] = useState('waiting');
   const [isChecked, setIsChecked] = useState(true);
-  const barangays = [
-    'Alcate',
-    'Antonino',
-    'Babangonan',
-    'Bagong Buhay',
-    'Bagong Silang',
-    'Bambanin',
-    'Bethel',
-    'Canaan',
-    'Concepcion',
-    'Duongan',
-    'Leido',
-    'Loyal',
-    'Mabini',
-    'Macatoc',
-    'Malabo',
-    'Merit',
-    'Ordovilla',
-    'Pakyas',
-    'Poblacion I',
-    'Poblacion II',
-    'Poblacion III',
-    'Poblacion IV',
-    'Sampaguita',
-    'San Antonio',
-    'San Cristobal',
-    'San Gabriel',
-    'San Gelacio',
-    'San Isidro',
-    'San Juan',
-    'San Narciso',
-    'Urdaneta',
-    'Villa Cerveza',
-  ];
-
-  function cleanUp() {
-    setPayload({
-      name: "",
-      barangay: ""
-    });
-  };
-
-  function toggleClose() {
-    cleanUp();
-    ATonClick();
-  }
-
-  function setNewSuggestions(newData) {
-    setSuggestions((prevSuggestions) => {
-      const newSuggestions = newData.map((data) => `${String(data.Firstname)} ${String(data.Lastname)}`);
-      if (newSuggestions !== null || newSuggestions !== undefined) {
-        return [...prevSuggestions, ...newSuggestions];
-      } else {
-        return null;
-      }
-    });
-  }
-  
-  useEffect(() => {
-    // setIsBarangayValid(barangays.includes(payload.barangay.charAt(0).toUpperCase() + payload.barangay.slice(1)));
-    setIsBarangayValid(true)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [payload.barangay]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isChecked) {
-      addData('addToQueue', payload);
-      cleanUp();
+      addData('addToQueue', { name: name, dateTime: String(mysqlTime), status });
     } else {
-      addData('addToQueue', payload);
-      cleanUp();
+      addData('addToQueue', { name: name, dateTime: String(mysqlTime), status });
       ATonClick();
     }
+    setName('');
     setTimeout(() => {
       socket.emit("updateQueue", {dateTime: String(mysqlTime)});
     },500);
   };
 
-  const handleEnter = (event) => {
-    const records = JSON.parse(sessionStorage.getItem('sessionRecords'));
-    if (event.key === 'Enter' && payload.name && records) {
-      const foundRecords = records.filter(prev => {
-        return prev.Firstname.toLowerCase().includes(payload.name.toLowerCase()) || prev.Lastname.toLowerCase().includes(payload.name.toLowerCase());
-      });
-      setNewSuggestions(foundRecords);
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    const specialCharacterPattern = /[!@#$%^&*()_+\-=\]{};':"\\|,.<>?]/g;
-    if (!specialCharacterPattern.test(value)) {
-      setPayload((prevFormData) => ({
-          ...prevFormData,
-          [name]: value,
-          time_added: String(mysqlTime),
-          status: status,
-          gender: gender
-      }));
-    } else {
+  const handleEnter = async (e) => {
+    if (e.key === 'Enter') {
       e.preventDefault();
+      postData('/findCitizen', {name: name});
     }
-  };
+  }
+
+  useEffect(() => {
+    if (response?.status === 200) {
+      setName(response.citizen?.full_name || '');
+      setBarangay(response.citizen?.citizen_barangay || '');
+      setGender(response.citizen?.citizen_gender || '');
+    }
+  }, [response]);
+
+  useEffect(() => {
+    if (name.length === 0) {
+      setBarangay('');
+      setGender('');
+    }
+  }, [name]);
   
   return (
     <dialog ref={ATref} className={`rounded-lg bg-gray-100 drop-shadow-lg w-80 md:w-[500px] lg:w-[600px]`}>
@@ -131,11 +61,11 @@ const AddToQueue = ({ ATref, ATonClick }) => {
         <div className={`flex justify-between items-center p-2 text-${selectedTheme}-600 border-b-[1px] border-solid border-${selectedTheme}-500 shadow-md shadow-${selectedTheme}-600 mb-2`}>
           <div className="flex items-center p-1 gap-1">
             <MdPeople className='w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8' />
-            <strong className="font-semibold drop-shadow-md text-sm md:text-base lg:text-lg">Add to query
+            <strong className="font-semibold drop-shadow-md text-sm md:text-base lg:text-lg">Add to Queue
             {/* <span className={`ml-2 text-${selectedTheme}-500 font-bold`}>Patient's Number: 55</span> */}
             </strong>
           </div>
-          <button onClick={() => toggleClose()} className={`transition-colors duration-200 rounded-3xl p-1 bg-${selectedTheme}-300 hover:bg-${selectedTheme}-400 active:bg-${selectedTheme}-200`}>
+          <button onClick={() => ATonClick()} className={`transition-colors duration-200 rounded-3xl p-1 bg-${selectedTheme}-300 hover:bg-${selectedTheme}-400 active:bg-${selectedTheme}-200`}>
             <MdClose className='w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7' />
           </button>
         </div>
@@ -146,17 +76,21 @@ const AddToQueue = ({ ATref, ATonClick }) => {
             <input 
               required 
               maxLength={50} 
+              minLength={1}
               type="text" 
               name="name" 
               id="name" 
-              value={payload.name} 
-              onChange={handleChange} 
+              value={name} 
+              onChange={(e) => {
+                const alphabetsOnly = /^[a-zA-Z\s]*$/;
+                if (alphabetsOnly.test(e.target.value)) setName(e.target.value);
+              }} 
               className={`text-xs md:text-sm lg:text-base grow p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent`}
               autoComplete="off"
               onBlur={() => setSuggestions([])}
               onKeyDown={handleEnter}
               list="nameResults"
-              placeholder="Type then press ENTER to search the records"
+              placeholder="Type your name then press ENTER to search the records"
             />
             <datalist id="nameResults">
               {suggestions && suggestions.slice(0, 5).map((name, index) => (
@@ -172,54 +106,26 @@ const AddToQueue = ({ ATref, ATonClick }) => {
               type="text" 
               name="barangay" 
               id="barangay" 
-              value={payload.barangay} 
-              onChange={handleChange} 
-              className={`text-xs md:text-sm lg:text-base grow p-2 rounded-lg bg-${selectedTheme}-50 border-transparent focus:ring-0 focus:border-transparent`} 
+              disabled
+              value={barangay} 
+              className={`text-xs md:text-sm lg:text-base grow p-2 rounded-lg bg-${selectedTheme}-200 text-${selectedTheme}-800 border-transparent focus:ring-0 focus:border-transparent`} 
               autoComplete="off"
-              list="barangaySuggestions"
             />
-            <datalist id="barangaySuggestions">
-              {payload.barangay.length >= 2 && barangays.map((barangay, index) => (
-                <option key={index} value={barangay} />
-              ))}
-            </datalist>
           </div>
-          <fieldset className="flex flex-row gap-3 p-2">
-            <legend className="mr-4 text-xs md:text-sm lg:text-base">Choose a gender</legend>
-            <div className="flex items-center gap-2">
-              <Radio
-                id="male"
-                name="gender"
-                value="male"
-                className='text-xs md:text-sm lg:text-base'
-                checked={gender === 'male'}
-                onChange={() => setGender('male')}
-              />
-              <Label htmlFor="male">Male</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Radio
-                id="female"
-                name="gender"
-                value="female"
-                className='text-xs md:text-sm lg:text-base'
-                checked={gender === 'female'}
-                onChange={() => setGender('female')}
-              />
-              <Label htmlFor="female">Female</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Radio
-                id="others"
-                name="gender"
-                value="others"
-                className='text-xs md:text-sm lg:text-base'
-                checked={gender === 'others'}
-                onChange={() => setGender('others')}
-              />
-              <Label htmlFor="others">Others</Label>
-            </div>
-          </fieldset>
+          <div className="flex gap-3 items-center justify-start">
+            <label htmlFor="gender">Choose a gender:</label>
+            <input 
+              required 
+              maxLength={50} 
+              type="text" 
+              name="gender" 
+              id="gender" 
+              disabled
+              value={gender} 
+              className={`text-xs md:text-sm lg:text-base grow p-2 rounded-lg bg-${selectedTheme}-200 text-${selectedTheme}-800 border-transparent focus:ring-0 focus:border-transparent`} 
+              autoComplete="off"
+            />
+          </div>
           <fieldset className="flex flex-row gap-3 p-2">
             <legend className="mr-4 text-xs md:text-sm lg:text-base">Status</legend>
             <div className="flex items-center gap-2">
@@ -256,7 +162,13 @@ const AddToQueue = ({ ATref, ATonClick }) => {
               <Label htmlFor="emergency">Emergency</Label>
             </div>
           </fieldset>
-          <button type="submit" className={`py-2 px-4 hover:shadow-md font-semibold rounded-lg transition-colors duration-200 ${payload.name && payload.barangay && isBarangayValid ? `text-${selectedTheme}-100 bg-${selectedTheme}-600 hover:cursor-pointer shadow-sm` : `shadow-inner text-${selectedTheme}-100 bg-${selectedTheme}-400 hover:cursor-not-allowed`}`} disabled={!payload.name || !isBarangayValid}>{isLoading || error ? <Spinner /> : 'Submit Edit'}</button>
+          <button 
+            type="submit" 
+            className={`py-2 px-4 hover:shadow-md font-semibold rounded-lg transition-colors duration-200 ${barangay && gender ? `text-${selectedTheme}-100 bg-${selectedTheme}-600 hover:cursor-pointer shadow-sm` : `shadow-inner text-${selectedTheme}-100 bg-${selectedTheme}-400 hover:cursor-not-allowed`}`}
+            disabled={!barangay || !gender}
+          >
+            {isLoading || error ? <Spinner /> : 'Submit Edit'}
+          </button>
           <div className="flex items-center justify-end gap-2">
             <Checkbox
               id="accept"

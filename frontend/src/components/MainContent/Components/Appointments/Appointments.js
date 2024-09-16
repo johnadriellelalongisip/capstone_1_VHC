@@ -11,9 +11,9 @@ import AppointmentOptions from "./AppointmentOptions";
 import useSocket from "../../../../hooks/useSocket";
 import { socket } from "../../../../socket";
 import useCurrentTime from "../../../../hooks/useCurrentTime";
-import { decryptData } from "../../../../hooks/useCrypto";
 import { jwtDecode } from "jwt-decode";
 import { Tooltip } from "flowbite-react";
+import useIndexedDB from "../../../../hooks/useIndexedDb";
 
 export const appointmentDate = createContext();
 
@@ -38,12 +38,19 @@ const Appointments = () => {
   const selectedMonth = selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' });
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [scheduledAppointments, setScheduledAppointments] = useState([]);
-
-  const { accessToken } = decryptData(localStorage.getItem('safeStorageData'));
-  const decoded = accessToken ? jwtDecode(accessToken) : {};
-  const role = decoded && decoded.role;
+  const { getAllItems } = useIndexedDB();
   const appointedDayRef = useRef(null);
   const [isAppDayOpen, setIsAppDayOpen] = useState(false);
+  const [role, setRole] = useState('staff');
+
+  useEffect(() => {
+    const setToken = async () => {
+      const token = await getAllItems('tokens');
+      setRole(jwtDecode(token?.accessToken).role);
+    }
+    setToken();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const keyMap = {
     "appointment_id": "Number",

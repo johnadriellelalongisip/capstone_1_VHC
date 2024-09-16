@@ -1,8 +1,7 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import api from '../axios';
 import { jwtDecode } from 'jwt-decode';
 import { notificationMessage } from '../App';
-import useCurrentTime from './useCurrentTime';
 import useIndexedDB from "./useIndexedDb";
 
 const useQuery = () => {
@@ -10,15 +9,24 @@ const useQuery = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchResults, setSearchResults] = useState(null);
-  const { mysqlTime } = useCurrentTime();
   // eslint-disable-next-line no-unused-vars
   const [notifMessage, setNotifMessage] = useContext(notificationMessage);
+  const [accessToken, setToken] = useState('');
   const { addItem, getAllItems, clearStore } = useIndexedDB();
+
+  useEffect(() => {
+    const getToken = async () => {
+      const token = await getAllItems('tokens');
+      setToken(token?.accessToken);
+    }
+    getToken();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchData = async (route) => {
     setIsLoading(true);
     try {
-      const response = await api.get(`/${route}`, {dateTime: String(mysqlTime)});
+      const response = await api.get(`${route}`);
       setResponse(response?.data);
       setIsLoading(false);
     } catch (error) {
@@ -34,10 +42,11 @@ const useQuery = () => {
   const postData = async (route, payload) => {
     setIsLoading(true);
     try {
-      const newPayload = {dateTime: String(mysqlTime), ...payload};
-      const response = await api.post(`/${route}`, newPayload);
+      const response = await api.post(`${route}`, payload);
       setResponse(response?.data);
+      setNotifMessage(response.data.message);
       setIsLoading(false);
+      return response;
     } catch (error) {
       console.error(error);
     } finally {
@@ -48,7 +57,7 @@ const useQuery = () => {
   const addData = async (route, payload) => {
     setIsLoading(true);
     try {
-      const response = await api.post(`/${route}`, payload);
+      const response = await api.post(`${route}`, payload);
       setResponse(response?.data);
       setNotifMessage(response.data.message);
       setIsLoading(false);
@@ -62,7 +71,7 @@ const useQuery = () => {
   const editData = async (route, payload, id) => {
     setIsLoading(true);
     try {
-      const response = await api.post(`/${route}/${id}`, payload);
+      const response = await api.post(`${route}/${id}`, payload);
       setResponse(response?.data);
       setNotifMessage(response.data.message);
       setIsLoading(false);
@@ -76,7 +85,7 @@ const useQuery = () => {
   const deleteData = async (route, id) => {
     setIsLoading(true);
     try {
-      const response = await api.post(`/${route}/${id}`);
+      const response = await api.post(`${route}/${id}`);
       setResponse(response?.data);
       setNotifMessage(response.data.message);
       setIsLoading(false);
@@ -90,7 +99,7 @@ const useQuery = () => {
   const searchData = async (route, id) => {
     setIsLoading(true);
     try {
-      const response = await api.get(`/${route}/${id}`);
+      const response = await api.get(`${route}/${id}`);
       setSearchResults(response.data.data[0]);
       setIsLoading(false);
     } catch (error) {
@@ -103,7 +112,7 @@ const useQuery = () => {
   const searchItems = async (route, id) => {
     setIsLoading(true);
     try {
-      const response = await api.get(`/${route}/${id}`);
+      const response = await api.get(`${route}/${id}`);
       setSearchResults(response.data);
       setIsLoading(false);
     } catch (error) {
@@ -116,7 +125,10 @@ const useQuery = () => {
   const userAuth = async (payload) => {
     setIsLoading(true);
     try {
-      const response = await api.post(`/authStaff`, payload);
+      const response = await api.post(`/authStaff`, payload, {
+        headers: { Authorization: `Bearer ${accessToken}`},
+        withCredentials: true
+      });
       if (response && response.status === 200 && response.data.accessToken) {
         const tokens = await getAllItems('tokens');
         if (tokens.length > 0) {
@@ -134,32 +146,28 @@ const useQuery = () => {
   
   const verifyToken = async () => {
     setIsLoading(true);
-    const tokens = await getAllItems('tokens');
-    const { accessToken } = tokens;
-    if (tokens) {
-      try {
-        const response = await api.post('/authToken', { username: jwtDecode(accessToken).username }, {
-          headers: { Authorization: `Bearer ${accessToken}`},
-          withCredentials: true
-        });
-        if (response && response.data && response.data.accessToken) {
-          addItem('tokens', accessToken, 'accessToken');
-        }
-        setIsLoading(false);
-      } catch (error) {
-        handleError(error);
-      } finally {
-        setIsLoading(false);
+    try {
+      const response = await api.post('/authToken', { username: jwtDecode(accessToken).username }, {
+        headers: { Authorization: `Bearer ${accessToken}`},
+        withCredentials: true
+      });
+      if (response && response.data && response.data.accessToken) {
+        addItem('tokens', accessToken, 'accessToken');
       }
+      setIsLoading(false);
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setIsLoading(false);
     }
   };
   
   const logoutUser = async (payload) => {
     setIsLoading(true);
-    const { accessToken } = await getAllItems('tokens');
     try {
       const response = await api.post('/logoutUser', payload, {
-        headers: { Authorization: `Bearer ${accessToken}`}
+        headers: { Authorization: `Bearer ${accessToken}`},
+        withCredentials: true
       });
       if (response && response.data && response.data.status === 200) {
         await clearStore('tokens');

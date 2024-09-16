@@ -76,6 +76,30 @@ class RecordController {
     }
   }
 
+  async findCitizen(req, res) {
+    let connection;
+    try {
+      
+      connection = await dbModel.getConnection();
+      const findCitizenIdQuery = "SELECT `citizen_gender`, `citizen_barangay`, `citizen_family_id`, CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) AS `full_name` FROM `citizen` WHERE `citizen_firstname` LIKE ? OR `citizen_lastname` LIKE ?";
+      const [citizen] = await dbModel.query(findCitizenIdQuery, [req.body.name, req.body.name]);
+      if (!citizen) return res.status(404).json({ status: 404, message: 'Citizen Not Found!' });
+
+      return res.status(200).json({ status: 200, message: 'Citizen Found!', citizen });
+      
+    } catch (error) {
+      return res.status(500).json({
+        status: 500,
+        message: error.message,
+        error: error.message
+      });
+    } finally {
+      if (connection) {
+        dbModel.releaseConnection(connection)
+      }
+    }
+  }
+
   async findRecord(req, res) {
     let connection;
     try {

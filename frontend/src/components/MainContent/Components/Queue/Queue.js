@@ -1,18 +1,17 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useLocation } from "react-router-dom";
 import { MdOutlineArrowLeft, MdOutlineArrowRight, MdPeople } from "react-icons/md";
 import Header from "../../Header";
 import { colorTheme } from "../../../../App";
 import { useContext, useEffect, useRef, useState } from "react";
+import { IoMdAlert } from "react-icons/io";
 import useQuery from "../../../../hooks/useQuery";
-// import { IoMdAlert } from "react-icons/io";
 import AddToQueue from "./AddToQueue";
 import Attended from "./Attended";
 import { socket } from "../../../../socket";
 import useSocket from "../../../../hooks/useSocket";
-import { decryptData } from "../../../../hooks/useCrypto";
 import { jwtDecode } from "jwt-decode";
 import useCurrentTime from "../../../../hooks/useCurrentTime";
+import useIndexedDB from "../../../../hooks/useIndexedDb";
 
 const Queue = () => {
   const [selectedTheme] = useContext(colorTheme);
@@ -20,14 +19,18 @@ const Queue = () => {
   const attendedRef = useRef(null);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [isAttendedOpen, setIsAttendedOpen] = useState(false);
-  const { isLoading, error, addData, editData } = useQuery();
+  const { response, isLoading, error, addData, editData, fetchData } = useQuery();
+  const [staff_id, setStaffId] = useState(null);
   const [waiting, setWaiting] = useState([{}]);
   const displayedData = ['priority', 'emergency', 'serving'];
   const [viewStateIndex, setViewStateIndex] = useState(displayedData.indexOf('serving'));
+
   const location = useLocation();
   const pathname = location.pathname.slice(1);
   const title = pathname.charAt(0).toUpperCase() + pathname.slice(1);
   const { mysqlTime } = useCurrentTime();
+  const [accessToken, setAccessToken] = useState(null);
+  const { getAllItems } = useIndexedDB();
   const keyMap = {
     "queue_number": "queue_number",
     "patient_name": "patient_name",
@@ -37,11 +40,26 @@ const Queue = () => {
     "current_status" : "current_status",
     "patient_status_history": "patient_status_history"
   }
-  const { data: queue } = useSocket({ SSName: "sessionQueue", keyMap: keyMap, fetchUrl: "getQueue", socketUrl: "newQueue", socketEmit: "updateQueue", socketError: "newQueueError" });
+  const { data: queue } = useSocket({ keyMap: keyMap, fetchUrl: "getQueue", socketUrl: "newQueue", socketEmit: "updateQueue", socketError: "newQueueError" });
 
-  const { accessToken } = decryptData(localStorage.getItem('safeStorageData'));
+  useEffect(() => {
+    const setToken = async () => {
+      const token = await getAllItems('tokens');
+      setAccessToken(token?.accessToken);
+    }
+    setToken();
+    fetchData('/getStaffId');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
   const role = accessToken ? jwtDecode(accessToken).role : "";
 
+  useEffect(() => {
+    if (response?.status === 200) {
+      setStaffId(response.staff_id);
+    }
+  }, [response]);
+  
   useEffect(() => {
     setWaiting(queue.reduce((acc, curr) => {
       if(curr.current_status === 'waiting') {
@@ -71,15 +89,25 @@ const Queue = () => {
     }
   };
 
-  const handleNext = () => {
-    addData('nextQueue', {dateTime: String(mysqlTime)});
+  const handleNext = async () => {
+    const payload = {
+      dateTime: String(mysqlTime),
+      staff_id: staff_id
+    }
+    addData('nextQueue', payload);
     setTimeout(() => {
-      socket.emit('updateQueue', {dateTime: String(mysqlTime)});
+      socket.emit('updateQueue', {dateTime: String(mysqlTime), staff_id});
     },[500])
   };
 
-  const handleDismiss = (i) => {
-    editData('dismissQueue', {dateTime: String(mysqlTime)}, i);
+  const handleDismiss = async (i) => {
+    const family_id = queue.find(prev => parseInt(prev.queue_number) === i ).family_id;
+    const payload = {
+      dateTime: String(mysqlTime), 
+      family_id: family_id, 
+      staff_id: staff_id
+    }
+    editData('dismissQueue', payload, i);
     setTimeout(() => {
       socket.emit('updateQueue', {dateTime: String(mysqlTime)});
       socket.emit('updateAttended');
@@ -156,14 +184,12 @@ const Queue = () => {
               </div>
               <div className="h-72 min-h-72 overflow-y-auto">
               {queue.length >= 0 && queue.map((q, i) => {
-                const statusArr = q.patient_status_history ? JSON.parse(q.patient_status_history) : {};
-                const statusValues = Object.values(statusArr);
-                if (statusValues[statusValues.length - 1] === displayedData[viewStateIndex]) {
+                if (q.current_status === displayedData[viewStateIndex]) {
                   return (
                     <div key={i} className="flex flex-col gap-3 mx-2 my-3">
                       <div className={`flex justify-between items-center px-10 bg-${selectedTheme}-100 rounded-lg font-semibold p-2 drop-shadow-md`}>
                         <p>{q.queue_number}</p>
-                        <p>{q.patient_name}</p>
+                        <p>{q.citizen_fullname}</p>
                         <button onClick={() => handleDismiss(q.queue_number)} className={`p-1 rounded-lg bg-${selectedTheme}-600 text-${selectedTheme}-200 font-semibold text-xs md:text-sm lg:text-base`}>Dismiss</button>
                       </div>
                     </div>
@@ -195,7 +221,7 @@ const Queue = () => {
                       <div key={i} className="flex flex-col gap-3 mx-2 my-3">
                         <div className={`flex justify-between items-center px-10 border-[1px] bg-${selectedTheme}-100 rounded-lg font-semibold p-2 drop-shadow-md`}>
                           <p>{q.queue_number}</p>
-                          <p>{q.patient_name}</p>
+                          <p>{q.citizen_fullname}</p>
                           <button onClick={() => handleDismiss(q.queue_number)} className={`p-1 rounded-lg bg-${selectedTheme}-600 text-${selectedTheme}-200 font-semibold text-xs md:text-sm lg:text-base`}>Dismiss</button>
                         </div>
                       </div>
@@ -208,7 +234,7 @@ const Queue = () => {
               </div>
               ))}
             
-            {/* {queue && queue.length > 0 && queue.map((q, i) => {
+            {queue && queue.length > 0 && queue.map((q, i) => {
               if (q.patient_status_history === 'emergency') {
                 return (
                   <div key={i} className={`relative w-full md:w-full lg:grow flex flex-col h-auto bg-red-300 animate-pulse rounded-lg drop-shadow-md text-xs md:text-sm lg:text-base`}>
@@ -217,13 +243,13 @@ const Queue = () => {
                     </div>
                     <div className="flex flex-col gap-2 p-2 my-3">
                       <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
-                        <p className="truncate">{q.patient_name}</p>
+                        <p className="truncate">{q.citizen_fullname}</p>
                       </div>
                       <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
-                        <p>{q.barangay_from}</p>
+                        <p>{q.citizen_barangay}</p>
                       </div>  
                       <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
-                        <p>{q.patient_gender}</p>
+                        <p>{q.citizen_gender}</p>
                       </div>
                     </div>
                     <p className="absolute bottom-0 right-0 p-1 text-xs md:text-sm lg:text-base font-thin">{getMeridianTime(q.time_arrived)}</p>
@@ -232,7 +258,7 @@ const Queue = () => {
               } else {
                 return null;
               }
-            })} */}
+            })}
 
             {waiting && waiting.length !== 0 && waiting.map((w, i) => (
               <div key={i} className={`relative w-full md:w-full lg:grow flex flex-col h-auto bg-${selectedTheme}-50 rounded-lg drop-shadow-md text-xs md:text-sm lg:text-base`}>
@@ -241,13 +267,13 @@ const Queue = () => {
                 </div>
                 <div className="flex flex-col gap-2 p-2 my-3">
                   <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
-                    <p className="truncate">{w.patient_name}</p>
+                    <p className="truncate">{w.citizen_fullname}</p>
                   </div>
                   <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
-                    <p>{w.barangay_from}</p>
+                    <p>{w.citizen_barangay}</p>
                   </div>
                   <div className={`flex justify-start items-center gap-2 text-${selectedTheme}-800 font-semibold`}>
-                    <p>{w.patient_gender}</p>
+                    <p>{w.citizen_gender}</p>
                   </div>
                 </div>
                 <p className="absolute bottom-0 right-0 p-1 text-xs md:text-sm lg:text-base font-thin">{getMeridianTime(w.time_arrived)}</p>
