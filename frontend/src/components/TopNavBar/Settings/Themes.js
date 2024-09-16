@@ -23,7 +23,11 @@ const Themes = ({ theme, toggle }) => {
                 <button
                   key={i}
                   className={`${selectedColor} rounded-3xl w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 transition-transform duration-150 hover:scale-110`}
-                  onClick={() => {setSelectedTheme(color); toggle();}}
+                  onClick={() => {
+                    localStorage.setItem('theme',color);
+                    setSelectedTheme(color); 
+                    toggle();
+                  }}
                 >
                 </button>
               )

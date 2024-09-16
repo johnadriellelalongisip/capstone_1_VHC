@@ -5,7 +5,7 @@ class QueueController {
     let connection;
     try {
       connection = await dbModel.getConnection();
-      const { name, dateTime, status } = req.body;
+      const { name, dateTime, status, staff_id } = req.body;
       const getFamilyIdQuery = 'SELECT `citizen_family_id` FROM `citizen` WHERE `citizen_firstname` LIKE ? OR `citizen_lastname` LIKE ?';
       const firstName = name.split(' ')[0];
       const lastName = name.split(' ')[1];
@@ -24,8 +24,8 @@ class QueueController {
         citizen.citizen_family_id,
         'waiting',
         `added to queue as ${status}`,
-        req.body.staff_id,
-        req.body.dateTime
+        staff_id,
+        dateTime
       ];
       await dbModel.query(insertHistoryQuery, historyPayload);
       const response = await dbModel.query(insertQueueQuery, data)
@@ -130,24 +130,19 @@ class QueueController {
       const startDate = `${year}-${month}-${day} 00:00:00`;
       const endDate = `${year}-${month}-${day} 23:59:59`;
       
-      const [getFIFO] = await dbModel.query(
-        `SELECT cq.queue_number, c.citizen_family_id, CONCAT(c.citizen_firstname, ' ', c.citizen_middlename, ' ', c.citizen_lastname) AS citizen_fullname, 
+      const getCitizenQueueQuery = `SELECT cq.queue_number, c.citizen_family_id, CONCAT(c.citizen_firstname, ' ', c.citizen_middlename, ' ', c.citizen_lastname) AS citizen_fullname, 
                 c.citizen_barangay, c.citizen_number, c.citizen_gender, cq.time_arrived, cq.current_status 
          FROM citizen_queue cq
          INNER JOIN citizen c ON c.citizen_family_id = cq.citizen_family_id
          WHERE cq.time_arrived BETWEEN ? AND ? 
            AND cq.current_status = "waiting"
          ORDER BY cq.queue_number ASC
-         LIMIT 1`, 
+         LIMIT 1`
+      const [getFIFO] = await dbModel.query(getCitizenQueueQuery, 
          [startDate, endDate]
       );
       
-      if (getFIFO.length === 0) {
-        return res.status(404).json({ status: 404, message: 'No patient found in the queue' });
-      }
-      
       const query = 'UPDATE citizen_queue SET current_status = "serving" WHERE queue_number = ?';
-      
       const updateStatusResponse = await dbModel.query(query, [getFIFO.queue_number]);
       if (updateStatusResponse.affectedRows === 0) return res.status(404).json({ status: 404, message: "Something have gone wrong updating the status of the queue. "});
       const insertHistoryQuery = 'INSERT INTO `citizen_history` (`family_id`, `action`, `action_details`, `staff_id`, `action_datetime`) VALUES (?, ?, ?, ?, ?)';

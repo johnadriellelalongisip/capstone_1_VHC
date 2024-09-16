@@ -20,7 +20,6 @@ const Queue = () => {
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [isAttendedOpen, setIsAttendedOpen] = useState(false);
   const { response, isLoading, error, addData, editData, fetchData } = useQuery();
-  const [staff_id, setStaffId] = useState(null);
   const [waiting, setWaiting] = useState([{}]);
   const displayedData = ['priority', 'emergency', 'serving'];
   const [viewStateIndex, setViewStateIndex] = useState(displayedData.indexOf('serving'));
@@ -48,14 +47,15 @@ const Queue = () => {
       setAccessToken(token?.accessToken);
     }
     setToken();
-    fetchData('/getStaffId');
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   const role = accessToken ? jwtDecode(accessToken).role : "";
 
+  const [staff_id, setStaffId] = useState(null);
   useEffect(() => {
     if (response?.status === 200) {
+      console.log(response)
       setStaffId(response.staff_id);
     }
   }, [response]);
@@ -90,23 +90,27 @@ const Queue = () => {
   };
 
   const handleNext = async () => {
+    fetchData('/getStaffId');
     const payload = {
       dateTime: String(mysqlTime),
       staff_id: staff_id
     }
     addData('nextQueue', payload);
     setTimeout(() => {
+      console.log(staff_id)
       socket.emit('updateQueue', {dateTime: String(mysqlTime), staff_id});
     },[500])
   };
 
   const handleDismiss = async (i) => {
     const family_id = queue.find(prev => parseInt(prev.queue_number) === i ).family_id;
+    fetchData('/getStaffId');
     const payload = {
       dateTime: String(mysqlTime), 
       family_id: family_id, 
       staff_id: staff_id
     }
+    console.log(payload)
     editData('dismissQueue', payload, i);
     setTimeout(() => {
       socket.emit('updateQueue', {dateTime: String(mysqlTime)});
@@ -148,7 +152,7 @@ const Queue = () => {
                 ))}
               </div>
               <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 place-items-center gap-4 mb-60 md:mb-72 lg:mb-80`}>
-                <div className={`flex flex-col w-full h-[21rem] col-span-2 row-span-2 bg-${selectedTheme}-400 rounded-lg text-xs md:text-sm lg:text-base drop-shadow-md`}></div>
+                <div className={`flex flex-col w-full h-[21rem] col-span-4 row-span-2 bg-${selectedTheme}-400 rounded-lg text-xs md:text-sm lg:text-base drop-shadow-md`}></div>
                 {Array.from({ length: 8 }).map((_, index) => (
                   <div key={index} className={`relative w-full md:w-full lg:grow flex flex-col h-[10rem] bg-${selectedTheme}-400 rounded-lg drop-shadow-md text-xs md:text-sm lg:text-base`}></div>
                 ))}
