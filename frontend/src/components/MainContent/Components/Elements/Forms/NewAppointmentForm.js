@@ -3,8 +3,6 @@ import { colorTheme } from "../../../../../App";
 import { Spinner } from "flowbite-react";
 import useQuery from "../../../../../hooks/useQuery";
 import useCurrentTime from "../../../../../hooks/useCurrentTime";
-import { confirmationContext } from "../FormModal";
-import { MdOutlineRadioButtonChecked, MdOutlineRadioButtonUnchecked } from "react-icons/md";
 import { socket } from "../../../../../socket";
 
 const NewAppointmentForm = ({ close, children }) => {
@@ -15,13 +13,8 @@ const NewAppointmentForm = ({ close, children }) => {
   const [description, setDescription] = useState("");
   const [appointment, setAppointment] = useState("");
   const [errorPrompt, setErrorPrompt] = useState("");
-  const [inputState, setInputState] = useState(false);
-  const [useRecordNum, setUseRecordNum] = useState(false);
   const { mysqlTime } = useCurrentTime();
-
-  // eslint-disable-next-line no-unused-vars
-  const [message, setMessage, confirmMessage, setConfirmMessage, cancelMessage, setCancelMessage, backMessage, setBackMessage, toggleConfirmDialog, selectedOption, setSelectedOption] = useContext(confirmationContext);
-  const { isLoading, error, addData } = useQuery();
+  const { response, isLoading, addData, postData } = useQuery();
 
   function cleanUp() {
     setFullname("");
@@ -44,18 +37,12 @@ const NewAppointmentForm = ({ close, children }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const appointmentLogs = {};
-    const JKey = String(mysqlTime);
-    appointmentLogs[JKey] = "Appointment Added";
     const payload = {
-      appointmentID: appointmentID,
-      fullname: fullname,
-      phonenumber: phoneNumber,
+      fullName: fullname,
+      phoneNumber: phoneNumber,
       appointedTime: appointment,
       description: description,
-      status: "to be scheduled",
-      createdAt: mysqlTime,
-      logs: JSON.stringify(appointmentLogs)
+      dateTime: mysqlTime,
     };
     const convertedPayload = {
         ...payload,
@@ -63,11 +50,7 @@ const NewAppointmentForm = ({ close, children }) => {
         appointedAt: convertToMySQLDateTime(payload.appointedAt)
     };
     if (new Date(appointment) > new Date()) {
-      if (inputState) {
-        addData("newAppointmentByFamID", convertedPayload);
-      } else {
-        addData("newAppointment", convertedPayload);
-      }
+      addData("newAppointment", convertedPayload);
       setTimeout(() => {
         socket.emit('updateAppointment');
       },[500]);
@@ -90,43 +73,6 @@ const NewAppointmentForm = ({ close, children }) => {
     }
   };
 
-  const toggleConfirm = () => {
-    setMessage(!inputState ? "This will leave your Name unchanged, proceed?" : "This will leave your FamilyID unchanged, proceed?");
-    setConfirmMessage("Proceed");
-    setCancelMessage("Cancel");
-    setBackMessage("Go Back?");
-    toggleConfirmDialog();
-  };
-
-  useEffect(() => {
-    if (selectedOption) {
-      if (inputState) {
-        setAppointmentID("");
-        toggleConfirmDialog();
-      } else {
-        setFullname("");
-        toggleConfirmDialog();
-      }
-      setInputState(prev => !prev);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedOption]);
-  
-  const toggleInputState = () => {
-    if (appointmentID.length === 0) {
-      setInputState(prev => !prev);
-    } else {
-      toggleConfirm();
-    }
-    if (fullname.length > 0) {
-      toggleConfirm();
-    } else {
-      setInputState(prev => !prev);
-    }
-    setPhoneNumber("");
-    setInputState(prev => !prev);
-  };
-
   const handleNumberChange = (e) => {
     const numberPattern = /^[0-9]*$/;
     if (numberPattern.test(e.target.value) || e.target.value === "") {
@@ -136,28 +82,45 @@ const NewAppointmentForm = ({ close, children }) => {
     }
   };
 
+  const handleEnter = async (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      postData('/findCitizen', {name: fullname});
+    }
+  }
+
+  useEffect(() => {
+    if (response?.status === 200) {
+      setFullname(response?.citizen?.full_name);
+      setPhoneNumber(response?.citizen?.citizen_number);
+    }
+  }, [response]);
+  useEffect(() => {
+    if (fullname.length === 0) {
+      setPhoneNumber('');
+    }
+  }, [fullname]);
+  
   return (
     <>
       {children}
       <div className="flex flex-col gap-4 m-5 mt-20 md:mt-24 lg:mt-24">
-        <button onClick={toggleInputState} className={`font-semibold mt-2 p-2 rounded-md transition-colors duration-200 text-${selectedTheme}-100 bg-${selectedTheme}-700 hover:drop-shadow-md hover:bg-${selectedTheme}-800 focus:bg-${selectedTheme}-600 active:bg-${selectedTheme}-300 active:text-${selectedTheme}-600 active:shadow-inner active:ring-2 active:ring-${selectedTheme}-600`}>
-          {!inputState ? 'Add By FamilyID' : 'Add By Name'}
-        </button>
         <form className="flex flex-col gap-4 max-h-[500px] min-h-[500px] overflow-y-auto" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor={inputState ? 'familyID' : 'fullname'} className='mb-2 text-xs md:text-sm lg:text-base font-semibold'>{inputState ? 'FamilyID' : 'Name'}:<span className="text-red-600 font-bold">*</span></label>
+            <label htmlFor={'fullname'} className='mb-2 text-xs md:text-sm lg:text-base font-semibold'>{'Name'}:<span className="text-red-600 font-bold">*</span></label>
             <input
                 type="text"
-                name={inputState ? 'familyID' : 'fullname'}
-                id={inputState ? 'familyID' : 'fullname'}
+                name={'fullname'}
+                id={'fullname'}
                 list="recordSuggestions"
                 required
-                value={inputState ? appointmentID : fullname}
-                onChange={inputState ? (e) => setAppointmentID(e.target.value) : handleNameChange}
+                value={fullname}
+                onChange={handleNameChange}
                 autoComplete="off"
                 className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
-                placeholder={inputState ? "Enter patient's FamilyID. . . . ." : "Enter appointee's full name. . . . ."}
+                placeholder="Type your name then press ENTER to search the records"
                 maxLength={100}
+                onKeyDown={handleEnter}
               />
           </div>
           <div>
@@ -171,20 +134,10 @@ const NewAppointmentForm = ({ close, children }) => {
                 value={phoneNumber}
                 onChange={handleNumberChange}
                 className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
-                placeholder={inputState ? (!useRecordNum ? 'Enter personal contact number. . . .' : 'Proceeding will use the contact number of this citizen') : 'Enter personal contact number. . . . .'}
                 maxLength={12}
-                minLength={10}
-                disabled={inputState ? useRecordNum : false}
+                minLength={11}
+                disabled={true}
               />
-              {inputState && 
-                <button onClick={(e) => {e.preventDefault(); setPhoneNumber(""); setUseRecordNum(prev => !prev)}}>
-                  {useRecordNum ? (
-                    <MdOutlineRadioButtonChecked className="size-6 md:size-7 lg:size-8" />
-                  ):(
-                    <MdOutlineRadioButtonUnchecked className="size-6 md:size-7 lg:size-8"/>
-                  )}
-                </button>
-              }
             </div>
           </div>
           <div>
@@ -218,15 +171,6 @@ const NewAppointmentForm = ({ close, children }) => {
               className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] border-${selectedTheme}-800`}
             />
           </div>
-          {!inputState ? (
-            <p className={`text-wrap text-red-700 text-xs md:text-sm lg:text-sm font-thin p-1 bg-${selectedTheme}-50 rounded-lg text-center`}>
-              Note: If there's no provided FAMILY ID, create or search the name on the records.
-            </p>
-          ):(
-            <p className={`text-xs md:text-sm lg:text-sm text-${selectedTheme}-700 font-thin p-1 bg-${selectedTheme}-50 rounded-lg text-center`}>
-              Proceeding to create this appointment will add this action to the record's history.
-            </p>
-          )}
           <button disabled={isLoading} type="submit" className={`font-semibold p-2 rounded-md w-full transition-colors duration-200 ${!isLoading ? `text-${selectedTheme}-100 bg-${selectedTheme}-700 hover:drop-shadow-md hover:bg-${selectedTheme}-800 focus:bg-${selectedTheme}-600 active:bg-${selectedTheme}-300 active:text-${selectedTheme}-600 active:shadow-inner active:ring-2 active:ring-${selectedTheme}-600` : `text-${selectedTheme}-700 bg-${selectedTheme}-100 shadow-inner` }`}><p className="drop-shadow-lg">{!isLoading ? 'Create new appointment' : <Spinner/>}</p></button>
         </form>
       </div>

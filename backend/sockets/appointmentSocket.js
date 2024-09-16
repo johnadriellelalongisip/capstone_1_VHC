@@ -7,7 +7,7 @@ module.exports = function(io) {
       let connection;
       try {
         connection = await dbModel.getConnection();
-        const response = await dbModel.query("SELECT a.appointment_id, CASE WHEN a.citizen_id IS NULL OR a.fullname IS NOT NULL THEN a.fullname ELSE CONCAT(mc.citizen_firstname, ' ', mc.citizen_lastname) END AS citizen_fullname, CASE WHEN a.citizen_id IS NULL THEN a.phone_number ELSE mc.citizen_number END AS phone_number, a.appointed_datetime AS appointed_datetime,a.description AS description, a.status AS status, a.created_at AS created_at FROM appointments a LEFT JOIN citizen mc ON a.citizen_id = mc.citizen_family_id");
+        const response = await dbModel.query("SELECT ca.appointment_id, CONCAT(c.citizen_firstname, ' ', c.citizen_lastname) AS full_name, c.citizen_number, ca.status, ca.created_at, ca.appointed_datetime FROM citizen_appointments ca INNER JOIN citizen c ON c.citizen_family_id = ca.citizen_family_id");
         const convertDate = (Ddate) => {
           const date = new Date(Ddate);
           const year = date.getFullYear();

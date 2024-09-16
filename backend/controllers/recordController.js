@@ -81,7 +81,7 @@ class RecordController {
     try {
       
       connection = await dbModel.getConnection();
-      const findCitizenIdQuery = "SELECT `citizen_gender`, `citizen_barangay`, `citizen_family_id`, CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) AS `full_name` FROM `citizen` WHERE `citizen_firstname` LIKE ? OR `citizen_lastname` LIKE ?";
+      const findCitizenIdQuery = "SELECT `citizen_gender`, `citizen_barangay`, `citizen_family_id`, CONCAT(`citizen_firstname`, ' ', `citizen_lastname`) AS `full_name`, `citizen_number` FROM `citizen` WHERE `citizen_firstname` LIKE ? OR `citizen_lastname` LIKE ?";
       const [citizen] = await dbModel.query(findCitizenIdQuery, [req.body.name, req.body.name]);
       if (!citizen) return res.status(404).json({ status: 404, message: 'Citizen Not Found!' });
 

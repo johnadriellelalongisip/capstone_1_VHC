@@ -64,10 +64,6 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
     });
   };
 
-  // const handleUpdate = (data) => {
-    
-  // };
-
   const handleCancelAppointment = () => {
     deleteData("handleCancelAppointment", PK);
     setTimeout(() => {
@@ -103,33 +99,6 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
       confirmationRef.current.showModal();
     }
   };
-
-  // const isFormFilled = () => {
-  //   if (editing && (payload.fullname !== selectedAppointment.fullname ||
-  //     payload.phoneNumber !== selectedAppointment.phoneNumber ||
-  //     payload.description !== selectedAppointment.description ||
-  //     payload.appointed_datetime !== selectedAppointment.appointed_datetime)) 
-  //   {
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-  // };
-
-  // const handleToggleEdit = () => {
-  //   setPayload(() => ({
-  //     fullname: selectedAppointment.fullname || "",
-  //     phoneNumber: selectedAppointment.phoneNumber || "",
-  //     description: selectedAppointment.description || "",
-  //     appointed_datetime: selectedAppointment.appointed_datetime || "",
-  //     status: selectedAppointment.status || ""
-  //   }));
-  //   if (isFormFilled()) {
-  //     toggleConfirmation();
-  //   } else {
-  //     setEditing((prev) => !prev);
-  //   }
-  // };
 
   const proceedUpdate = () => {
     toggleConfirmation();
@@ -182,7 +151,7 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
             ) : (
               <>
                 <form className="flex flex-col gap-3 p-3 m-2">
-                  {selectedAppointment?.citizen_id && <p className="font-semibold">Family ID: <span className="underline">{selectedAppointment?.citizen_id}</span></p>}
+                  {selectedAppointment?.citizen_family_id && <p className="font-semibold">Family ID: <span className="underline">{selectedAppointment?.citizen_family_id}</span></p>}
                   <div>
                     <label htmlFor="fullname" className='mb-2 text-xs md:text-sm lg:text-base font-semibold'>Full Name:</label>
                     <input 
@@ -205,7 +174,7 @@ const AppointmentOptions = ({ appointmentRef, toggle, PK }) => {
                       name="phoneNumber" 
                       id="phoneNumber"
                       required
-                      value={!editing ? (selectedAppointment?.phone_number || "") : payload.phoneNumber}
+                      value={!editing ? (selectedAppointment?.phoneNumber || "") : payload.phoneNumber}
                       onChange={handleChange}
                       className={`text-xs md:text-sm lg:text-base shadow-md rounded-lg w-full bg-transparent border-[1px] ${editing ? `border-${selectedTheme}-800` : `border-transparent`}`}
                     />

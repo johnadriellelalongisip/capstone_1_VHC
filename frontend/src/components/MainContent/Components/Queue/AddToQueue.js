@@ -9,7 +9,7 @@ import api from "../../../../axios";
 
 const AddToQueue = ({ ATref, ATonClick }) => {
   const [selectedTheme] = useContext(colorTheme);
-  const { response, isLoading, error, addData, postData, fetchData } = useQuery();
+  const { response, isLoading, error, addData, postData } = useQuery();
   const { mysqlTime } = useCurrentTime();
   const [suggestions, setSuggestions] = useState([]);
   const [name, setName] = useState('');
@@ -17,32 +17,30 @@ const AddToQueue = ({ ATref, ATonClick }) => {
   const [gender, setGender] = useState('');
   const [status, setStatus] = useState('waiting');
   const [isChecked, setIsChecked] = useState(true);
-  const [staff_id, setStaffId] = useState(null);
 
-  useEffect(() => {
-    fetchData('/getStaffId');
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  
-  useEffect(() => {
-    if (response?.status === 200) {
-      console.log(response)
-      setStaffId(response.staff_id);
-    }
-  }, [response]);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    if (isChecked) {
-      addData('addToQueue', { name: name, dateTime: String(mysqlTime), status, staff_id });
-    } else {
-      addData('addToQueue', { name: name, dateTime: String(mysqlTime), status, staff_id });
-      ATonClick();
+    try {
+      const res = await api.get('/getStaffId');
+      if (res?.status === 200) {
+        const staff_id = res.data.staff_id;
+        if (isChecked) {
+          addData('addToQueue', { name: name, dateTime: String(mysqlTime), status, staff_id });
+        } else {
+          addData('addToQueue', { name: name, dateTime: String(mysqlTime), status, staff_id });
+          ATonClick();
+        }
+      } else {
+        console.log(res);
+      }
+      const time = setTimeout(() => {
+        socket.emit("updateQueue", {dateTime: String(mysqlTime)});
+      },500);
+      return () => clearTimeout(time);
+    } catch (error) {
+      console.log(error);
     }
     setName('');
-    setTimeout(() => {
-      socket.emit("updateQueue", {dateTime: String(mysqlTime)});
-    },500);
   };
 
   const handleEnter = async (e) => {

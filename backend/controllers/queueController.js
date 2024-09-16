@@ -157,7 +157,7 @@ class QueueController {
 
       res.status(200).json({
         status: 200,
-        message: `Now Serving: ${nextOnQueue.queue_number}`
+        message: `Now Serving: ${getFIFO.queue_number}`
       });
       
     } catch (error) {

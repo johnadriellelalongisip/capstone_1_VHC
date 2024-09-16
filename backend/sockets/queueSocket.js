@@ -49,8 +49,8 @@ module.exports = function(io) {
         const year = date.getFullYear();
         const startDate = `${year}-${month}-${day} 00:00:00`;
         const endDate = `${year}-${month}-${day} 23:59:59`;
-        const query = `SELECT cq.queue_number, c.citizen_family_id AS family_id, CONCAT(c.citizen_firstname, ' ', c.citizen_middlename, ' ', c.citizen_lastname) AS citizen_fullname, c.citizen_barangay, c.citizen_number, c.citizen_gender, cq.time_arrived, cq.current_status FROM citizen c INNER JOIN  citizen_queue cq ON c.citizen_family_id = cq.citizen_family_id WHERE cq.time_arrived BETWEEN ? AND ?`;
-        const response = await dbModel.query(query, [startDate, endDate]);
+        const query = `SELECT cq.queue_number, c.citizen_family_id AS family_id, CONCAT(c.citizen_firstname, ' ', c.citizen_middlename, ' ', c.citizen_lastname) AS citizen_fullname, c.citizen_barangay, c.citizen_number, c.citizen_gender, cq.time_arrived, cq.current_status FROM citizen c INNER JOIN  citizen_queue cq ON c.citizen_family_id = cq.citizen_family_id WHERE cq.time_arrived BETWEEN ? AND ?AND current_status = ?`;
+        const response = await dbModel.query(query, [startDate, endDate, 'dismissed']);
         socket.emit('newAttended', response);
         socket.broadcast.emit('newAttended', response);
       } catch (error) {

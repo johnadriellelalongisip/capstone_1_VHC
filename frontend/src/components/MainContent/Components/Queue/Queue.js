@@ -12,6 +12,7 @@ import useSocket from "../../../../hooks/useSocket";
 import { jwtDecode } from "jwt-decode";
 import useCurrentTime from "../../../../hooks/useCurrentTime";
 import useIndexedDB from "../../../../hooks/useIndexedDb";
+import api from "../../../../axios";
 
 const Queue = () => {
   const [selectedTheme] = useContext(colorTheme);
@@ -51,14 +52,6 @@ const Queue = () => {
   }, []);
   
   const role = accessToken ? jwtDecode(accessToken).role : "";
-
-  const [staff_id, setStaffId] = useState(null);
-  useEffect(() => {
-    if (response?.status === 200) {
-      console.log(response)
-      setStaffId(response.staff_id);
-    }
-  }, [response]);
   
   useEffect(() => {
     setWaiting(queue.reduce((acc, curr) => {
@@ -90,32 +83,34 @@ const Queue = () => {
   };
 
   const handleNext = async () => {
-    fetchData('/getStaffId');
-    const payload = {
-      dateTime: String(mysqlTime),
-      staff_id: staff_id
+    const res = await api.get('/getStaffId');
+    if (res?.status === 200) {
+      const payload = {
+        dateTime: String(mysqlTime),
+        staff_id: res.data.staff_id
+      }
+      addData('nextQueue', payload);
+      setTimeout(() => {
+        socket.emit('updateQueue', {dateTime: String(mysqlTime)});
+      },[500])
     }
-    addData('nextQueue', payload);
-    setTimeout(() => {
-      console.log(staff_id)
-      socket.emit('updateQueue', {dateTime: String(mysqlTime), staff_id});
-    },[500])
   };
 
   const handleDismiss = async (i) => {
     const family_id = queue.find(prev => parseInt(prev.queue_number) === i ).family_id;
-    fetchData('/getStaffId');
-    const payload = {
-      dateTime: String(mysqlTime), 
-      family_id: family_id, 
-      staff_id: staff_id
+    const res = await api.get('/getStaffId');
+    if (res?.status === 200) {
+      const payload = {
+        dateTime: String(mysqlTime), 
+        family_id: family_id, 
+        staff_id: res.data.staff_id
+      }
+      editData('dismissQueue', payload, i);
+      setTimeout(() => {
+        socket.emit('updateQueue', {dateTime: String(mysqlTime)});
+        socket.emit('updateAttended');
+      },[500])
     }
-    console.log(payload)
-    editData('dismissQueue', payload, i);
-    setTimeout(() => {
-      socket.emit('updateQueue', {dateTime: String(mysqlTime)});
-      socket.emit('updateAttended');
-    },[500])
   }
 
   const toggleViewState = (direction) => {
@@ -206,7 +201,7 @@ const Queue = () => {
             </div>
 
             {(isLoading || error) && Array.from({ length: 3 }).map((_, i) => (
-              <div>
+              <div key={i}>
 
               </div>
             ))}

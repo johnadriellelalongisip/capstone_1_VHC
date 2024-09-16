@@ -29,8 +29,8 @@ class AppointmentController {
     let connection;
     try {
       connection = await dbModel.getConnection();
+      const { fullName, phoneNumber, appointedTime, description, dateTime } = req.body;
       const query = "INSERT INTO `appointments`(`citizen_id`, `fullname`, `phone_number`, `appointed_datetime`, `description`, `status`, `created_at`, `appointment_logs`) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ";
-      const payload = req.body;
       const data = [
         null,
         payload.fullname,
@@ -51,62 +51,6 @@ class AppointmentController {
       return res.status(500).json({
         status: 500,
         message: error.message,
-        error: error,
-      });
-    } finally {
-      if (connection) {
-        dbModel.releaseConnection(connection);
-      }
-    }
-  }
-
-  async newAppointmentByFamID(req, res) {
-    let connection;
-    try {
-      connection = await dbModel.getConnection();
-      const findRecord = "SELECT `citizen_history`, `citizen_firstname`,`citizen_middlename`, `citizen_lastname`, `citizen_gender`, `citizen_number`, `citizen_birthdate` FROM `citizen` WHERE `citizen_family_id` = ?";
-      if (!findRecord) return res.status(404).json({ status: 404, message: "User not found!"});
-      const retrieveResponse = await dbModel.query(findRecord, req.body.appointmentID);
-      const payload = req.body;
-      const curRecord = retrieveResponse[0];
-      const updateRecord = "UPDATE `citizen` SET `citizen_history` = ? WHERE `citizen_family_id` = ? ";
-      const oldRecLogs = JSON.parse(curRecord.citizen_history);
-      const newHistory = {};
-      const Hkey = String(convertDate(new Date));
-      newHistory[Hkey] = "Created an Appointment"
-      const newRecLogs = {
-        ...oldRecLogs,
-        ...newHistory
-      };
-      const newRecord = [
-        JSON.stringify(newRecLogs),
-        payload.appointmentID
-      ];
-      const updateResponse = await dbModel.query(updateRecord, newRecord);
-      const data = [
-        payload.appointmentID,
-        curRecord.citizen_firstname + ' ' + curRecord.citizen_middlename.substring(0,1) + '. ' + curRecord.citizen_lastname,
-        payload.phonenumber ? payload.phonenumber : curRecord.citizen_number,
-        payload.appointedTime,
-        payload.description,
-        payload.status,
-        payload.createdAt,
-        payload.logs
-      ];
-      const query = "INSERT INTO `appointments`(`citizen_id`, `fullname`, `phone_number`, `appointed_datetime`, `description`, `status`, `created_at`, `appointment_logs`) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ";
-      const createResponse = await dbModel.query(query, data);
-      return res.status(200).json({
-        status: 200,
-        message: "Appointment created successfully",
-        createResponse: createResponse,
-        retrieveResponse: retrieveResponse, 
-        updateResponse: updateResponse
-      });
-    } catch (error) {
-      return res.status(500).json({
-        status: 500,
-        message: "Record not found!",
-        error_message: error.message,
         error: error,
       });
     } finally {
@@ -277,13 +221,13 @@ class AppointmentController {
       }
     }
   }
-
+  
   async findAppointmentByNumber(req, res) {
     let connection;
     try {
       connection = await dbModel.getConnection();
       const PK = req.params.id;
-      const query = "SELECT `appointment_id`, `citizen_id`, `fullname`, `phone_number`, `appointed_datetime`, `description`, `status`, `created_at`, `appointment_logs` FROM `appointments` WHERE `appointment_id` = ?";
+      const query = "SELECT ca.appointment_id, c.citizen_family_id, CONCAT(c.citizen_firstname, ' ', c.citizen_lastname) AS fullname, ca.description, c.citizen_number AS phoneNumber, ca.appointed_datetime, ca.status, ca.created_at FROM citizen_appointments ca INNER JOIN citizen c ON c.citizen_family_id = ca.citizen_family_id WHERE ca.appointment_id = ?";
       const response = await dbModel.query(query, PK);
       const newResponse = response.map((res) => {
         return {

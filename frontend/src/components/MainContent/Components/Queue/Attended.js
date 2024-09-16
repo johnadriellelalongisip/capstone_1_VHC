@@ -1,21 +1,13 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { MdClose, MdPeople } from "react-icons/md";
 import { colorTheme } from "../../../../App";
 import DataTable from "../Elements/DataTable";
 import useQuery from "../../../../hooks/useQuery";
-// import useCurrentTime from "../../../../hooks/useCurrentTime";
-// import { socket } from "../../../../socket";
 import useSocket from "../../../../hooks/useSocket";
 
 const Attended = ({ ATref, ATonClick }) => {
   const [selectedTheme] = useContext(colorTheme);
   const { isLoading, error } = useQuery();
-  // const { startDate:newStartDate, endDate:newEndDate } = useCurrentTime();
-  // const NSD = new Date(newStartDate);
-  // const NED = new Date(newEndDate);
-  // const [startDate, setStartDate] = useState(`${NSD.getFullYear()}-${String(NSD.getMonth() + 1).padStart(2, 0)}-01 00:00:00`);
-  // const [endDate, setEndDate] = useState(`${NED.getFullYear()}-${String(NED.getMonth() + 1).padStart(2, 0)}-${NED.getDate()} 23:59:59`);
   const keyMap = {
     "queue_number": "Queue Number",
     "family_id": "Family ID",
@@ -27,6 +19,10 @@ const Attended = ({ ATref, ATonClick }) => {
     "current_status": "Current Status"
   };
   const { data: queue } = useSocket({ SSName: "attendedQueue", keyMap: keyMap, fetchUrl: "getAttended", socketUrl: "newAttended", socketEmit: "updateAttended", socketError: "newAttendedError" });
+
+  useEffect(() => {
+    console.log(queue)
+  }, [queue]);
   
   const transformedData = queue && queue.length > 0 && queue.map(item => {
     const date = new Date(item["Time Arrived"]);

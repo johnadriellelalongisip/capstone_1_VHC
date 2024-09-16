@@ -36,12 +36,10 @@ router.post('/dismissQueue/:id', queueController.dismissQueue);
 
 // APPOINTMENTS
 router.post('/newAppointment', appointmentController.newAppointment);
-router.post('/newAppointmentByFamID', appointmentController.newAppointmentByFamID);
 router.get('/getAppointments', appointmentController.getAppointments);
 router.get('/findAppointmentByNumber/:id', appointmentController.findAppointmentByNumber);
 router.post('/editAppointment', appointmentController.editAppointment);
 router.post('/handleCancelAppointment/:id', appointmentController.handleCancelAppointment);
 router.post('/handleApproveAppointment/:id', appointmentController.handleApproveAppointment);
-
 
 module.exports = router;

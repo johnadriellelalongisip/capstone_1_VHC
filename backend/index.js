@@ -10,6 +10,7 @@ require('dotenv').config();
 const bodyParser = require('body-parser');
 const routeAuth = require('./middlewares/routeAuth');
 const authController = require('./controllers/authController');
+const emailController = require('./controllers/emailController');
 
 const app = express();
 const port = 5000;
@@ -34,6 +35,7 @@ app.use(express.static('public'));
 
 app.use('/api/authStaff', authController.authStaff);
 app.use('/api/authToken', authController.authToken);
+app.post('/sendEmail', emailController.sendEmail);
 app.use('/api', routeAuth, routes);
 
 const server = https.createServer(serverOptions, app);

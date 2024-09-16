@@ -36,6 +36,7 @@ const Appointments = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedDateFirstDayWeek, setSelectedDateFirstDayWeek] = useState(new Date(`${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}-01`).getDay()); 
   const selectedMonth = selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+  // eslint-disable-next-line no-unused-vars
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [scheduledAppointments, setScheduledAppointments] = useState([]);
   const { getAllItems } = useIndexedDB();
@@ -54,13 +55,11 @@ const Appointments = () => {
   
   const keyMap = {
     "appointment_id": "Number",
-    "citizen_fullname": "Full Name",
-    "phone_number": "Phone Number",
-    "citizen_id": "Citizen ID",
-    "appointed_datetime": "Appointed Time",
-    "description": "Description",
+    "full_name": "Full Name",
+    "citizen_number": "Phone Number",
     "status": "Status",
     "created_at": "Created At",
+    "appointed_datetime": "Appointed Time",
   };
 
   const { data: appointments } = useSocket({ SSName: "sessionAppointments", keyMap: keyMap, fetchUrl: "getAppointments", socketUrl: "newAppointments", socketEmit: "updateAppointment", socketError: "newAppointmentsError" })
@@ -101,7 +100,6 @@ const Appointments = () => {
       const SDate = new Date(startDate);
       const EDate = new Date(endDate);
       const ODate = new Date(prev["Appointed Time"]);
-      // return ODate >= SDate && ODate <= EDate && (prev["Status"] === "to be scheduled" || prev["Status"] === "scheduled");
       return ODate >= SDate && ODate <= EDate;
     }));
     setScheduledAppointments(appointments.filter(prev => {
