@@ -1,4 +1,3 @@
 @echo off
-cd backend
-npm install
-npm run start
+npm install && npm run start
+cmd
