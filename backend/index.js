@@ -35,7 +35,7 @@ app.use(express.static('public'));
 
 app.use('/api/authStaff', authController.authStaff);
 app.use('/api/authToken', authController.authToken);
-app.post('/sendEmail', emailController.sendEmail);
+app.post('/api/sendEmail', emailController.sendEmail);
 app.use('/api', routeAuth, routes);
 
 const server = https.createServer(serverOptions, app);
