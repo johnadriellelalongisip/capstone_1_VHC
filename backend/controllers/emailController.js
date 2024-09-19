@@ -1,56 +1,55 @@
-const express = require("express");
-const app = express();
-const nodemailer =require("nodemailer");
-require("dotenv").config();
-const path = require("path");
-const csrf = require("csurf");
-const csurfProtection = csrf(); 
-app.use(csurfProtection);
-app.use(express.urlencoded({ extended: true }));
+const nodemailer = require('nodemailer');
+require('dotenv').config();
 
-const transporter = nodemailer.createTransport({
-  service:'gmail',
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // true for port 465, false for other ports
-  auth: {
-    user: "olalalongisipmacapia.capstone@gmail.com",
-    pass: "phxv xvoi tbmj bmwc",
-  },
-  
-});
-app.post("/email", (req, res) => {
-  const mailOptions = {
-    from: '"olalalongisipmacapia.capstone@gmail.com"',
-    to: "ad.lalongisip.45@gmail.com, ad.lalongisip.45@gmail.com",
-    subject: "Hello ✔",
-    text: "Hello world?",
-    html: "<b>Hello world?</b>", //dine ka pre mag aadd ng html
-    attachment: {
-      filename: "Bold.pdf",
-      path: path.join(__dirname, "Bold.pdf"),
-      contentType: "application/pdf",
-    },
-  };
-  mailOptions.csrf = req.csrfToken();
+class EmailController {
+  async sendEmail(req, res) {
+    let transporter;
 
-  sendMail(transporter, mailOptions)
-    .then(() => {
-      console.log("Email sent successfully!");
-      res.send("Email sent successfully!");
-    })
-    .catch((error) => {
-      console.error("Error sending email:", error);
-      res.status(500).send("Error sending email");
-    });
-});
+    try {
+      // Set up the transporter with your SMTP credentials
+      transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com', // Replace with your SMTP host
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASSWORD
+        }
+      });
 
-const sendMail = async (transporter, mailOptions) => {
-  try {
-    await transporter.sendMail(mailOptions);
-  } 
-  catch (error) {
-    console.error(error);
-    throw error;
+      // Extract data from the request body
+      const { to, subject, text, html } = req.body;
+
+      // Mail options
+      const mailOptions = {
+        from: 'This system <your-email@example.com>', // Replace with your sender address
+        to,
+        subject,
+        text,
+        html // HTML body (optional)
+      };
+
+      // Send email
+      const info = await transporter.sendMail(mailOptions);
+
+      // Respond with success message
+      return res.status(200).json({
+        status: 200,
+        message: 'Email sent successfully',
+        messageId: info.messageId
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: 500,
+        message: 'Failed to send email',
+        error: error.message
+      });
+    } finally {
+      if (transporter) {
+        transporter.close();
+      }
+    }
   }
 }
+
+module.exports = new EmailController();
