@@ -12,8 +12,8 @@ class EmailController {
         port: 587,
         secure: false, // true for 465, false for other ports
         auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASSWORD
+          user: "olalalongisipmacapia.capstone@gmail.com",
+          pass: "filhmaradriellealbeur"
         }
       });
 
@@ -22,11 +22,11 @@ class EmailController {
 
       // Mail options
       const mailOptions = {
-        from: 'This system <your-email@example.com>', // Replace with your sender address
-        to,
-        subject,
-        text,
-        html // HTML body (optional)
+        from: 'This system <olalalongisipmacapia.capstone@gmail.com>', // Replace with your sender address
+        to:'ad.lalongisip.45@gmail.com',
+        subject:'hello world',
+        text:'hi pogi',
+        html// HTML body (optional)
       };
 
       // Send email
