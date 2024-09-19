@@ -25,7 +25,7 @@ app.post("/email", (req, res) => {
     to: "ad.lalongisip.45@gmail.com, ad.lalongisip.45@gmail.com",
     subject: "Hello ✔",
     text: "Hello world?",
-    html: "<b>Hello world?</b>",
+    html: "<b>Hello world?</b>", //dine ka pre mag aadd ng html
     attachment: {
       filename: "Bold.pdf",
       path: path.join(__dirname, "Bold.pdf"),
