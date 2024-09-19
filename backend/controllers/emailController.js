@@ -13,7 +13,7 @@ class EmailController {
         secure: false, // true for 465, false for other ports
         auth: {
           user: "olalalongisipmacapia.capstone@gmail.com",
-          pass: "filhmaradriellealbeur"
+          pass: "cypj uwdz jtpi xyoj"
         }
       });
 
