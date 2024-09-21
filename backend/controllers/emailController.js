@@ -22,11 +22,23 @@ class EmailController {
 
       // Mail options
       const mailOptions = {
-        from: 'This system <olalalongisipmacapia.capstone@gmail.com>', // Replace with your sender address
+        from: 'KalusogApp in partnership with VMHO <olalalongisipmacapia.capstone@gmail.com>', // Replace with your sender address
         to:'ad.lalongisip.45@gmail.com',
-        subject:'hello world',
-        text:'hi pogi',
-        html// HTML body (optional)
+        subject:'KalusogApp Email Vericification',
+        text:'Hi Everyone!!!',
+        html:`
+       <html>
+  <body style="text-align: center;">
+    <h1>Welcome to the KalusogApp!!!</h1>
+    <p>Please click the button below to verify your email:</p>
+    <button style="background-color: #228B22; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;">Verify Email</button>
+    <p>If you did not sign up for the KalusogApp, please ignore this email.</p>
+   
+  </body>
+</html>
+`
+        
+        // HTML body (add it here)
       };
 
       // Send email
